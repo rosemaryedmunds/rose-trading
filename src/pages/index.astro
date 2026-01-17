@@ -1,0 +1,273 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import ResourceCard from '../components/ResourceCard.astro';
+import StepCard from '../components/StepCard.astro';
+---
+
+<Layout title="Beginners Guide to Trading">
+  <Hero />
+
+  <!-- Beginner Resources Section -->
+  <section class="section">
+    <div class="container">
+      <h2>Learning Resources</h2>
+      <div class="grid grid-2">
+        <ResourceCard 
+          title="Beginner Charting"
+          links={[
+            { text: "Intro to the Market", url: "https://youtu.be/7UFkfBbGk8s?si=O4Y5aZz7sDRL84B_" },
+            { text: "Chart Pattern Course", url: "https://www.youtube.com/playlist?list=PLU9f1fTtAn5rCgq2tCbpaJkEru3bzxF7x" },
+            { text: "Technical Trading Course", url: "https://www.youtube.com/playlist?list=PLU9f1fTtAn5r0om7hq7nhRs45kzSBZMcl" },
+            { text: "Supply & Demand Trading", url: "https://www.youtube.com/playlist?list=PLU9f1fTtAn5qSOuwkc5PT0STeLF0mW8Ur" },
+            { text: "Price Action Course", url: "https://www.youtube.com/playlist?list=PLU9f1fTtAn5oZxHxZVa50-myUJfohUGt9" },
+            { text: "Candlestick Patterns", url: "https://www.youtube.com/playlist?list=PLU9f1fTtAn5ofyRQKWqMhOBp2DWUSQU3n" },
+            { text: "Smart Money Concepts", url: "https://www.youtube.com/playlist?list=PLU9f1fTtAn5o9qnTwApheFvnkyFG5Tice" },
+            { text: "Fibonacci", url: "https://www.youtube.com/watch?v=uSjDYn8xaNs&list=PLFAKby4qxtHVXUxudppWUtGrsqHZZiRV_&pp=iAQB" }
+          ]}
+        />
+        
+        <ResourceCard 
+          title="Beginner Options Trading"
+          links={[
+            { text: "Beginner Options Trading", url: "https://www.youtube.com/playlist?list=PLU9f1fTtAn5pPXal0TSKS4ohfRk9xwXzY" },
+            { text: "Options Greeks", url: "https://www.youtube.com/watch?v=jN4QODy000Y&pp=ygUOb3B0aW9ucyBncmVla3M%3D" },
+            { text: "Options Explained", url: "https://www.youtube.com/watch?v=0GSB5YZx9ZE" }
+          ]}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Study Plan Section -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <h2>Study Plan</h2>
+      <p style="max-width: 800px; margin-bottom: 3rem;">
+        There are a lot of resources on YouTube that offer great videos on learning different strategies, 
+        but sometimes it's hard to know where to start or where to go. Here are some YouTube channels that 
+        may help you understand. The beauty about trading is that there is no set strategy that fits everyone. 
+        Here are a couple of resources that you may learn to find the one that fits you.
+      </p>
+
+      <div class="grid grid-2">
+        <ResourceCard 
+          title="#theStrat"
+          links={[
+            { text: "Sara Strat Sniper Playlists", url: "https://www.youtube.com/@SaraStratSniper/playlists" },
+            { text: "Adex Beginner's Guide to #theStrat", url: "https://www.youtube.com/playlist?list=PL8FT63xUyCPPSq2qJdgVDBbxJU6CRW2_X" },
+            { text: "Adex Public Lessons", url: "https://www.youtube.com/playlist?list=PL8FT63xUyCPNzQhBpmgLqdr95bNcipFo9" }
+          ]}
+        />
+
+        <ResourceCard 
+          title="ICT"
+          links={[
+            { text: "2016 Month 1", url: "https://www.youtube.com/playlist?list=PLVgHx4Z63pabb9rl1nyG58TG8PG8yzuao" },
+            { text: "2016 Month 2", url: "https://www.youtube.com/watch?v=mjVHmE1gVMg&list=PLVgHx4Z63paZvjqerfbn320myZ06L1MOB&pp=iAQB" },
+            { text: "2016 Month 3", url: "https://www.youtube.com/playlist?list=PLVgHx4Z63paYBN404Q2QZ7D4mOJz1IHAk" },
+            { text: "2016 Month 4", url: "https://www.youtube.com/playlist?list=PLVgHx4Z63pabb9rl1nyG58TG8PG8yzuao" },
+            { text: "2022 Mentorship", url: "https://www.youtube.com/playlist?list=PLVgHx4Z63paYiFGQ56PjTF1PGePL3r69s" },
+            { text: "2023 Mentorship", url: "https://www.youtube.com/playlist?list=PLVgHx4Z63pabpjlduWBaEsn8VMtALhjGV" },
+            { text: "TTrades Education", url: "https://www.youtube.com/@TTrades_edu" }
+          ]}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Preparing for the Market Section -->
+  <section class="section">
+    <div class="container">
+      <h2>Preparing for the Market</h2>
+      <div class="grid grid-2">
+        <StepCard 
+          number="01"
+          title="Chart Indices & Futures (ES, SPY, NQ, DIA, QQQ, VIX, DXY, etc.)"
+          description="This will help you find the direction of where the market is going."
+        />
+        
+        <StepCard 
+          number="02"
+          title="Chart Sectors (XLB, XLK, XLY, etc.)"
+          description="This will help you see which sector this market is moving in and out of."
+        />
+        
+        <StepCard 
+          number="03"
+          title="Chart tickers within sectors"
+          description="If you see certain tickers within the sectors that look strong, you can find great plays in there."
+        />
+        
+        <StepCard 
+          number="04"
+          title="Look for setups with the most confluences"
+          description="The more confluences you have (strat setups, emas, trendlines, etc.), the more likely the trade may go in the direction you want it to go."
+        />
+        
+        <StepCard 
+          number="05"
+          title="Check option contracts for favorable Greeks"
+          description="Once you find the tickers you like, look for option contracts to make sure you have favorable greeks, implied volatility, volume and open interest."
+        />
+        
+        <StepCard 
+          number="06"
+          title="Do a look back on what moved the market"
+          description="Was there a big event or did we chop? It's important to see where we are on the daily or weekly to gauge where we are going."
+        />
+        
+        <StepCard 
+          number="07"
+          title="Look for catalysts"
+          description="Earnings, Overall Economic News (CPI, Fed Rates, etc.), Ratings, Company Events can add additional volatility to your tickers."
+        />
+        
+        <StepCard 
+          number="08"
+          title="Review your rules and mentally prepare"
+          description="Make sure to rewrite your rules to make sure you follow them. Morning meditation is a great way to mentally prepare for the day."
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Study Curriculum Section -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <h2>Study Curriculum</h2>
+      <div class="card" style="max-width: 800px; margin: 0 auto; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">01</div>
+        <h3>FOUNDATIONS OF STOCK TRADING</h3>
+        <p style="margin-bottom: 2rem;">Follow at your own pace.</p>
+        <a href="https://funsizedrose.my.canva.site/learning-the-stock-market" class="btn" target="_blank" rel="noopener noreferrer">
+          Click here to learn the essential topics
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Journaling Section -->
+  <section class="section">
+    <div class="container">
+      <h2>Journaling</h2>
+      <p style="max-width: 800px; margin-bottom: 2rem;">
+        Journaling is one of the most important parts of trading successfully, yet it is overlooked by many traders, 
+        especially beginners. Here are some tips to help in your journaling.
+      </p>
+      
+      <div class="grid grid-3">
+        <div class="card">
+          <p>Explain what you did well and what you did poorly and what needs to improve.</p>
+        </div>
+        <div class="card">
+          <p>What trade did you take (was it called out or did you find it)?</p>
+        </div>
+        <div class="card">
+          <p>Compare your entry, stop and exit to the IDEAL trade you would have taken.</p>
+        </div>
+        <div class="card">
+          <p>What did you do well and what were your mistakes?</p>
+        </div>
+        <div class="card">
+          <p>What will you do tomorrow differently?</p>
+        </div>
+        <div class="card">
+          <p>You can mark your entry, exits and notes on your TradingView chart or print them out and mark them up. Save them in a binder and go back and review.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Must Read Books Section -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <h2>Must Read Books</h2>
+      <p style="max-width: 800px; margin-bottom: 2rem;">
+        Books that deal with trading psychology are necessary to help with your trading journey. 
+        Here's a recommendation of a few I have read.
+      </p>
+      
+      <div class="grid grid-3">
+        {[
+          "Trading in the Zone by Mark Douglas",
+          "The Zen Trader by Peter Castle",
+          "The Best Loser Wins by Tom Hougaard",
+          "Think and Grow Rich by Napoleon Hill",
+          "Atomic Habits by James Clear",
+          "The Compound Effect by Darren Hardy",
+          "The Mental Game of Trading by Jared Tendler",
+          "Discipline is Destiny by Ryan Holiday",
+          "The Mountain is You by Brianna Wiest",
+          "The Organized Mind by Daniel Levitin",
+          "Mastering the Market Cycle by Howard Marks",
+          "Volume Price Analysis by Anna Coulling"
+        ].map(book => (
+          <div class="card">
+            <p style="margin: 0;">{book}</p>
+          </div>
+        ))}
+      </div>
+      
+      <div class="card" style="max-width: 600px; margin: 2rem auto 0; text-align: center;">
+        <a href="https://www.tradersstateofmind.com" target="_blank" rel="noopener noreferrer" style="font-size: 1.125rem;">
+          www.tradersstateofmind.com
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Helpful Links Section -->
+  <section class="section">
+    <div class="container">
+      <h2>Helpful Links</h2>
+      <div class="grid grid-2">
+        <ResourceCard 
+          title="Watchlists"
+          links={[
+            { text: "Master Sector List", url: "https://www.tradingview.com/watchlists/116311478/" },
+            { text: "Sector Industry (ETF List)", url: "https://www.tradingview.com/watchlists/116968101/" },
+            { text: "Entire Market List", url: "https://www.tradingview.com/watchlists/107939650/" },
+            { text: "Small Account Friendly List", url: "https://www.tradingview.com/watchlists/207513575/" }
+          ]}
+        />
+        
+        <ResourceCard 
+          title="Think or Swim Scripts"
+          links={[
+            { text: "#TheStrat Scripts", url: "https://docs.google.com/spreadsheets/d/1dWibOarZXk2dHOD6C9wAsJsmV-xz6cDQ6iNR1UuZlMg/htmlview" }
+          ]}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <h2>Contact</h2>
+      <div class="card" style="max-width: 800px; margin: 0 auto; text-align: center;">
+        <h3>Join our Discord Community</h3>
+        <p style="margin-bottom: 2rem;">
+          Learning to trade by yourself can sometimes make you feel lost. If you'd like to be part of a 
+          community that focuses on discipline, education, live trading and overall a fun environment, 
+          please join us.
+        </p>
+        <a href="https://whop.com/adextrades/?d2c=true&directPlanId=plan_0S7UBXkzD2JTf&pass=prod_Qq8PUMzDnOp6O&a=user1ec11086429" class="btn" target="_blank" rel="noopener noreferrer">
+          Join Discord Community
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  h2 {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+</style>
