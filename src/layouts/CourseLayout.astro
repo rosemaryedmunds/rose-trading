@@ -1,0 +1,22 @@
+---
+const { frontmatter } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{frontmatter.title}</title>
+  </head>
+  <body>
+    <div style="display: flex;">
+      <aside style="width: 250px; padding: 20px; background: #f4f4f4;">
+        <h3>Course Menu</h3>
+        <p>Phase 1</p>
+      </aside>
+
+      <main style="padding: 40px;">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
