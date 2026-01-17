@@ -1,0 +1,124 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="About Rose">
+  <section class="section">
+    <div class="container">
+      <h1 style="text-align: center; margin-bottom: 3rem;">About Me</h1>
+      
+      <div class="about-content">
+        <div class="about-image">
+          <img src="/rose-photo.jpg" alt="Rose - Trading Analyst" />
+        </div>
+        
+        <div class="about-text">
+          <h2 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Hi, I'm Rose! 👋</h2>
+          
+          <p>
+            Rose is an IT Trading Analyst for a Fortune 500 company that lives in Houston, Texas. 
+            She's a wife, dog mom and cancer survivor that likes to play soccer, travel and read on her free time.
+          </p>
+          
+          <p>
+            Rose started trading in 2020. She mainly focused on options with a main focus on SPX right now.
+          </p>
+          
+          <p>
+            Rose likes to use #TheStrat and Market Structure to swing trade and intraday trade. 
+            Rose loves to pay it forward by teaching others what has brought her success in trading 
+            from technical analysis, risk management, and trading psychology.
+          </p>
+        </div>
+      </div>
+
+      <!-- Trading Focus Section -->
+      <div class="grid grid-3" style="margin-top: 4rem;">
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+          <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">My Approach</h3>
+          <p style="margin: 0;">#TheStrat and Market Structure for swing and intraday trading</p>
+        </div>
+        
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎯</div>
+          <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">Main Focus</h3>
+          <p style="margin: 0;">SPX Options Trading</p>
+        </div>
+        
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">📚</div>
+          <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">My Mission</h3>
+          <p style="margin: 0;">Teaching technical analysis, risk management, and trading psychology</p>
+        </div>
+      </div>
+
+      <!-- CTA Section -->
+      <div class="card" style="max-width: 800px; margin: 4rem auto 0; text-align: center;">
+        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Ready to Start Your Trading Journey?</h3>
+        <p style="margin-bottom: 2rem;">
+          Join our community and learn the strategies that have brought success.
+        </p>
+        <a href="/contact" class="btn">Get Started</a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  h1 {
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .about-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 3rem;
+    align-items: center;
+    margin-bottom: 3rem;
+  }
+
+  .about-image {
+    width: 100%;
+  }
+
+  .about-image img {
+    width: 100%;
+    border-radius: 16px;
+    border: 3px solid var(--accent-primary);
+    box-shadow: 0 8px 32px rgba(108, 99, 255, 0.2);
+  }
+
+  .about-text p {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 968px) {
+    .about-content {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .about-image {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .about-text p {
+      font-size: 1rem;
+    }
+  }
+</style>
