@@ -31,17 +31,35 @@ if (!entry) {
 
 // Extract quiz from raw markdown content
 const content = entry.body;
-const quizMatch = content.match(/### 📝 Week \d+ Assessment\s*\n\s*\*\*Question:\*\*\s*(.+?)\n((?:\d+\..+?\n)+)\s*\*\(Self-Check:\s*The answer is (\d+)/s);
 
+// More robust quiz extraction
 let quizQuestion = null;
 let quizOptions = [];
 let correctAnswer = null;
 
-if (quizMatch) {
-  quizQuestion = quizMatch[1].trim();
-  const optionsText = quizMatch[2].trim();
-  quizOptions = optionsText.split('\n').filter(line => line.trim()).map(opt => opt.trim());
-  correctAnswer = parseInt(quizMatch[3]);
+// Find the quiz section
+const quizSectionMatch = content.match(/### 📝 Week \d+ Assessment[\s\S]*$/);
+
+if (quizSectionMatch) {
+  const quizSection = quizSectionMatch[0];
+  
+  // Extract question
+  const questionMatch = quizSection.match(/\*\*Question:\*\*\s*(.+?)(?=\n\d+\.)/s);
+  if (questionMatch) {
+    quizQuestion = questionMatch[1].trim();
+  }
+  
+  // Extract options (numbered lines)
+  const optionsMatch = quizSection.match(/\d+\..+/g);
+  if (optionsMatch) {
+    quizOptions = optionsMatch;
+  }
+  
+  // Extract correct answer
+  const answerMatch = quizSection.match(/\*\(Self-Check:\s*The answer is (\d+)/);
+  if (answerMatch) {
+    correctAnswer = parseInt(answerMatch[1]);
+  }
 }
 
 // Remove quiz section from content before rendering
