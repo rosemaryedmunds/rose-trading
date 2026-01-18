@@ -140,14 +140,92 @@ declare module 'astro:content' {
 	>;
 
 	type ContentEntryMap = {
-		"course": Record<string, {
-  id: string;
-  slug: string;
+		"course": {
+"week-01.md": {
+	id: "week-01.md";
+  slug: "week-01";
   body: string;
   collection: "course";
-  data: InferEntrySchema<"course">;
-  render(): Render[".md"];
-}>;
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-02.md": {
+	id: "week-02.md";
+  slug: "week-02";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-03.md": {
+	id: "week-03.md";
+  slug: "week-03";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-04.md": {
+	id: "week-04.md";
+  slug: "week-04";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-05.md": {
+	id: "week-05.md";
+  slug: "week-05";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-06.md": {
+	id: "week-06.md";
+  slug: "week-06";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-07.md": {
+	id: "week-07.md";
+  slug: "week-07";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-08.md": {
+	id: "week-08.md";
+  slug: "week-08";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-09.md": {
+	id: "week-09.md";
+  slug: "week-09";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-10.md": {
+	id: "week-10.md";
+  slug: "week-10";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-11.md": {
+	id: "week-11.md";
+  slug: "week-11";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+"week-12.md": {
+	id: "week-12.md";
+  slug: "week-12";
+  body: string;
+  collection: "course";
+  data: InferEntrySchema<"course">
+} & { render(): Render[".md"] };
+};
 
 	};
 

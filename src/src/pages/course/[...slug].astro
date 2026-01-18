@@ -1,0 +1,321 @@
+---
+import { getCollection } from 'astro:content';
+import CourseLayout from '../../layouts/CourseLayout.astro';
+
+export async function getStaticPaths() {
+  const courseEntries = await getCollection('course');
+  
+  // Sort by week number
+  const sortedEntries = courseEntries.sort((a, b) => a.data.week - b.data.week);
+
+  return sortedEntries.map((entry, index) => {
+    const prevWeek = index > 0 ? sortedEntries[index - 1] : null;
+    const nextWeek = index < sortedEntries.length - 1 ? sortedEntries[index + 1] : null;
+
+    return {
+      params: { slug: entry.slug },
+      props: { 
+        entry,
+        prevWeek,
+        nextWeek
+      },
+    };
+  });
+}
+
+const { entry, prevWeek, nextWeek } = Astro.props;
+
+if (!entry) {
+  throw new Error('Course entry not found!');
+}
+
+// Extract quiz from raw markdown content
+const content = entry.body;
+const quizMatch = content.match(/### 📝 Week \d+ Assessment\s*\n\s*\*\*Question:\*\*\s*(.+?)\n((?:\d+\..+?\n)+)\s*\*\(Self-Check:\s*The answer is (\d+)/s);
+
+let quizQuestion = null;
+let quizOptions = [];
+let correctAnswer = null;
+
+if (quizMatch) {
+  quizQuestion = quizMatch[1].trim();
+  const optionsText = quizMatch[2].trim();
+  quizOptions = optionsText.split('\n').filter(line => line.trim()).map(opt => opt.trim());
+  correctAnswer = parseInt(quizMatch[3]);
+}
+
+// Remove quiz section from content before rendering
+const contentWithoutQuiz = content.replace(/### 📝 Week \d+ Assessment[\s\S]*$/m, '').trim();
+
+// Create a modified entry for rendering
+const modifiedEntry = {
+  ...entry,
+  body: contentWithoutQuiz
+};
+
+const { Content } = await modifiedEntry.render();
+---
+
+<CourseLayout frontmatter={entry.data}>
+  <Content />
+  
+  {quizQuestion && (
+    <div class="quiz-section">
+      <h3 class="quiz-title">📝 Week {entry.data.week} Assessment</h3>
+      <p class="quiz-question"><strong>Question:</strong> {quizQuestion}</p>
+      
+      <div class="quiz-options">
+        {quizOptions.map((option, index) => (
+          <button 
+            class="quiz-option" 
+            data-option={index + 1}
+            data-correct={correctAnswer}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+      
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+    </div>
+  )}
+
+  <!-- Navigation -->
+  <div class="lesson-navigation">
+    {prevWeek ? (
+      <a href={`/course/${prevWeek.slug}`} class="nav-btn prev-btn">
+        <span class="nav-arrow">←</span>
+        <div>
+          <div class="nav-label">Previous</div>
+          <div class="nav-title">{prevWeek.data.title}</div>
+        </div>
+      </a>
+    ) : (
+      <div></div>
+    )}
+    
+    {nextWeek ? (
+      <a href={`/course/${nextWeek.slug}`} class="nav-btn next-btn">
+        <div>
+          <div class="nav-label">Next</div>
+          <div class="nav-title">{nextWeek.data.title}</div>
+        </div>
+        <span class="nav-arrow">→</span>
+      </a>
+    ) : (
+      <a href="/course" class="nav-btn next-btn">
+        <div>
+          <div class="nav-label">Complete</div>
+          <div class="nav-title">Back to Course</div>
+        </div>
+        <span class="nav-arrow">→</span>
+      </a>
+    )}
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const options = document.querySelectorAll('.quiz-option');
+      const feedback = document.getElementById('quiz-feedback');
+      
+      if (!options.length) return;
+      
+      options.forEach(option => {
+        option.addEventListener('click', function() {
+          const selected = parseInt(this.dataset.option);
+          const correct = parseInt(this.dataset.correct);
+          
+          // Remove previous states
+          options.forEach(opt => {
+            opt.classList.remove('selected', 'correct', 'incorrect');
+            opt.disabled = false;
+          });
+          
+          // Mark selected
+          this.classList.add('selected');
+          
+          // Check answer
+          if (selected === correct) {
+            this.classList.add('correct');
+            if (feedback) {
+              feedback.innerHTML = '<div class="feedback-correct">✓ Correct! Great job!</div>';
+            }
+          } else {
+            this.classList.add('incorrect');
+            // Show correct answer
+            options.forEach(opt => {
+              if (parseInt(opt.dataset.option) === correct) {
+                opt.classList.add('correct');
+              }
+            });
+            if (feedback) {
+              feedback.innerHTML = '<div class="feedback-incorrect">✗ Incorrect. The correct answer is highlighted above.</div>';
+            }
+          }
+          
+          // Disable all options after answer
+          options.forEach(opt => opt.disabled = true);
+        });
+      });
+    });
+  </script>
+
+  <style>
+    .quiz-section {
+      margin-top: 4rem;
+      padding-top: 3rem;
+      border-top: 2px solid var(--border-color);
+    }
+
+    .quiz-title {
+      color: var(--accent-primary);
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .quiz-question {
+      font-size: 1.125rem;
+      margin-bottom: 2rem;
+      color: var(--text-primary);
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .quiz-option {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      color: var(--text-primary);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .quiz-option:hover:not(:disabled) {
+      border-color: var(--accent-primary);
+      background: var(--bg-card);
+      transform: translateX(8px);
+    }
+
+    .quiz-option.correct {
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgb(34, 197, 94);
+      color: rgb(34, 197, 94);
+      font-weight: 600;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgb(239, 68, 68);
+      color: rgb(239, 68, 68);
+    }
+
+    .quiz-option:disabled {
+      cursor: not-allowed;
+      opacity: 0.9;
+    }
+
+    .quiz-feedback {
+      min-height: 60px;
+      margin-top: 1.5rem;
+    }
+
+    .feedback-correct {
+      background: rgba(34, 197, 94, 0.1);
+      border: 2px solid rgb(34, 197, 94);
+      color: rgb(34, 197, 94);
+      padding: 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-align: center;
+      font-size: 1.125rem;
+    }
+
+    .feedback-incorrect {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgb(239, 68, 68);
+      color: rgb(239, 68, 68);
+      padding: 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-align: center;
+      font-size: 1.125rem;
+    }
+
+    .lesson-navigation {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 4rem;
+      padding-top: 3rem;
+      border-top: 2px solid var(--border-color);
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(108, 99, 255, 0.2);
+    }
+
+    .prev-btn {
+      justify-content: flex-start;
+    }
+
+    .next-btn {
+      justify-content: flex-end;
+      grid-column: 2;
+    }
+
+    .nav-arrow {
+      font-size: 1.5rem;
+      color: var(--accent-primary);
+    }
+
+    .nav-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .nav-title {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .lesson-navigation {
+        grid-template-columns: 1fr;
+      }
+
+      .next-btn {
+        grid-column: 1;
+      }
+
+      .quiz-option:hover:not(:disabled) {
+        transform: translateX(4px);
+      }
+    }
+  </style>
+</CourseLayout>

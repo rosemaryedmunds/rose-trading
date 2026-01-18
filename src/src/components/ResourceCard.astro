@@ -1,0 +1,56 @@
+---
+interface Props {
+  title: string;
+  links: Array<{ text: string; url: string }>;
+}
+
+const { title, links } = Astro.props;
+---
+
+<div class="resource-card card">
+  <h3>{title}</h3>
+  <ul>
+    {links.map(link => (
+      <li>
+        <a href={link.url} target="_blank" rel="noopener noreferrer">
+          {link.text}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .resource-card h3 {
+    color: var(--accent-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+  }
+  
+  ul {
+    list-style: none;
+  }
+  
+  li {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  
+  li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent-primary);
+    font-weight: bold;
+  }
+  
+  li a {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+  }
+  
+  li a:hover {
+    color: var(--accent-primary);
+  }
+</style>

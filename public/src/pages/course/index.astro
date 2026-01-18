@@ -1,0 +1,205 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+const courseEntries = await getCollection('course');
+
+// Group weeks by phase
+const phases = courseEntries.reduce((acc, entry) => {
+  const phase = entry.data.phase;
+  if (!acc[phase]) {
+    acc[phase] = [];
+  }
+  acc[phase].push(entry);
+  return acc;
+}, {});
+
+// Sort weeks within each phase
+Object.keys(phases).forEach(phase => {
+  phases[phase].sort((a, b) => a.data.week - b.data.week);
+});
+
+// Define phase order
+const phaseOrder = [
+  "Phase 1: The Charting Engine",
+  "Phase 2: The Business Model", 
+  "Phase 3: Execution",
+  "Phase 4: Risk & Mastery"
+];
+---
+
+<Layout title="Sniper Trading Curriculum">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>Sniper Trading Curriculum</h1>
+      <p class="subtitle">Master Options Trading in 12 Weeks</p>
+      <p class="intro">
+        Transform from a retail trader into a professional "Sniper" trader. This comprehensive 
+        curriculum teaches you to trade with precision, not guessing. Learn the mechanics of 
+        price action, the business model of selling options, and the psychology of consistent profits.
+      </p>
+    </div>
+  </section>
+
+  <!-- Course Overview Cards -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="grid grid-2" style="max-width: 900px; margin: 0 auto;">
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎯</div>
+          <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">12 Weeks</h3>
+          <p style="margin: 0;">Structured curriculum from beginner to certified sniper trader</p>
+        </div>
+        
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+          <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">4 Phases</h3>
+          <p style="margin: 0;">Charting, Business Model, Execution, and Risk Management</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Course Phases -->
+  {phaseOrder.map((phaseName) => {
+    const phaseWeeks = phases[phaseName] || [];
+    if (phaseWeeks.length === 0) return null;
+    
+    return (
+      <section class="section phase-section">
+        <div class="container">
+          <h2 class="phase-title">{phaseName}</h2>
+          <div class="grid grid-3">
+            {phaseWeeks.map((entry) => (
+              <a href={`/course/${entry.slug}`} class="week-card card">
+                <div class="week-number">Week {entry.data.week}</div>
+                <h3>{entry.data.title.replace(/^Week \d+:\s*/, '')}</h3>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  })}
+
+  <!-- Call to Action -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="card" style="max-width: 800px; margin: 0 auto; text-align: center;">
+        <h2 style="color: var(--accent-primary); margin-bottom: 1rem;">Ready to Begin?</h2>
+        <p style="margin-bottom: 2rem; font-size: 1.125rem;">
+          Start with Phase 1, Week 1 and work through the curriculum at your own pace. 
+          Each week builds on the previous, taking you from understanding price action 
+          to executing real trades with confidence.
+        </p>
+        <a href="/course/week-01" class="btn">Start Week 1</a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding: 6rem 0 4rem;
+    text-align: center;
+  }
+  
+  .hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .subtitle {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+  }
+  
+  .intro {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+
+  .phase-section {
+    background: var(--bg-primary);
+  }
+
+  .phase-section:nth-child(even) {
+    background: var(--bg-secondary);
+  }
+
+  .phase-title {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2rem;
+    color: var(--accent-primary);
+  }
+
+  .week-card {
+    text-decoration: none;
+    display: block;
+    position: relative;
+    padding: 1.5rem;
+    padding-top: 4rem;
+    transition: all 0.3s ease;
+  }
+
+  .week-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(108, 99, 255, 0.25);
+  }
+
+  .week-number {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.5rem;
+    background: var(--accent-primary);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .week-card h3 {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
+  .week-card:hover h3 {
+    color: var(--accent-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 3rem 0 2rem;
+    }
+    
+    .hero h1 {
+      font-size: 2rem;
+    }
+    
+    .subtitle {
+      font-size: 1.25rem;
+    }
+
+    .intro {
+      font-size: 1rem;
+    }
+
+    .phase-title {
+      font-size: 1.5rem;
+    }
+  }
+</style>

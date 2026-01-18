@@ -1,0 +1,362 @@
+---
+import Layout from '../layouts/Layout.astro';
+import StepCard from '../components/StepCard.astro';
+---
+
+<Layout title="Trading Guides">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>Trading Guides</h1>
+      <p class="intro">
+        Essential guides to help you prepare for the market, develop a study plan, and maintain a trading journal.
+      </p>
+    </div>
+  </section>
+
+  <!-- Guides Navigation -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container" style="max-width: 900px;">
+      <div class="guides-nav">
+        <a href="#preparing" class="guide-nav-btn">Preparing for the Market</a>
+        <a href="#study-plan" class="guide-nav-btn">Study Plan</a>
+        <a href="#journaling" class="guide-nav-btn">Journaling</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Preparing for the Market -->
+  <section class="section" id="preparing">
+    <div class="container">
+      <h2>Preparing for the Market</h2>
+      <p style="max-width: 800px; margin: 0 auto 3rem; text-align: center; color: var(--text-secondary);">
+        Follow these 8 essential steps each morning to prepare for your trading day.
+      </p>
+      
+      <div class="grid grid-2">
+        <StepCard 
+          number="01"
+          title="Chart Indices & Futures (ES, SPY, NQ, DIA, QQQ, VIX, DXY, etc.)"
+          description="This will help you find the direction of where the market is going."
+        />
+        
+        <StepCard 
+          number="02"
+          title="Chart Sectors (XLB, XLK, XLY, etc.)"
+          description="This will help you see which sector this market is moving in and out of."
+        />
+        
+        <StepCard 
+          number="03"
+          title="Chart tickers within sectors"
+          description="If you see certain tickers within the sectors that look strong, you can find great plays in there."
+        />
+        
+        <StepCard 
+          number="04"
+          title="Look for setups with the most confluences"
+          description="The more confluences you have (strat setups, emas, trendlines, etc.), the more likely the trade may go in the direction you want it to go."
+        />
+        
+        <StepCard 
+          number="05"
+          title="Check option contracts for favorable Greeks"
+          description="Once you find the tickers you like, look for option contracts to make sure you have favorable greeks, implied volatility, volume and open interest."
+        />
+        
+        <StepCard 
+          number="06"
+          title="Do a look back on what moved the market"
+          description="Was there a big event or did we chop? It's important to see where we are on the daily or weekly to gauge where we are going."
+        />
+        
+        <StepCard 
+          number="07"
+          title="Look for catalysts"
+          description="Earnings, Overall Economic News (CPI, Fed Rates, etc.), Ratings, Company Events can add additional volatility to your tickers."
+        />
+        
+        <StepCard 
+          number="08"
+          title="Review your rules and mentally prepare"
+          description="Make sure to rewrite your rules to make sure you follow them. Morning meditation is a great way to mentally prepare for the day."
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Study Plan -->
+  <section class="section" id="study-plan" style="background: var(--bg-secondary);">
+    <div class="container">
+      <h2>Study Plan</h2>
+      <p style="max-width: 800px; margin: 0 auto 3rem; text-align: center; color: var(--text-secondary);">
+        There are a lot of resources on YouTube that offer great videos on learning different strategies, 
+        but sometimes it's hard to know where to start or where to go. Here are some recommended paths 
+        to help you find the strategy that fits you.
+      </p>
+
+      <div class="card" style="max-width: 900px; margin: 0 auto 3rem;">
+        <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Recommended Learning Path</h3>
+        <ol style="color: var(--text-secondary); line-height: 2; padding-left: 1.5rem;">
+          <li><strong>Start with the basics:</strong> Begin with charting fundamentals and price action</li>
+          <li><strong>Choose your methodology:</strong> Explore #theStrat or ICT to find what resonates with you</li>
+          <li><strong>Deep dive:</strong> Commit to one methodology for at least 3 months of focused study</li>
+          <li><strong>Paper trade:</strong> Practice your strategy without risking real capital</li>
+          <li><strong>Review and refine:</strong> Journal your trades and continuously improve</li>
+        </ol>
+      </div>
+
+      <div class="study-grid">
+        <div class="card">
+          <div style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+          <h3 style="color: var(--accent-primary); text-align: center; margin-bottom: 1rem;">#theStrat</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+            A mechanical approach to trading based on price action scenarios and time frame continuity.
+          </p>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 0.75rem;">
+              <a href="https://www.youtube.com/@SaraStratSniper/playlists" target="_blank" style="color: var(--text-secondary);">
+                → Sara Strat Sniper Playlists
+              </a>
+            </li>
+            <li style="margin-bottom: 0.75rem;">
+              <a href="https://www.youtube.com/playlist?list=PL8FT63xUyCPPSq2qJdgVDBbxJU6CRW2_X" target="_blank" style="color: var(--text-secondary);">
+                → Adex Beginner's Guide
+              </a>
+            </li>
+            <li style="margin-bottom: 0.75rem;">
+              <a href="https://www.youtube.com/playlist?list=PL8FT63xUyCPNzQhBpmgLqdr95bNcipFo9" target="_blank" style="color: var(--text-secondary);">
+                → Adex Public Lessons
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">📈</div>
+          <h3 style="color: var(--accent-primary); text-align: center; margin-bottom: 1rem;">ICT</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+            Inner Circle Trader methodology focusing on institutional order flow and market structure.
+          </p>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 0.75rem;">
+              <a href="https://www.youtube.com/playlist?list=PLVgHx4Z63pabb9rl1nyG58TG8PG8yzuao" target="_blank" style="color: var(--text-secondary);">
+                → 2016 Mentorship Series
+              </a>
+            </li>
+            <li style="margin-bottom: 0.75rem;">
+              <a href="https://www.youtube.com/playlist?list=PLVgHx4Z63paYiFGQ56PjTF1PGePL3r69s" target="_blank" style="color: var(--text-secondary);">
+                → 2022 Mentorship
+              </a>
+            </li>
+            <li style="margin-bottom: 0.75rem;">
+              <a href="https://www.youtube.com/playlist?list=PLVgHx4Z63pabpjlduWBaEsn8VMtALhjGV" target="_blank" style="color: var(--text-secondary);">
+                → 2023 Mentorship
+              </a>
+            </li>
+            <li style="margin-bottom: 0.75rem;">
+              <a href="https://www.youtube.com/@TTrades_edu" target="_blank" style="color: var(--text-secondary);">
+                → TTrades Education
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 800px; margin: 3rem auto 0; text-align: center;">
+        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Foundation Curriculum</h3>
+        <p style="margin-bottom: 2rem; color: var(--text-secondary);">
+          Start with the essential topics to build a solid trading foundation.
+        </p>
+        <a href="https://funsizedrose.my.canva.site/learning-the-stock-market" class="btn" target="_blank" rel="noopener noreferrer">
+          Access Foundation Curriculum
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Journaling -->
+  <section class="section" id="journaling">
+    <div class="container">
+      <h2>Journaling</h2>
+      <p style="max-width: 800px; margin: 0 auto 3rem; text-align: center; color: var(--text-secondary);">
+        Journaling is one of the most important parts of trading successfully, yet it is overlooked by many traders, 
+        especially beginners. Here are essential tips to help you maintain an effective trading journal.
+      </p>
+      
+      <div class="grid grid-3">
+        <div class="card journal-card">
+          <div class="journal-icon">📝</div>
+          <h4>Daily Reflection</h4>
+          <p>Explain what you did well and what you did poorly. Identify specific areas that need improvement.</p>
+        </div>
+
+        <div class="card journal-card">
+          <div class="journal-icon">🎯</div>
+          <h4>Track Your Trades</h4>
+          <p>Document every trade you take. Was it called out or did you find it? What was your reasoning?</p>
+        </div>
+
+        <div class="card journal-card">
+          <div class="journal-icon">⚖️</div>
+          <h4>Compare to Ideal</h4>
+          <p>Compare your actual entry, stop, and exit to the IDEAL trade you should have taken.</p>
+        </div>
+
+        <div class="card journal-card">
+          <div class="journal-icon">✅</div>
+          <h4>Wins & Mistakes</h4>
+          <p>What did you execute well? What mistakes did you make? Be honest with yourself.</p>
+        </div>
+
+        <div class="card journal-card">
+          <div class="journal-icon">🔄</div>
+          <h4>Future Planning</h4>
+          <p>What will you do differently tomorrow? Set specific, actionable improvements.</p>
+        </div>
+
+        <div class="card journal-card">
+          <div class="journal-icon">📊</div>
+          <h4>Visual Documentation</h4>
+          <p>Mark your entries, exits and notes on TradingView charts. Print them out, save them in a binder, and review regularly.</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 800px; margin: 4rem auto 0;">
+        <h3 style="color: var(--accent-primary); margin-bottom: 1rem; text-align: center;">Journal Template</h3>
+        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 8px;">
+          <p style="color: var(--text-secondary); margin-bottom: 1rem; font-family: monospace;">
+            <strong style="color: var(--text-primary);">Date:</strong> _______________<br><br>
+            <strong style="color: var(--text-primary);">Market Conditions:</strong> _______________<br><br>
+            <strong style="color: var(--text-primary);">Trade Setup:</strong> _______________<br><br>
+            <strong style="color: var(--text-primary);">Entry:</strong> ___ | <strong style="color: var(--text-primary);">Stop:</strong> ___ | <strong style="color: var(--text-primary);">Exit:</strong> ___<br><br>
+            <strong style="color: var(--text-primary);">Result:</strong> _______________<br><br>
+            <strong style="color: var(--text-primary);">What went well:</strong><br>
+            _______________<br><br>
+            <strong style="color: var(--text-primary);">What to improve:</strong><br>
+            _______________<br><br>
+            <strong style="color: var(--text-primary);">Tomorrow's focus:</strong><br>
+            _______________
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding: 6rem 0 4rem;
+    text-align: center;
+  }
+  
+  .hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .guides-nav {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .guide-nav-btn {
+    padding: 1rem 2rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .guide-nav-btn:hover {
+    border-color: var(--accent-primary);
+    background: var(--bg-primary);
+    transform: translateY(-2px);
+  }
+
+  .study-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .journal-card {
+    text-align: center;
+  }
+
+  .journal-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .journal-card h4 {
+    color: var(--accent-primary);
+    margin-bottom: 0.75rem;
+    font-size: 1.125rem;
+  }
+
+  .journal-card p {
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+    }
+
+    .study-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+</script>
