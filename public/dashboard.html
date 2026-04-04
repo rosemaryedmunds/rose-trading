@@ -961,10 +961,15 @@
 
     <!-- ── JOURNAL TAB ───────────────────────────────── -->
     <div id="tab-journal" class="tab-panel">
-      <div class="config-row">
-        <input class="config-input" id="notion-key" placeholder="Notion Integration Token (secret_xxx...)">
-        <input class="config-input" id="notion-db" placeholder="Database ID" style="max-width:320px;">
-        <button class="config-btn" onclick="loadNotion()">LOAD JOURNAL</button>
+      <div class="journal-controls" style="flex-direction:column;align-items:flex-start;gap:0.75rem;">
+        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.05em;">
+          Token is optional if <code style="color:var(--accent)">NOTION_API_KEY</code> is set in Railway. Database ID is required.
+        </div>
+        <div class="config-row" style="width:100%;margin-bottom:0;">
+          <input class="config-input" id="notion-key" placeholder="Notion token (leave blank if set in Railway)">
+          <input class="config-input" id="notion-db" placeholder="Database ID" style="max-width:340px;" value="30e626c1-f8f8-80f4-83cf-000bde7776e8">
+          <button class="config-btn" onclick="loadNotion()">LOAD JOURNAL</button>
+        </div>
       </div>
       <div id="notion-status" style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:1rem;"></div>
 
@@ -1532,39 +1537,54 @@ async function loadNotion() {
   const db  = document.getElementById('notion-db').value.trim();
   const status = document.getElementById('notion-status');
 
-  if (!key || !db) { status.textContent = '⚠ Enter both Notion token and database ID'; status.style.color='var(--red)'; return; }
-
-  localStorage.setItem('notion_key', key);
-  localStorage.setItem('notion_db', db);
-  document.getElementById('saved-notion').textContent = 'Connected';
-  document.getElementById('saved-notion').style.color = 'var(--green)';
-
-  status.innerHTML = '<span class="loading-spinner"></span> Loading from Notion...';
-  status.style.color = 'var(--muted)';
-
-  // Notion API requires a backend proxy due to CORS.
-  // Route through your Railway server's /notion endpoint.
-  const serverUrl = localStorage.getItem('server_url');
-  if (!serverUrl) {
-    status.textContent = '⚠ Connect to your Railway server first (Alerts tab) — Notion calls route through it to avoid CORS.';
+  // DB is required. Key is optional if Railway has NOTION_API_KEY set.
+  if (!db) {
+    status.textContent = '⚠ Enter your database ID';
     status.style.color = 'var(--red)';
     return;
   }
 
+  const serverUrl = localStorage.getItem('server_url');
+  if (!serverUrl) {
+    status.textContent = '⚠ Go to Live Alerts tab and hit Connect first';
+    status.style.color = 'var(--red)';
+    return;
+  }
+
+  if (key) {
+    localStorage.setItem('notion_key', key);
+  }
+  localStorage.setItem('notion_db', db);
+
+  status.innerHTML = '<span class="loading-spinner"></span> Loading from Notion...';
+  status.style.color = 'var(--muted)';
+
   try {
-    const res = await fetch(`${serverUrl}/notion?db=${db}`, {
-      headers: { 'X-Notion-Key': key }
-    });
-    if (!res.ok) throw new Error(res.status);
+    const headers = {};
+    if (key) headers['X-Notion-Key'] = key;
+
+    const res = await fetch(`${serverUrl}/notion?db=${db}`, { headers });
+
     const data = await res.json();
-    renderJournal(data.results || []);
-    status.textContent = `✓ Loaded ${data.results?.length || 0} trades from Notion`;
+
+    if (!res.ok) {
+      // Show the actual error from Railway/Notion
+      const detail = data.detail || JSON.stringify(data);
+      status.textContent = `⚠ Error ${res.status}: ${detail}`;
+      status.style.color = 'var(--red)';
+      return;
+    }
+
+    const results = data.results || [];
+    renderJournal(results);
+    status.textContent = `✓ Loaded ${results.length} trades from Notion`;
     status.style.color = 'var(--green)';
+    document.getElementById('saved-notion').textContent = 'Connected';
+    document.getElementById('saved-notion').style.color = 'var(--green)';
+
   } catch(e) {
-    status.textContent = '⚠ Could not load — add /notion endpoint to your Railway server (see settings)';
-    status.style.color = 'var(--orange)';
-    // Show demo data
-    renderJournal(getDemoJournal());
+    status.textContent = `⚠ Network error: ${e.message}`;
+    status.style.color = 'var(--red)';
   }
 }
 
