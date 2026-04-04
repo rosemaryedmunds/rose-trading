@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rose Trading Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #080a0f;
+    --bg2:       #0d1117;
+    --bg3:       #111620;
+    --border:    #1e2535;
+    --border2:   #2a3347;
+    --accent:    #00e5ff;
+    --accent2:   #7c3aed;
+    --green:     #00ff88;
+    --red:       #ff3b5c;
+    --orange:    #ff9500;
+    --yellow:    #ffe600;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --mono:      'Space Mono', monospace;
+    --sans:      'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── LOGIN SCREEN ──────────────────────────────────── */
+  #login-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .login-box {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    padding: 3rem;
+    width: 380px;
+    position: relative;
+  }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .login-logo {
+    font-family: var(--sans);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .login-sub {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    margin-bottom: 2rem;
+  }
+
+  .login-box input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 0.85rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    outline: none;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .login-box input:focus { border-color: var(--accent); }
+
+  .login-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.85rem;
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .login-btn:hover { opacity: 0.85; }
+
+  .login-error {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--red);
+    margin-top: 0.75rem;
+    display: none;
+  }
+
+  /* ── MAIN DASHBOARD ────────────────────────────────── */
+  #dashboard { display: none; }
+
+  /* ── HEADER ────────────────────────────────────────── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .header-left {
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+
+  .logo {
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--muted); font-weight: 400; }
+
+  .live-indicator {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--green);
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .header-time {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* ── NAV TABS ──────────────────────────────────────── */
+  .nav-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    padding: 0 2rem;
+    gap: 0;
+  }
+
+  .tab-btn {
+    padding: 0.9rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── MAIN GRID ─────────────────────────────────────── */
+  .main-content { padding: 1.5rem 2rem; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── STAT CARDS ────────────────────────────────────── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+  }
+
+  .stat-card.green::after { background: var(--green); }
+  .stat-card.red::after   { background: var(--red); }
+  .stat-card.cyan::after  { background: var(--accent); }
+  .stat-card.purple::after{ background: var(--accent2); }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-value.pos { color: var(--green); }
+  .stat-value.neg { color: var(--red); }
+  .stat-value.neu { color: var(--accent); }
+
+  .stat-sub {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.35rem;
+  }
+
+  /* ── ALERTS PANEL ──────────────────────────────────── */
+  .alerts-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+  }
+
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .panel-badge {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--accent);
+  }
+
+  /* ── ALERT ITEMS ───────────────────────────────────── */
+  #alerts-list { max-height: 600px; overflow-y: auto; }
+
+  .alert-item {
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    animation: slideIn 0.3s ease;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .alert-item:hover { background: var(--bg3); }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .alert-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .alert-setup {
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+
+  .alert-go   { color: var(--green); }
+  .alert-nogo { color: var(--red); }
+
+  .alert-meta {
+    display: flex; gap: 0.75rem; align-items: center;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--muted);
+  }
+
+  .conf-badge {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.55rem;
+    font-family: var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .conf-high   { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
+  .conf-medium { background: rgba(255,149,0,0.1);  color: var(--orange); border: 1px solid rgba(255,149,0,0.3); }
+  .conf-low    { background: rgba(255,59,92,0.1);  color: var(--red);   border: 1px solid rgba(255,59,92,0.3); }
+
+  .alert-reasoning {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+  }
+
+  .alert-levels {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .level-item {
+    background: var(--bg3);
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+  }
+
+  .level-label {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .level-val {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 0.1rem;
+  }
+
+  .level-val.entry  { color: var(--accent); }
+  .level-val.stop   { color: var(--red); }
+  .level-val.target { color: var(--green); }
+
+  .alert-warnings {
+    margin-top: 0.5rem;
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+  }
+
+  .warning-tag {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(255,230,0,0.08);
+    border: 1px solid rgba(255,230,0,0.2);
+    color: var(--yellow);
+    letter-spacing: 0.05em;
+  }
+
+  .empty-state {
+    padding: 3rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── SIDEBAR MARKET STATUS ─────────────────────────── */
+  .market-status { padding: 1.5rem; }
+
+  .ms-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+  }
+
+  .ms-row:last-child { border-bottom: none; }
+  .ms-label { color: var(--muted); letter-spacing: 0.05em; }
+  .ms-val   { font-weight: 700; }
+  .ms-green { color: var(--green); }
+  .ms-red   { color: var(--red); }
+  .ms-cyan  { color: var(--accent); }
+  .ms-yellow{ color: var(--yellow); }
+
+  /* ── PLAYBOOK TAB ──────────────────────────────────── */
+  .playbook-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .setup-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .setup-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .setup-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+
+  .setup-card.bull::before { background: var(--green); }
+  .setup-card.bear::before { background: var(--red); }
+  .setup-card.both::before { background: linear-gradient(var(--green), var(--red)); }
+
+  .setup-number {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-bottom: 0.35rem;
+  }
+
+  .setup-name {
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .setup-section {
+    margin-bottom: 0.75rem;
+  }
+
+  .setup-section-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .setup-section-text {
+    font-size: 0.75rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .setup-rules {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .rule { 
+    display: flex; gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+    align-items: flex-start;
+    line-height: 1.4;
+  }
+
+  .rule-icon { color: var(--accent); flex-shrink: 0; }
+  .rule.bad .rule-icon { color: var(--red); }
+
+  /* ── JOURNAL TAB ───────────────────────────────────── */
+  .journal-controls {
+    display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center;
+  }
+
+  .journal-btn {
+    padding: 0.6rem 1.2rem;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .journal-btn:hover, .journal-btn.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .journal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+  }
+
+  .journal-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .journal-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    transition: background 0.15s;
+  }
+
+  .journal-table tr:hover td { background: var(--bg3); }
+
+  .grade-badge {
+    display: inline-block;
+    width: 28px; height: 28px;
+    line-height: 28px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+
+  .grade-A { background: rgba(0,255,136,0.15); color: var(--green); }
+  .grade-B { background: rgba(0,229,255,0.15); color: var(--accent); }
+  .grade-C { background: rgba(255,149,0,0.15);  color: var(--orange); }
+  .grade-D { background: rgba(255,59,92,0.15);  color: var(--red); }
+  .grade-F { background: rgba(255,59,92,0.3);   color: var(--red); }
+
+  /* ── P&L TAB ───────────────────────────────────────── */
+  .pnl-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1.5rem;
+  }
+
+  .equity-chart {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+
+  canvas { width: 100%; }
+
+  .pnl-entry-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+
+  .pnl-form-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+
+  .pnl-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 0.65rem 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    outline: none;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .pnl-input:focus { border-color: var(--accent); }
+
+  .pnl-submit {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.75rem;
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .pnl-submit:hover { opacity: 0.85; }
+
+  .pnl-history { margin-top: 1.5rem; }
+
+  .pnl-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+  }
+
+  .pnl-date { color: var(--muted); }
+  .pnl-pos { color: var(--green); font-weight: 700; }
+  .pnl-neg { color: var(--red);   font-weight: 700; }
+
+  /* ── SCROLLBAR ─────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  /* ── NOTION LOADING ────────────────────────────────── */
+  .loading-spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .notion-error {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--red);
+    padding: 1rem 1.5rem;
+  }
+
+  /* ── SERVER CONFIG ─────────────────────────────────── */
+  .config-row {
+    display: flex; gap: 0.75rem; align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .config-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 0.65rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .config-input:focus { border-color: var(--accent); }
+
+  .config-btn {
+    padding: 0.65rem 1.25rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ── RESPONSIVE ────────────────────────────────────── */
+  @media (max-width: 1100px) {
+    .alerts-grid { grid-template-columns: 1fr; }
+    .playbook-grid { grid-template-columns: 1fr 1fr; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .pnl-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 700px) {
+    .playbook-grid { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .main-content { padding: 1rem; }
+    header { padding: 0.75rem 1rem; }
+    .nav-tabs { padding: 0 1rem; }
+    .tab-btn { padding: 0.75rem 0.75rem; font-size: 0.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Rose Trading</div>
+    <div class="login-sub">// COMMAND CENTER — PRIVATE ACCESS</div>
+    <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password">
+    <button class="login-btn" onclick="checkPassword()">ACCESS DASHBOARD</button>
+    <div class="login-error" id="login-error">⚠ Incorrect password</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ DASHBOARD -->
+<div id="dashboard">
+
+  <header>
+    <div class="header-left">
+      <div class="logo">Rose <span>Trading</span></div>
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        <span>LIVE</span>
+      </div>
+    </div>
+    <div class="header-time" id="clock"></div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="showTab('alerts')">🚨 Live Alerts</button>
+    <button class="tab-btn" onclick="showTab('pnl')">💰 P&amp;L</button>
+    <button class="tab-btn" onclick="showTab('journal')">📓 Journal</button>
+    <button class="tab-btn" onclick="showTab('playbook')">📋 Playbook</button>
+    <button class="tab-btn" onclick="showTab('settings')">⚙ Settings</button>
+  </nav>
+
+  <div class="main-content">
+
+    <!-- ── ALERTS TAB ───────────────────────────────── -->
+    <div id="tab-alerts" class="tab-panel active">
+
+      <div class="stat-row" id="alert-stats">
+        <div class="stat-card green">
+          <div class="stat-label">Alerts Today</div>
+          <div class="stat-value neu" id="stat-total">0</div>
+          <div class="stat-sub">Since market open</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">GO Signals</div>
+          <div class="stat-value pos" id="stat-go">0</div>
+          <div class="stat-sub">Claude approved</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">NO-GO Signals</div>
+          <div class="stat-value neg" id="stat-nogo">0</div>
+          <div class="stat-sub">Claude rejected</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-label">Last Alert</div>
+          <div class="stat-value neu" id="stat-last" style="font-size:0.9rem;">—</div>
+          <div class="stat-sub" id="stat-last-setup">Waiting...</div>
+        </div>
+      </div>
+
+      <div class="config-row">
+        <input class="config-input" id="server-url" placeholder="https://your-railway-url.com" value="">
+        <button class="config-btn" onclick="startPolling()">CONNECT</button>
+        <button class="config-btn" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border2);" onclick="clearAlerts()">CLEAR</button>
+      </div>
+
+      <div class="alerts-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Alert Feed</div>
+            <div class="panel-badge" id="alert-count">0 alerts</div>
+          </div>
+          <div id="alerts-list">
+            <div class="empty-state">
+              Connect to your Railway server above to receive live alerts
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Market Context</div>
+          </div>
+          <div class="market-status" id="market-context">
+            <div class="ms-row">
+              <span class="ms-label">Session</span>
+              <span class="ms-val ms-cyan" id="ctx-session">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">Last Setup</span>
+              <span class="ms-val" id="ctx-setup">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">Direction</span>
+              <span class="ms-val" id="ctx-action">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">Price</span>
+              <span class="ms-val ms-cyan" id="ctx-price">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">Nearest Level</span>
+              <span class="ms-val" id="ctx-level">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">Range Juice</span>
+              <span class="ms-val" id="ctx-juice">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">PO Zone</span>
+              <span class="ms-val" id="ctx-po">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">In Trigger Box</span>
+              <span class="ms-val" id="ctx-box">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">Chop Warning</span>
+              <span class="ms-val" id="ctx-chop">—</span>
+            </div>
+            <div class="ms-row">
+              <span class="ms-label">Conviction Arrow</span>
+              <span class="ms-val" id="ctx-conviction">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── P&L TAB ────────────────────────────────────── -->
+    <div id="tab-pnl" class="tab-panel">
+      <div class="stat-row">
+        <div class="stat-card green">
+          <div class="stat-label">Total P&amp;L</div>
+          <div class="stat-value" id="total-pnl">$0</div>
+          <div class="stat-sub" id="total-pnl-sub">All time</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value neu" id="win-rate">0%</div>
+          <div class="stat-sub" id="win-rate-sub">0W / 0L</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Best Day</div>
+          <div class="stat-value pos" id="best-day">$0</div>
+          <div class="stat-sub" id="best-day-date">—</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Worst Day</div>
+          <div class="stat-value neg" id="worst-day">$0</div>
+          <div class="stat-sub" id="worst-day-date">—</div>
+        </div>
+      </div>
+
+      <div class="pnl-grid">
+        <div class="equity-chart panel">
+          <div class="panel-header">
+            <div class="panel-title">Equity Curve</div>
+          </div>
+          <div style="padding:1.5rem;">
+            <canvas id="equity-canvas" height="280"></canvas>
+          </div>
+          <div style="padding:0 1.5rem 1.5rem;">
+            <table class="journal-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Setup</th>
+                  <th>Direction</th>
+                  <th>P&amp;L</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="pnl-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pnl-entry-panel">
+          <div class="panel-header" style="padding:0 0 1rem 0; border-bottom:1px solid var(--border); margin-bottom:1rem;">
+            <div class="panel-title">Log Trade P&amp;L</div>
+          </div>
+          <label class="pnl-form-label">Date</label>
+          <input class="pnl-input" type="date" id="pnl-date">
+          <label class="pnl-form-label">Setup</label>
+          <select class="pnl-input" id="pnl-setup" style="cursor:pointer;">
+            <option value="">Select setup...</option>
+            <option>ORB</option>
+            <option>Vomy</option>
+            <option>iVomy</option>
+            <option>Flag Into Ribbon</option>
+            <option>Divergence From Extreme</option>
+            <option>1min EOD Divergence</option>
+            <option>Tweezer Bottom</option>
+          </select>
+          <label class="pnl-form-label">Direction</label>
+          <select class="pnl-input" id="pnl-dir" style="cursor:pointer;">
+            <option value="Call">Call (Long)</option>
+            <option value="Put">Put (Short)</option>
+          </select>
+          <label class="pnl-form-label">P&amp;L ($)</label>
+          <input class="pnl-input" type="number" id="pnl-amount" placeholder="-250 or 480">
+          <label class="pnl-form-label">Notes</label>
+          <input class="pnl-input" type="text" id="pnl-notes" placeholder="Optional notes">
+          <button class="pnl-submit" onclick="addPnlEntry()">LOG TRADE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── JOURNAL TAB ───────────────────────────────── -->
+    <div id="tab-journal" class="tab-panel">
+      <div class="config-row">
+        <input class="config-input" id="notion-key" placeholder="Notion Integration Token (secret_xxx...)">
+        <input class="config-input" id="notion-db" placeholder="Database ID" style="max-width:320px;">
+        <button class="config-btn" onclick="loadNotion()">LOAD JOURNAL</button>
+      </div>
+      <div id="notion-status" style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:1rem;"></div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Trade Journal</div>
+          <div class="panel-badge" id="journal-count">0 trades</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="journal-table" style="min-width:800px;">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Setup</th>
+                <th>Direction</th>
+                <th>Entry</th>
+                <th>Exit</th>
+                <th>P&amp;L</th>
+                <th>Grade</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="journal-body">
+              <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">Enter your Notion token and database ID above to load journal</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PLAYBOOK TAB ──────────────────────────────── -->
+    <div id="tab-playbook" class="tab-panel">
+      <div class="playbook-grid">
+
+        <div class="setup-card both">
+          <div class="setup-number">SETUP 01</div>
+          <div class="setup-name">10-Min Open Range Breakout</div>
+          <div class="setup-section">
+            <div class="setup-section-label">Condition</div>
+            <div class="setup-section-text">Break AND retest of OR High or Low after 9:40am ET. Mark the range 9:30–9:40am.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Entry</div>
+            <div class="setup-section-text">On the RETEST of the broken level — not the initial break candle.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Stop / Target</div>
+            <div class="setup-section-text">Stop: OR midpoint. Target: next ATR level / S&R / momentum shift.</div>
+          </div>
+          <div class="setup-rules">
+            <div class="rule"><span class="rule-icon">✓</span> Candle close confirmation before entry</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Entering on the initial break candle</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Trading before 9:40am</div>
+          </div>
+        </div>
+
+        <div class="setup-card bear">
+          <div class="setup-number">SETUP 02</div>
+          <div class="setup-name">Vomy (Bearish Ribbon Transition)</div>
+          <div class="setup-section">
+            <div class="setup-section-label">Anatomy</div>
+            <div class="setup-section-text">Clear trending ribbon → fins at resistance → 8/13 break → 13 EMA retest → 48 EMA break confirmed.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Entry</div>
+            <div class="setup-section-text">Early: 13 EMA retest (tight stop). Confirmed: 48 EMA break &amp; hold = A-level.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Ultimate Scenario</div>
+            <div class="setup-section-text">48 break + active compression + RSI/Phase at extreme.</div>
+          </div>
+          <div class="setup-rules">
+            <div class="rule"><span class="rule-icon">✓</span> Wait for 48 EMA break for confirmation</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Entering before candle close</div>
+          </div>
+        </div>
+
+        <div class="setup-card bull">
+          <div class="setup-number">SETUP 03</div>
+          <div class="setup-name">iVomy (Bullish Ribbon Transition)</div>
+          <div class="setup-section">
+            <div class="setup-section-label">Condition</div>
+            <div class="setup-section-text">Same as Vomy but bullish. Fin forms at support (Put Trigger). 48 EMA break upward confirms.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Entry / Stop</div>
+            <div class="setup-section-text">Entry on 48 EMA break close or pullback to 13 EMA. Stop: other side of ribbon.</div>
+          </div>
+          <div class="setup-rules">
+            <div class="rule"><span class="rule-icon">✓</span> 48 EMA break = confirmed entry</div>
+            <div class="rule"><span class="rule-icon">✓</span> Check conviction arrow (13/48 cross)</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Chasing after ribbon is far away</div>
+          </div>
+        </div>
+
+        <div class="setup-card both">
+          <div class="setup-number">SETUP 04</div>
+          <div class="setup-name">Flag Into Ribbon</div>
+          <div class="setup-section">
+            <div class="setup-section-label">Condition</div>
+            <div class="setup-section-text">Trending market (ribbon stacked). Price pulls back INTO the ribbon which acts as support/resistance.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Entry / Stop</div>
+            <div class="setup-section-text">Entry at 13 or 21 EMA. Conviction arrow + pullback = high conviction. Stop: other side of ribbon.</div>
+          </div>
+          <div class="setup-rules">
+            <div class="rule"><span class="rule-icon">✓</span> Wicks AT ribbon (not through it) = good retest</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Wicks THROUGH ribbon = bad retest, skip</div>
+          </div>
+        </div>
+
+        <div class="setup-card both">
+          <div class="setup-number">SETUP 05</div>
+          <div class="setup-name">Divergence From Extreme</div>
+          <div class="setup-section">
+            <div class="setup-section-label">Condition</div>
+            <div class="setup-section-text">Range market. Phase Oscillator in Distribution (≥61.8) or Accumulation (≤-61.8). Class A divergence preferred.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Entry / Stop</div>
+            <div class="setup-section-text">Entry on CANDLE CLOSE confirmation only. Stop: above/below swing H/L. Target: 21 EMA → ribbon.</div>
+          </div>
+          <div class="setup-rules">
+            <div class="rule"><span class="rule-icon">✓</span> Class A = price lower low + osc higher low</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Class C divergence = low conviction</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Osc in neutral zone = not valid</div>
+          </div>
+        </div>
+
+        <div class="setup-card both">
+          <div class="setup-number">SETUP 06</div>
+          <div class="setup-name">1-Min EOD Divergence</div>
+          <div class="setup-section">
+            <div class="setup-section-label">Condition</div>
+            <div class="setup-section-text">ONLY 3:00–4:00pm ET. Phase Oscillator divergence + volume confirmation at swing H/L.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Entry / Stop</div>
+            <div class="setup-section-text">Entry on candle close. Stop: above/below swing. Target: mean reversion to 21 EMA.</div>
+          </div>
+          <div class="setup-rules">
+            <div class="rule"><span class="rule-icon">✓</span> Volume confirmation required</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Outside 3–4pm window = invalid</div>
+          </div>
+        </div>
+
+        <div class="setup-card bull">
+          <div class="setup-number">SETUP 07</div>
+          <div class="setup-name">Tweezer Bottom "Wicky Wicky"</div>
+          <div class="setup-section">
+            <div class="setup-section-label">Condition</div>
+            <div class="setup-section-text">Two parallel candles with matching bottom wicks at support level.</div>
+          </div>
+          <div class="setup-section">
+            <div class="setup-section-label">Entry / Stop</div>
+            <div class="setup-section-text">Entry: 50% reclaim of down candle. Stop: below wicks → trail to body lows → trail below structure.</div>
+          </div>
+          <div class="setup-rules">
+            <div class="rule"><span class="rule-icon">✓</span> Wicks must be parallel and matching</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Entering before 50% reclaim</div>
+          </div>
+        </div>
+
+        <div class="setup-card cyan" style="border-left:3px solid var(--accent);">
+          <div class="setup-number">HARD RULES</div>
+          <div class="setup-name">Non-Negotiables</div>
+          <div class="setup-rules" style="border-top:none; margin-top:0; padding-top:0;">
+            <div class="rule bad"><span class="rule-icon">✗</span> No trading 12:30–3:00pm ET</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> No trading on FOMC / CPI days</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Max $1,000 risk per trade</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> Min 1:2 R:R at entry</div>
+            <div class="rule bad"><span class="rule-icon">✗</span> No averaging down</div>
+            <div class="rule"><span class="rule-icon">✓</span> Candle close confirmation ALWAYS</div>
+            <div class="rule"><span class="rule-icon">✓</span> Set TradingView price alert at target on entry</div>
+            <div class="rule"><span class="rule-icon">✓</span> Pre-market prep every day</div>
+          </div>
+        </div>
+
+        <div class="setup-card" style="border-left:3px solid var(--accent2);">
+          <div class="setup-number">ATR PROBABILITIES</div>
+          <div class="setup-name">Level-to-Level Edge</div>
+          <div class="setup-rules" style="border-top:none; margin-top:0; padding-top:0;">
+            <div class="rule"><span class="rule-icon" style="color:var(--green);">80%</span> Call/Put Trigger → Golden Gate</div>
+            <div class="rule"><span class="rule-icon" style="color:var(--green);">80%</span> Golden Gate → 50%</div>
+            <div class="rule"><span class="rule-icon" style="color:var(--green);">80%</span> 50% → Golden Fib (61.8%)</div>
+            <div class="rule"><span class="rule-icon" style="color:var(--orange);">69%</span> Golden Fib → 78.6%</div>
+            <div class="rule"><span class="rule-icon" style="color:var(--orange);">60%</span> 78.6% → +1 ATR</div>
+            <div class="rule"><span class="rule-icon" style="color:var(--accent);">64%</span> Prev Close → ±1 ATR (GG Setup)</div>
+            <div class="rule"><span class="rule-icon" style="color:var(--red);">14%</span> Prev Close → ±1 ATR (full range)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SETTINGS TAB ──────────────────────────────── -->
+    <div id="tab-settings" class="tab-panel">
+      <div style="max-width:600px;">
+        <div class="panel" style="padding:1.5rem; margin-bottom:1rem;">
+          <div class="panel-title" style="margin-bottom:1.5rem;">Change Dashboard Password</div>
+          <label class="pnl-form-label">New Password</label>
+          <input class="pnl-input" type="password" id="new-pw" placeholder="New password">
+          <label class="pnl-form-label">Confirm Password</label>
+          <input class="pnl-input" type="password" id="confirm-pw" placeholder="Confirm new password">
+          <button class="pnl-submit" onclick="changePassword()">UPDATE PASSWORD</button>
+          <div id="pw-msg" style="font-family:var(--mono);font-size:0.7rem;margin-top:0.75rem;"></div>
+        </div>
+
+        <div class="panel" style="padding:1.5rem;">
+          <div class="panel-title" style="margin-bottom:1.5rem;">Saved Configuration</div>
+          <div class="ms-row">
+            <span class="ms-label">Server URL</span>
+            <span class="ms-val ms-cyan" id="saved-url">Not set</span>
+          </div>
+          <div class="ms-row">
+            <span class="ms-label">Notion Connected</span>
+            <span class="ms-val" id="saved-notion">Not set</span>
+          </div>
+          <div class="ms-row">
+            <span class="ms-label">Poll Interval</span>
+            <span class="ms-val ms-cyan">10 seconds</span>
+          </div>
+          <div style="margin-top:1.5rem;">
+            <button class="pnl-submit" style="background:var(--red);" onclick="clearAll()">CLEAR ALL DATA</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /dashboard -->
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+const DEFAULT_PASSWORD = 'rose2024';  // Change this!
+let alerts = [];
+let pnlData = [];
+let pollInterval = null;
+
+// ── AUTH ─────────────────────────────────────────────
+function checkPassword() {
+  const pw = document.getElementById('pw-input').value;
+  const stored = localStorage.getItem('dashboard_pw') || DEFAULT_PASSWORD;
+  if (pw === stored) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    init();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+  }
+}
+
+document.getElementById('pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+});
+
+function changePassword() {
+  const np = document.getElementById('new-pw').value;
+  const cp = document.getElementById('confirm-pw').value;
+  const msg = document.getElementById('pw-msg');
+  if (!np) { msg.style.color='var(--red)'; msg.textContent='Password cannot be empty.'; return; }
+  if (np !== cp) { msg.style.color='var(--red)'; msg.textContent='Passwords do not match.'; return; }
+  localStorage.setItem('dashboard_pw', np);
+  msg.style.color='var(--green)'; msg.textContent='✓ Password updated successfully.';
+  document.getElementById('new-pw').value = '';
+  document.getElementById('confirm-pw').value = '';
+}
+
+// ── TABS ─────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── CLOCK ─────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const h = et.getHours().toString().padStart(2,'0');
+  const m = et.getMinutes().toString().padStart(2,'0');
+  const s = et.getSeconds().toString().padStart(2,'0');
+  const d = et.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  document.getElementById('clock').textContent = `${d} ${h}:${m}:${s} ET`;
+}
+
+// ── POLLING ───────────────────────────────────────────
+function startPolling() {
+  const url = document.getElementById('server-url').value.trim().replace(/\/$/, '');
+  if (!url) return;
+  localStorage.setItem('server_url', url);
+  document.getElementById('saved-url').textContent = url;
+  if (pollInterval) clearInterval(pollInterval);
+  fetchAlerts(url);
+  pollInterval = setInterval(() => fetchAlerts(url), 10000);
+}
+
+async function fetchAlerts(url) {
+  try {
+    const res = await fetch(url + '/alerts');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.alerts && Array.isArray(data.alerts)) {
+      const newAlerts = data.alerts.filter(a => !alerts.find(ex => ex.id === a.id));
+      if (newAlerts.length > 0) {
+        alerts = [...newAlerts, ...alerts];
+        renderAlerts();
+        updateStats();
+      }
+    }
+  } catch(e) {
+    // Server not yet supporting /alerts endpoint — use demo mode
+  }
+}
+
+// ── RENDER ALERTS ─────────────────────────────────────
+function renderAlerts() {
+  const list = document.getElementById('alerts-list');
+  if (alerts.length === 0) {
+    list.innerHTML = '<div class="empty-state">No alerts yet. Waiting for TradingView signals...</div>';
+    return;
+  }
+
+  list.innerHTML = alerts.slice(0, 20).map(a => {
+    const go = a.should_trade;
+    const conf = a.confidence || 'medium';
+    const warnings = a.risk_warnings || [];
+    const sl = a.saty_levels || {};
+    const ctx = a.context || {};
+    const mo = a.momentum || {};
+    const time = a.timestamp ? new Date(a.timestamp).toLocaleTimeString('en-US', {
+      hour:'2-digit', minute:'2-digit', timeZone:'America/New_York'
+    }) : '—';
+
+    return `
+    <div class="alert-item" onclick="this.querySelector('.alert-levels').style.display = this.querySelector('.alert-levels').style.display === 'none' ? 'grid' : 'none'">
+      <div class="alert-top">
+        <div class="alert-setup ${go ? 'alert-go' : 'alert-nogo'}">
+          ${go ? '🟢' : '🔴'} ${a.setup || 'Unknown Setup'}
+          <span style="font-size:0.7rem;font-weight:400;color:var(--muted);margin-left:0.5rem;">${a.action?.toUpperCase() || ''} ${a.ticker || 'SPX'}</span>
+        </div>
+        <div class="alert-meta">
+          <span class="conf-badge conf-${conf}">${conf}</span>
+          <span>${time}</span>
+          <span style="color:var(--accent);font-family:var(--mono);">$${a.price || '—'}</span>
+        </div>
+      </div>
+      <div class="alert-reasoning">${a.reasoning || ''}</div>
+      ${a.entry_plan ? `<div style="font-size:0.72rem;color:var(--accent);font-family:var(--mono);margin-bottom:0.35rem;">↳ ${a.entry_plan}</div>` : ''}
+      <div class="alert-levels" style="display:none;">
+        <div class="level-item">
+          <div class="level-label">Entry</div>
+          <div class="level-val entry">${a.entry_plan?.match(/\d+\.?\d*/)?.[0] || '—'}</div>
+        </div>
+        <div class="level-item">
+          <div class="level-label">Stop</div>
+          <div class="level-val stop">${a.stop_level || '—'}</div>
+        </div>
+        <div class="level-item">
+          <div class="level-label">Target</div>
+          <div class="level-val target">${a.targets?.split(',')[0] || '—'}</div>
+        </div>
+        ${sl.nearest_level ? `<div class="level-item"><div class="level-label">Nearest Level</div><div class="level-val" style="color:var(--muted)">${sl.nearest_level}</div></div>` : ''}
+        ${sl.range_juice ? `<div class="level-item"><div class="level-label">Range Juice</div><div class="level-val" style="color:${sl.range_juice==='green'?'var(--green)':sl.range_juice==='red'?'var(--red)':'var(--orange)'}">${sl.range_juice?.toUpperCase()}</div></div>` : ''}
+        ${mo.po_zone ? `<div class="level-item"><div class="level-label">PO Zone</div><div class="level-val" style="color:var(--muted)">${mo.po_zone}</div></div>` : ''}
+      </div>
+      ${warnings.length > 0 ? `<div class="alert-warnings">${warnings.map(w => `<span class="warning-tag">⚠ ${w}</span>`).join('')}</div>` : ''}
+      ${a.committee_check ? `<div style="font-size:0.68rem;color:var(--muted);font-family:var(--mono);margin-top:0.5rem;line-height:1.4;border-left:2px solid var(--border2);padding-left:0.5rem;">${a.committee_check}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // Update market context from latest alert
+  if (alerts[0]) updateMarketContext(alerts[0]);
+  document.getElementById('alert-count').textContent = `${alerts.length} alert${alerts.length !== 1 ? 's' : ''}`;
+}
+
+function updateMarketContext(a) {
+  const sl = a.saty_levels || {};
+  const tb = a.trigger_box || {};
+  const mo = a.momentum || {};
+  const ctx = a.context || {};
+
+  const set = (id, val, cls) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = val || '—'; if (cls) el.className = 'ms-val ' + cls; }
+  };
+
+  set('ctx-session', ctx.session || a.session, 'ms-cyan');
+  set('ctx-setup', a.setup);
+  set('ctx-action', a.action?.toUpperCase(), a.action === 'buy' ? 'ms-green' : 'ms-red');
+  set('ctx-price', a.price ? '$' + a.price : null, 'ms-cyan');
+  set('ctx-level', sl.nearest_level);
+  const juice = sl.range_juice;
+  set('ctx-juice', juice?.toUpperCase(), juice === 'green' ? 'ms-green' : juice === 'red' ? 'ms-red' : 'ms-yellow');
+  set('ctx-po', mo.po_zone);
+  set('ctx-box', tb.in_box ? '⚠ YES' : 'No', tb.in_box ? 'ms-yellow' : 'ms-green');
+  set('ctx-chop', tb.chop_warning ? '⚠ ' + tb.chop_reason : 'Clear', tb.chop_warning ? 'ms-yellow' : 'ms-green');
+  const cvBull = mo.conviction_arrow_bull;
+  const cvBear = mo.conviction_arrow_bear;
+  set('ctx-conviction', cvBull ? '↑ Bull Arrow' : cvBear ? '↓ Bear Arrow' : 'None', cvBull ? 'ms-green' : cvBear ? 'ms-red' : '');
+}
+
+function updateStats() {
+  const total = alerts.length;
+  const go = alerts.filter(a => a.should_trade).length;
+  const nogo = total - go;
+  const last = alerts[0];
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-go').textContent = go;
+  document.getElementById('stat-nogo').textContent = nogo;
+  if (last) {
+    document.getElementById('stat-last').textContent = last.should_trade ? 'GO' : 'NO-GO';
+    document.getElementById('stat-last').className = 'stat-value ' + (last.should_trade ? 'pos' : 'neg');
+    document.getElementById('stat-last-setup').textContent = last.setup || '—';
+  }
+}
+
+function clearAlerts() {
+  alerts = [];
+  renderAlerts();
+  updateStats();
+}
+
+// Add alert manually (called from server SSE or webhook push in future)
+function addAlert(alertData) {
+  alertData.id = alertData.id || Date.now().toString();
+  alertData.timestamp = alertData.timestamp || new Date().toISOString();
+  alerts.unshift(alertData);
+  renderAlerts();
+  updateStats();
+}
+
+// ── P&L ──────────────────────────────────────────────
+function addPnlEntry() {
+  const date   = document.getElementById('pnl-date').value;
+  const setup  = document.getElementById('pnl-setup').value;
+  const dir    = document.getElementById('pnl-dir').value;
+  const amount = parseFloat(document.getElementById('pnl-amount').value);
+  const notes  = document.getElementById('pnl-notes').value;
+
+  if (!date || !setup || isNaN(amount)) return;
+
+  pnlData.push({ date, setup, dir, amount, notes });
+  pnlData.sort((a,b) => new Date(b.date) - new Date(a.date));
+  localStorage.setItem('pnl_data', JSON.stringify(pnlData));
+
+  document.getElementById('pnl-amount').value = '';
+  document.getElementById('pnl-notes').value = '';
+
+  renderPnl();
+  drawEquityCurve();
+}
+
+function renderPnl() {
+  const body = document.getElementById('pnl-table-body');
+  if (pnlData.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades logged yet</td></tr>';
+    return;
+  }
+
+  body.innerHTML = pnlData.map(t => `
+    <tr>
+      <td>${t.date}</td>
+      <td>${t.setup}</td>
+      <td style="color:${t.dir==='Call'?'var(--green)':'var(--red)'}">${t.dir}</td>
+      <td class="${t.amount >= 0 ? 'pnl-pos' : 'pnl-neg'}">${t.amount >= 0 ? '+' : ''}$${t.amount.toFixed(2)}</td>
+      <td style="color:var(--muted);font-size:0.65rem;">${t.notes || '—'}</td>
+    </tr>
+  `).join('');
+
+  // Update stat cards
+  const total = pnlData.reduce((s,t) => s + t.amount, 0);
+  const wins = pnlData.filter(t => t.amount > 0).length;
+  const losses = pnlData.filter(t => t.amount < 0).length;
+  const best = pnlData.reduce((a,b) => b.amount > a.amount ? b : a, pnlData[0]);
+  const worst = pnlData.reduce((a,b) => b.amount < a.amount ? b : a, pnlData[0]);
+
+  document.getElementById('total-pnl').textContent = (total >= 0 ? '+' : '') + '$' + Math.abs(total).toFixed(2);
+  document.getElementById('total-pnl').className = 'stat-value ' + (total >= 0 ? 'pos' : 'neg');
+  document.getElementById('win-rate').textContent = pnlData.length ? Math.round(wins/pnlData.length*100) + '%' : '0%';
+  document.getElementById('win-rate-sub').textContent = `${wins}W / ${losses}L`;
+  document.getElementById('best-day').textContent = '+$' + best.amount.toFixed(2);
+  document.getElementById('best-day-date').textContent = best.date;
+  document.getElementById('worst-day').textContent = '$' + worst.amount.toFixed(2);
+  document.getElementById('worst-day-date').textContent = worst.date;
+}
+
+function drawEquityCurve() {
+  const canvas = document.getElementById('equity-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth;
+  canvas.width = W;
+  canvas.height = 280;
+
+  if (pnlData.length < 2) return;
+
+  const sorted = [...pnlData].sort((a,b) => new Date(a.date) - new Date(b.date));
+  let running = 0;
+  const points = sorted.map(t => { running += t.amount; return running; });
+  const min = Math.min(0, ...points);
+  const max = Math.max(0, ...points);
+  const range = max - min || 1;
+  const pad = { t:20, b:40, l:60, r:20 };
+  const cw = W - pad.l - pad.r;
+  const ch = canvas.height - pad.t - pad.b;
+
+  const toX = i => pad.l + (i / (points.length - 1)) * cw;
+  const toY = v => pad.t + ch - ((v - min) / range) * ch;
+
+  // Zero line
+  ctx.strokeStyle = '#2a3347';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, toY(0));
+  ctx.lineTo(pad.l + cw, toY(0));
+  ctx.stroke();
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  const isPos = points[points.length-1] >= 0;
+  grad.addColorStop(0, isPos ? 'rgba(0,255,136,0.3)' : 'rgba(255,59,92,0.3)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+  ctx.beginPath();
+  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.lineTo(toX(points.length-1), toY(0));
+  ctx.lineTo(toX(0), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = isPos ? '#00ff88' : '#ff3b5c';
+  ctx.lineWidth = 2;
+  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = '#64748b';
+  ctx.font = '10px Space Mono, monospace';
+  ctx.fillText('$' + max.toFixed(0), 4, toY(max) + 4);
+  ctx.fillText('$' + min.toFixed(0), 4, toY(min) + 4);
+}
+
+// ── NOTION JOURNAL ────────────────────────────────────
+async function loadNotion() {
+  const key = document.getElementById('notion-key').value.trim();
+  const db  = document.getElementById('notion-db').value.trim();
+  const status = document.getElementById('notion-status');
+
+  if (!key || !db) { status.textContent = '⚠ Enter both Notion token and database ID'; status.style.color='var(--red)'; return; }
+
+  localStorage.setItem('notion_key', key);
+  localStorage.setItem('notion_db', db);
+  document.getElementById('saved-notion').textContent = 'Connected';
+  document.getElementById('saved-notion').style.color = 'var(--green)';
+
+  status.innerHTML = '<span class="loading-spinner"></span> Loading from Notion...';
+  status.style.color = 'var(--muted)';
+
+  // Notion API requires a backend proxy due to CORS.
+  // Route through your Railway server's /notion endpoint.
+  const serverUrl = localStorage.getItem('server_url');
+  if (!serverUrl) {
+    status.textContent = '⚠ Connect to your Railway server first (Alerts tab) — Notion calls route through it to avoid CORS.';
+    status.style.color = 'var(--red)';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${serverUrl}/notion?db=${db}`, {
+      headers: { 'X-Notion-Key': key }
+    });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    renderJournal(data.results || []);
+    status.textContent = `✓ Loaded ${data.results?.length || 0} trades from Notion`;
+    status.style.color = 'var(--green)';
+  } catch(e) {
+    status.textContent = '⚠ Could not load — add /notion endpoint to your Railway server (see settings)';
+    status.style.color = 'var(--orange)';
+    // Show demo data
+    renderJournal(getDemoJournal());
+  }
+}
+
+function renderJournal(results) {
+  const body = document.getElementById('journal-body');
+  document.getElementById('journal-count').textContent = `${results.length} trades`;
+
+  if (results.length === 0) {
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades found</td></tr>';
+    return;
+  }
+
+  body.innerHTML = results.map(r => {
+    const p = r.properties || r;
+    const date   = p.Date?.date?.start || p.date || '—';
+    const setup  = p.Setup?.select?.name || p.setup || '—';
+    const dir    = p.Direction?.select?.name || p.direction || '—';
+    const entry  = p['Entry Price']?.number || p.entry || '—';
+    const exit   = p['Exit Price']?.number || p.exit || '—';
+    const pnl    = p['P&L']?.number ?? p.pnl ?? null;
+    const grade  = p.Grade?.select?.name || p.grade || '—';
+    const notes  = p.Notes?.rich_text?.[0]?.plain_text || p.notes || '—';
+
+    const pnlStr = pnl !== null ? `${pnl >= 0 ? '+' : ''}$${pnl}` : '—';
+    const pnlClass = pnl > 0 ? 'pnl-pos' : pnl < 0 ? 'pnl-neg' : '';
+
+    return `
+    <tr>
+      <td>${date}</td>
+      <td>${setup}</td>
+      <td style="color:${dir==='Call'||dir==='Long'?'var(--green)':'var(--red)'}">${dir}</td>
+      <td style="color:var(--accent)">${entry !== '—' ? '$'+entry : '—'}</td>
+      <td style="color:var(--muted)">${exit !== '—' ? '$'+exit : '—'}</td>
+      <td class="${pnlClass}">${pnlStr}</td>
+      <td><span class="grade-badge grade-${grade}">${grade}</span></td>
+      <td style="color:var(--muted);font-size:0.65rem;">${notes}</td>
+    </tr>`;
+  }).join('');
+}
+
+function getDemoJournal() {
+  return [
+    { date:'2026-04-03', setup:'Vomy', direction:'Put', entry:5920, exit:5878, pnl:480, grade:'A', notes:'Clean 48 EMA break, held to GG' },
+    { date:'2026-04-02', setup:'ORB', direction:'Call', entry:5888, exit:5902, pnl:320, grade:'B', notes:'Good retest, slight early entry' },
+    { date:'2026-04-01', setup:'Flag Into Ribbon', direction:'Put', entry:5910, exit:5892, pnl:-180, grade:'A', notes:'Valid setup, stop hit, process clean' },
+  ].map(t => ({ properties: null, ...t }));
+}
+
+// ── INIT ──────────────────────────────────────────────
+function init() {
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Set today's date in P&L form
+  document.getElementById('pnl-date').valueAsDate = new Date();
+
+  // Restore saved data
+  const savedUrl = localStorage.getItem('server_url');
+  if (savedUrl) {
+    document.getElementById('server-url').value = savedUrl;
+    document.getElementById('saved-url').textContent = savedUrl;
+    startPolling();
+  }
+
+  const savedKey = localStorage.getItem('notion_key');
+  const savedDb  = localStorage.getItem('notion_db');
+  if (savedKey) document.getElementById('notion-key').value = savedKey;
+  if (savedDb)  document.getElementById('notion-db').value  = savedDb;
+  if (savedKey && savedDb) {
+    document.getElementById('saved-notion').textContent = 'Connected';
+    document.getElementById('saved-notion').style.color = 'var(--green)';
+  }
+
+  const savedPnl = localStorage.getItem('pnl_data');
+  if (savedPnl) {
+    pnlData = JSON.parse(savedPnl);
+    renderPnl();
+    setTimeout(drawEquityCurve, 100);
+  }
+}
+
+function clearAll() {
+  if (!confirm('Clear all saved data? This cannot be undone.')) return;
+  localStorage.clear();
+  pnlData = [];
+  alerts  = [];
+  renderPnl();
+  renderAlerts();
+  updateStats();
+}
+
+window.addEventListener('resize', drawEquityCurve);
+</script>
+</body>
+</html>
