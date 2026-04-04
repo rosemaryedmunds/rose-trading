@@ -986,17 +986,18 @@
               <tr>
                 <th>Date</th>
                 <th>Saty Setup</th>
-                <th>Type / Dir</th>
+                <th>Type</th>
+                <th>Contract / Expiry</th>
                 <th>Entry</th>
                 <th>Exit</th>
-                <th>P&amp;L ($)</th>
+                <th>P&amp;L</th>
                 <th>Grade</th>
                 <th>W/L</th>
                 <th>Notes</th>
               </tr>
             </thead>
             <tbody id="journal-body">
-              <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">Enter your database ID above and hit Load Journal</td></tr>
+              <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">Enter your database ID above and hit Load Journal</td></tr>
             </tbody>
           </table>
         </div>
@@ -1596,7 +1597,7 @@ function renderJournal(results) {
   document.getElementById('journal-count').textContent = `${results.length} trades`;
 
   if (results.length === 0) {
-    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades found</td></tr>';
+    body.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades found</td></tr>';
     renderJournalStats([]);
     return;
   }
@@ -1605,23 +1606,29 @@ function renderJournal(results) {
   const trades = results.map(r => {
     const p = r.properties || {};
     return {
-      date:     p['Date']?.date?.start || '—',
-      setup:    p['Saty Setup']?.rich_text?.[0]?.plain_text || p['Setup / Strat']?.rich_text?.[0]?.plain_text || '—',
-      dir:      p['Direction']?.select?.name || '—',
-      optType:  p['Option Type']?.select?.name || '—',
-      entry:    p['Entry Price']?.number ?? null,
-      exit:     p['Exit Price']?.number ?? null,
-      pnlDollar: p['P&L ($)']?.number ?? null,
-      pnlPct:   p['P&L (%)']?.number ?? null,
-      grade:    p['Emotional Grade']?.select?.name || '—',
-      winner:   p['Winner?']?.checkbox ?? null,
-      bias:     p['Bias']?.select?.name || '—',
-      session:  p['Session']?.select?.name || '—',
-      symbol:   p['Symbol']?.rich_text?.[0]?.plain_text || 'SPX',
-      strike:   p['Strike']?.number ?? null,
-      notes:    p['Notes']?.rich_text?.[0]?.plain_text || '—',
+      date:      p['Date']?.date?.start || '—',
+      setup:     p['Saty Setup']?.rich_text?.[0]?.plain_text || p['Setup / Strat']?.rich_text?.[0]?.plain_text || '—',
+      dir:       p['Direction']?.select?.name || '—',
+      optType:   p['Option Type']?.select?.name || '—',
+      underlying: p['Underlying']?.rich_text?.[0]?.plain_text || p['Symbol']?.rich_text?.[0]?.plain_text || '—',
+      symbol:    p['Symbol']?.rich_text?.[0]?.plain_text || '—',
+      strike:    p['Strike']?.number ?? null,
+      expiry:    p['Expiry']?.date?.start || '—',
       contracts: p['Qty / Contracts']?.number ?? null,
-      reviewed: p['Reviewed?']?.checkbox ?? false,
+      entry:     p['Entry Price']?.number ?? null,
+      entryTime: p['Entry Time']?.rich_text?.[0]?.plain_text || '—',
+      exit:      p['Exit Price']?.number ?? null,
+      exitTime:  p['Exit Time']?.rich_text?.[0]?.plain_text || '—',
+      pnlDollar: p['P&L ($)']?.number ?? null,
+      pnlPct:    p['P&L (%)']?.number ?? null,
+      grade:     p['Emotional Grade']?.select?.name || '—',
+      winner:    p['Winner?']?.checkbox ?? null,
+      bias:      p['Bias']?.select?.name || '—',
+      session:   p['Session']?.select?.name || '—',
+      notes:     p['Notes']?.rich_text?.[0]?.plain_text || '—',
+      reviewed:  p['Reviewed?']?.checkbox ?? false,
+      action:    p['Action']?.select?.name || '—',
+      timeframe: p['Timeframe Combo']?.rich_text?.[0]?.plain_text || '—',
     };
   });
 
@@ -1630,23 +1637,46 @@ function renderJournal(results) {
 
   // Render table
   body.innerHTML = trades.map(t => {
-    const pnlStr = t.pnlDollar !== null ? `${t.pnlDollar >= 0 ? '+' : ''}$${t.pnlDollar.toFixed(0)}` : '—';
-    const pnlPctStr = t.pnlPct !== null ? `${t.pnlPct >= 0 ? '+' : ''}${t.pnlPct.toFixed(1)}%` : '';
-    const pnlClass = t.pnlDollar > 0 ? 'pnl-pos' : t.pnlDollar < 0 ? 'pnl-neg' : '';
-    const dirColor = t.dir === 'LONG' ? 'var(--green)' : t.dir === 'SHORT' ? 'var(--red)' : 'var(--muted)';
-    const optColor = t.optType === 'CALL' ? 'var(--green)' : t.optType === 'PUT' ? 'var(--red)' : 'var(--muted)';
+    const pnlStr    = t.pnlDollar !== null ? `${t.pnlDollar >= 0 ? '+' : ''}$${t.pnlDollar.toFixed(0)}` : '—';
+    const pnlPctStr = t.pnlPct   !== null ? `${t.pnlPct >= 0 ? '+' : ''}${t.pnlPct.toFixed(1)}%` : '';
+    const pnlClass  = t.pnlDollar > 0 ? 'pnl-pos' : t.pnlDollar < 0 ? 'pnl-neg' : '';
+    const dirColor  = t.dir === 'LONG'  ? 'var(--green)' : t.dir === 'SHORT' ? 'var(--red)' : 'var(--muted)';
+    const optColor  = t.optType === 'CALL' ? 'var(--green)' : t.optType === 'PUT' ? 'var(--red)' : 'var(--muted)';
+    const biasColor = t.bias === 'Bullish' ? 'var(--green)' : t.bias === 'Bearish' ? 'var(--red)' : 'var(--muted)';
+    // Format expiry to short MM/DD
+    const expiryShort = t.expiry !== '—' ? t.expiry.slice(5).replace('-', '/') : '—';
+    // Strike display: e.g. SPX 5900C
+    const contractStr = t.underlying !== '—' && t.strike
+      ? `${t.underlying} ${t.strike}${t.optType === 'CALL' ? 'C' : t.optType === 'PUT' ? 'P' : ''}`
+      : t.underlying !== '—' ? t.underlying : '—';
 
     return `
     <tr>
-      <td style="color:var(--muted)">${t.date !== '—' ? t.date.slice(5) : '—'}</td>
-      <td style="font-weight:600">${t.setup}</td>
-      <td><span style="color:${optColor};font-size:0.65rem;">${t.optType}</span> <span style="color:${dirColor};font-size:0.65rem;">${t.dir}</span></td>
-      <td style="color:var(--accent);font-family:var(--mono)">${t.entry !== null ? '$'+t.entry : '—'}</td>
-      <td style="color:var(--muted);font-family:var(--mono)">${t.exit !== null ? '$'+t.exit : '—'}</td>
-      <td class="${pnlClass}" style="font-family:var(--mono)">${pnlStr} <span style="font-size:0.6rem;opacity:0.6">${pnlPctStr}</span></td>
+      <td style="color:var(--muted);font-family:var(--mono)">${t.date !== '—' ? t.date.slice(5) : '—'}</td>
+      <td style="font-weight:600;font-size:0.75rem">${t.setup}</td>
+      <td>
+        <span style="color:${optColor};font-family:var(--mono);font-size:0.65rem;font-weight:700">${t.optType}</span>
+        <span style="color:${dirColor};font-family:var(--mono);font-size:0.6rem;margin-left:0.25rem">${t.dir}</span>
+      </td>
+      <td style="font-family:var(--mono);font-size:0.7rem">
+        <div style="color:var(--accent)">${contractStr}</div>
+        <div style="color:var(--muted);font-size:0.6rem">exp ${expiryShort}${t.contracts ? ' · ' + t.contracts + ' ct' : ''}</div>
+      </td>
+      <td style="font-family:var(--mono);font-size:0.7rem">
+        <div style="color:var(--text)">${t.entry !== null ? '$'+t.entry : '—'}</div>
+        <div style="color:var(--muted);font-size:0.6rem">${t.entryTime !== '—' ? t.entryTime : ''}</div>
+      </td>
+      <td style="font-family:var(--mono);font-size:0.7rem">
+        <div style="color:var(--muted)">${t.exit !== null ? '$'+t.exit : '—'}</div>
+        <div style="color:var(--muted);font-size:0.6rem">${t.exitTime !== '—' ? t.exitTime : ''}</div>
+      </td>
+      <td class="${pnlClass}" style="font-family:var(--mono);font-size:0.8rem;font-weight:700">
+        ${pnlStr}
+        <div style="font-size:0.6rem;opacity:0.6;font-weight:400">${pnlPctStr}</div>
+      </td>
       <td><span class="grade-badge grade-${t.grade}">${t.grade}</span></td>
-      <td style="color:${t.winner === true ? 'var(--green)' : t.winner === false && t.pnlDollar !== null ? 'var(--red)' : 'var(--muted)'};font-size:0.7rem">${t.winner === true ? '✓ W' : t.winner === false && t.pnlDollar !== null ? '✗ L' : '—'}</td>
-      <td style="color:var(--muted);font-size:0.65rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.notes}">${t.notes}</td>
+      <td style="color:${t.winner === true ? 'var(--green)' : t.winner === false && t.pnlDollar !== null ? 'var(--red)' : 'var(--muted)'};font-size:0.7rem;font-family:var(--mono)">${t.winner === true ? '✓ W' : t.winner === false && t.pnlDollar !== null ? '✗ L' : '—'}</td>
+      <td style="color:var(--muted);font-size:0.65rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.notes}">${t.notes}</td>
     </tr>`;
   }).join('');
 }
