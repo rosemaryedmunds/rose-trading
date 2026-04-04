@@ -973,6 +973,8 @@
       </div>
       <div id="notion-status" style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:1rem;"></div>
 
+      <div id="journal-stats"></div>
+
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">Trade Journal</div>
@@ -983,17 +985,18 @@
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Setup</th>
-                <th>Direction</th>
+                <th>Saty Setup</th>
+                <th>Type / Dir</th>
                 <th>Entry</th>
                 <th>Exit</th>
-                <th>P&amp;L</th>
+                <th>P&amp;L ($)</th>
                 <th>Grade</th>
+                <th>W/L</th>
                 <th>Notes</th>
               </tr>
             </thead>
             <tbody id="journal-body">
-              <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">Enter your Notion token and database ID above to load journal</td></tr>
+              <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">Enter your database ID above and hit Load Journal</td></tr>
             </tbody>
           </table>
         </div>
@@ -1593,44 +1596,161 @@ function renderJournal(results) {
   document.getElementById('journal-count').textContent = `${results.length} trades`;
 
   if (results.length === 0) {
-    body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades found</td></tr>';
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades found</td></tr>';
+    renderJournalStats([]);
     return;
   }
 
-  body.innerHTML = results.map(r => {
-    const p = r.properties || r;
-    const date   = p.Date?.date?.start || p.date || '—';
-    const setup  = p.Setup?.select?.name || p.setup || '—';
-    const dir    = p.Direction?.select?.name || p.direction || '—';
-    const entry  = p['Entry Price']?.number || p.entry || '—';
-    const exit   = p['Exit Price']?.number || p.exit || '—';
-    const pnl    = p['P&L']?.number ?? p.pnl ?? null;
-    const grade  = p.Grade?.select?.name || p.grade || '—';
-    const notes  = p.Notes?.rich_text?.[0]?.plain_text || p.notes || '—';
+  // Parse using exact Notion schema field names
+  const trades = results.map(r => {
+    const p = r.properties || {};
+    return {
+      date:     p['Date']?.date?.start || '—',
+      setup:    p['Saty Setup']?.rich_text?.[0]?.plain_text || p['Setup / Strat']?.rich_text?.[0]?.plain_text || '—',
+      dir:      p['Direction']?.select?.name || '—',
+      optType:  p['Option Type']?.select?.name || '—',
+      entry:    p['Entry Price']?.number ?? null,
+      exit:     p['Exit Price']?.number ?? null,
+      pnlDollar: p['P&L ($)']?.number ?? null,
+      pnlPct:   p['P&L (%)']?.number ?? null,
+      grade:    p['Emotional Grade']?.select?.name || '—',
+      winner:   p['Winner?']?.checkbox ?? null,
+      bias:     p['Bias']?.select?.name || '—',
+      session:  p['Session']?.select?.name || '—',
+      symbol:   p['Symbol']?.rich_text?.[0]?.plain_text || 'SPX',
+      strike:   p['Strike']?.number ?? null,
+      notes:    p['Notes']?.rich_text?.[0]?.plain_text || '—',
+      contracts: p['Qty / Contracts']?.number ?? null,
+      reviewed: p['Reviewed?']?.checkbox ?? false,
+    };
+  });
 
-    const pnlStr = pnl !== null ? `${pnl >= 0 ? '+' : ''}$${pnl}` : '—';
-    const pnlClass = pnl > 0 ? 'pnl-pos' : pnl < 0 ? 'pnl-neg' : '';
+  // Render stats first
+  renderJournalStats(trades);
+
+  // Render table
+  body.innerHTML = trades.map(t => {
+    const pnlStr = t.pnlDollar !== null ? `${t.pnlDollar >= 0 ? '+' : ''}$${t.pnlDollar.toFixed(0)}` : '—';
+    const pnlPctStr = t.pnlPct !== null ? `${t.pnlPct >= 0 ? '+' : ''}${t.pnlPct.toFixed(1)}%` : '';
+    const pnlClass = t.pnlDollar > 0 ? 'pnl-pos' : t.pnlDollar < 0 ? 'pnl-neg' : '';
+    const dirColor = t.dir === 'LONG' ? 'var(--green)' : t.dir === 'SHORT' ? 'var(--red)' : 'var(--muted)';
+    const optColor = t.optType === 'CALL' ? 'var(--green)' : t.optType === 'PUT' ? 'var(--red)' : 'var(--muted)';
 
     return `
     <tr>
-      <td>${date}</td>
-      <td>${setup}</td>
-      <td style="color:${dir==='Call'||dir==='Long'?'var(--green)':'var(--red)'}">${dir}</td>
-      <td style="color:var(--accent)">${entry !== '—' ? '$'+entry : '—'}</td>
-      <td style="color:var(--muted)">${exit !== '—' ? '$'+exit : '—'}</td>
-      <td class="${pnlClass}">${pnlStr}</td>
-      <td><span class="grade-badge grade-${grade}">${grade}</span></td>
-      <td style="color:var(--muted);font-size:0.65rem;">${notes}</td>
+      <td style="color:var(--muted)">${t.date !== '—' ? t.date.slice(5) : '—'}</td>
+      <td style="font-weight:600">${t.setup}</td>
+      <td><span style="color:${optColor};font-size:0.65rem;">${t.optType}</span> <span style="color:${dirColor};font-size:0.65rem;">${t.dir}</span></td>
+      <td style="color:var(--accent);font-family:var(--mono)">${t.entry !== null ? '$'+t.entry : '—'}</td>
+      <td style="color:var(--muted);font-family:var(--mono)">${t.exit !== null ? '$'+t.exit : '—'}</td>
+      <td class="${pnlClass}" style="font-family:var(--mono)">${pnlStr} <span style="font-size:0.6rem;opacity:0.6">${pnlPctStr}</span></td>
+      <td><span class="grade-badge grade-${t.grade}">${t.grade}</span></td>
+      <td style="color:${t.winner === true ? 'var(--green)' : t.winner === false && t.pnlDollar !== null ? 'var(--red)' : 'var(--muted)'};font-size:0.7rem">${t.winner === true ? '✓ W' : t.winner === false && t.pnlDollar !== null ? '✗ L' : '—'}</td>
+      <td style="color:var(--muted);font-size:0.65rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.notes}">${t.notes}</td>
     </tr>`;
   }).join('');
 }
 
-function getDemoJournal() {
-  return [
-    { date:'2026-04-03', setup:'Vomy', direction:'Put', entry:5920, exit:5878, pnl:480, grade:'A', notes:'Clean 48 EMA break, held to GG' },
-    { date:'2026-04-02', setup:'ORB', direction:'Call', entry:5888, exit:5902, pnl:320, grade:'B', notes:'Good retest, slight early entry' },
-    { date:'2026-04-01', setup:'Flag Into Ribbon', direction:'Put', entry:5910, exit:5892, pnl:-180, grade:'A', notes:'Valid setup, stop hit, process clean' },
-  ].map(t => ({ properties: null, ...t }));
+function renderJournalStats(trades) {
+  const statsEl = document.getElementById('journal-stats');
+  if (!statsEl) return;
+
+  if (trades.length === 0) {
+    statsEl.innerHTML = '';
+    return;
+  }
+
+  const withPnl   = trades.filter(t => t.pnlDollar !== null);
+  const winners   = trades.filter(t => t.winner === true);
+  const losers    = trades.filter(t => t.winner === false && t.pnlDollar !== null);
+  const totalPnl  = withPnl.reduce((s, t) => s + t.pnlDollar, 0);
+  const winRate   = trades.length ? Math.round(winners.length / trades.filter(t => t.winner !== null).length * 100) : 0;
+  const avgWin    = winners.length ? winners.reduce((s,t) => s + t.pnlDollar, 0) / winners.length : 0;
+  const avgLoss   = losers.length  ? losers.reduce((s,t)  => s + t.pnlDollar, 0) / losers.length  : 0;
+  const best      = withPnl.length ? withPnl.reduce((a,b) => b.pnlDollar > a.pnlDollar ? b : a) : null;
+  const worst     = withPnl.length ? withPnl.reduce((a,b) => b.pnlDollar < a.pnlDollar ? b : a) : null;
+
+  // Setup breakdown
+  const setupMap = {};
+  trades.forEach(t => {
+    if (!t.setup || t.setup === '—') return;
+    if (!setupMap[t.setup]) setupMap[t.setup] = { count:0, pnl:0, wins:0 };
+    setupMap[t.setup].count++;
+    if (t.pnlDollar !== null) setupMap[t.setup].pnl += t.pnlDollar;
+    if (t.winner === true) setupMap[t.setup].wins++;
+  });
+  const setupArr = Object.entries(setupMap).sort((a,b) => b[1].pnl - a[1].pnl);
+
+  // Grade breakdown
+  const gradeMap = {};
+  trades.forEach(t => {
+    if (!t.grade || t.grade === '—') return;
+    gradeMap[t.grade] = (gradeMap[t.grade] || 0) + 1;
+  });
+
+  statsEl.innerHTML = `
+    <div class="stat-row" style="margin-bottom:1rem;">
+      <div class="stat-card ${totalPnl >= 0 ? 'green' : 'red'}">
+        <div class="stat-label">Total P&L</div>
+        <div class="stat-value ${totalPnl >= 0 ? 'pos' : 'neg'}">${totalPnl >= 0 ? '+' : ''}$${Math.abs(totalPnl).toFixed(0)}</div>
+        <div class="stat-sub">${trades.length} trades logged</div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-value neu">${winRate}%</div>
+        <div class="stat-sub">${winners.length}W / ${losers.length}L</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Avg Winner</div>
+        <div class="stat-value pos">+$${avgWin.toFixed(0)}</div>
+        <div class="stat-sub">${best ? 'Best: +$'+best.pnlDollar.toFixed(0) : '—'}</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Avg Loser</div>
+        <div class="stat-value neg">$${avgLoss.toFixed(0)}</div>
+        <div class="stat-sub">${worst ? 'Worst: $'+worst.pnlDollar.toFixed(0) : '—'}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+      <div class="panel" style="padding:1.25rem;">
+        <div class="panel-title" style="margin-bottom:1rem;">Setup Performance</div>
+        ${setupArr.length === 0 ? '<div style="color:var(--muted);font-family:var(--mono);font-size:0.7rem;">No setup data</div>' :
+          setupArr.map(([name, s]) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-size:0.8rem;font-weight:600;">${name}</div>
+              <div style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);">${s.count} trades · ${s.count ? Math.round(s.wins/s.count*100) : 0}% win</div>
+            </div>
+            <div style="font-family:var(--mono);font-size:0.85rem;font-weight:700;color:${s.pnl >= 0 ? 'var(--green)' : 'var(--red)'}">
+              ${s.pnl >= 0 ? '+' : ''}$${s.pnl.toFixed(0)}
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <div class="panel" style="padding:1.25rem;">
+        <div class="panel-title" style="margin-bottom:1rem;">Process Grades</div>
+        ${['A','B','C','D','F'].map(g => {
+          const count = gradeMap[g] || 0;
+          const pct = trades.length ? Math.round(count/trades.length*100) : 0;
+          return `
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+            <span class="grade-badge grade-${g}" style="flex-shrink:0">${g}</span>
+            <div style="flex:1;background:var(--bg3);height:6px;border-radius:0;">
+              <div style="height:6px;width:${pct}%;background:${g==='A'?'var(--green)':g==='B'?'var(--accent)':g==='C'?'var(--orange)':'var(--red)'};transition:width 0.5s"></div>
+            </div>
+            <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);width:40px;text-align:right">${count} (${pct}%)</span>
+          </div>`;
+        }).join('')}
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">PROCESS SCORE</div>
+          <div style="font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--accent)">
+            ${trades.length ? ((['A','B','C','D','F'].reduce((s,g,i) => s + (gradeMap[g]||0)*(4-i), 0)) / trades.filter(t=>t.grade!=='—').length).toFixed(1) : '—'}
+            <span style="font-size:0.7rem;color:var(--muted)">/ 4.0</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
 }
 
 // ── INIT ──────────────────────────────────────────────
