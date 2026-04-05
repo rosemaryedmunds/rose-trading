@@ -49,10 +49,9 @@ const GIST_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL ?? '';
 
 <style>
   .rtd {
-    --rose:  #c2185b; --glow: rgba(194,24,91,0.15);
-    --bg:    #0d0a0e; --surf: #16111a; --surf2: #1e1726;
+    --rose:  #c2185b; --bg: #0d0a0e; --surf: #16111a; --surf2: #1e1726;
     --bdr:   rgba(194,24,91,0.2); --txt: #ede8f0; --muted: #7d6e87;
-    --green: #4caf7d; --red: #e05c6a; --gold: #e8b84b;
+    --green: #4caf7d; --red: #e05c6a;
     font-family: 'DM Mono', monospace;
     background: var(--bg); color: var(--txt);
     padding: 2rem 1.5rem 3rem; border-radius: 1.25rem;
@@ -86,26 +85,17 @@ const GIST_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL ?? '';
   @media(max-width:900px){ .rtd-charts{ grid-template-columns:1fr; } }
 </style>
 
-<script type="module" define:vars={{ GIST_URL }}>
-  // Load Chart.js from CDN
-  await import('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js').catch(() => {});
+<script>
+  import { Chart, LineController, BarController, LineElement, BarElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip, Legend } from 'chart.js';
 
-  // If module import didn't work, fall back to script tag
-  if (!window.Chart) {
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
-      s.onload = resolve;
-      s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
+  Chart.register(LineController, BarController, LineElement, BarElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip, Legend);
 
-  const $ = id => document.getElementById(id);
-  const fmt    = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
-  const clr    = n => n >= 0 ? '#4caf7d' : '#e05c6a';
-  const ROSE   = '#c2185b';
-  const MUTED  = '#7d6e87';
+  const GIST_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL ?? '';
+  const $    = id => document.getElementById(id);
+  const fmt  = n  => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
+  const clr  = n  => n >= 0 ? '#4caf7d' : '#e05c6a';
+  const ROSE  = '#c2185b';
+  const MUTED = '#7d6e87';
 
   Chart.defaults.color       = MUTED;
   Chart.defaults.borderColor = 'rgba(194,24,91,0.15)';
@@ -115,28 +105,27 @@ const GIST_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL ?? '';
   async function load() {
     try {
       if (!GIST_URL) {
-        $('rtd-stamp').textContent = 'Error: GIST_URL not configured';
+        $('rtd-stamp').textContent = 'Error: GIST URL not set in Netlify env vars';
         return;
       }
 
       const url = GIST_URL + (GIST_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
       const res = await fetch(url);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (!res.ok) throw new Error('Fetch failed: HTTP ' + res.status);
       const d = await res.json();
 
-      const gen = new Date(d.generated);
-      $('rtd-stamp').textContent = 'Updated ' + gen.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      $('rtd-stamp').textContent = 'Updated ' + new Date(d.generated).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
       const pnlEl = $('kv-pnl');
-      pnlEl.textContent  = fmt(d.total_pnl);
-      pnlEl.style.color  = clr(d.total_pnl);
-      $('kv-wr').textContent  = d.win_rate + '%';
-      $('kv-wr').style.color  = d.win_rate >= 50 ? '#4caf7d' : '#e8b84b';
-      $('kv-aw').textContent  = '+' + fmt(d.avg_winner);
-      $('kv-al').textContent  = fmt(d.avg_loser);
-      $('kv-pf').textContent  = d.profit_factor + 'x';
-      $('kv-pf').style.color  = d.profit_factor >= 1 ? '#4caf7d' : '#e05c6a';
-      $('kv-tr').textContent  = d.total_trades;
+      pnlEl.textContent = fmt(d.total_pnl);
+      pnlEl.style.color = clr(d.total_pnl);
+      $('kv-wr').textContent = d.win_rate + '%';
+      $('kv-wr').style.color = d.win_rate >= 50 ? '#4caf7d' : '#e8b84b';
+      $('kv-aw').textContent = '+' + fmt(d.avg_winner);
+      $('kv-al').textContent = fmt(d.avg_loser);
+      $('kv-pf').textContent = d.profit_factor + 'x';
+      $('kv-pf').style.color = d.profit_factor >= 1 ? '#4caf7d' : '#e05c6a';
+      $('kv-tr').textContent = d.total_trades;
 
       new Chart($('rtd-curve'), {
         type: 'line',
@@ -153,42 +142,38 @@ const GIST_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL ?? '';
           labels: d.hour_winrate.map(x => x.hour),
           datasets: [{ data: d.hour_winrate.map(x => x.winrate), backgroundColor: d.hour_winrate.map(x => x.winrate>=50?'rgba(76,175,125,0.7)':'rgba(224,92,106,0.7)'), borderRadius:4 }]
         },
-        options: { responsive:true, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.raw+'% ('+d.hour_winrate[ctx.dataIndex].total+' trades)'}}}, scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}} }
+        options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}} }
       });
 
-      const top = d.setup_data.slice(0,8);
+      const top = (d.setup_data || []).slice(0,8);
       new Chart($('rtd-setup'), {
         type: 'bar',
         data: {
           labels: top.map(x => x.setup.length>18?x.setup.slice(0,18)+'…':x.setup),
           datasets: [{ data: top.map(x => x.pnl), backgroundColor: top.map(x => x.pnl>=0?'rgba(76,175,125,0.7)':'rgba(224,92,106,0.7)'), borderRadius:4 }]
         },
-        options: { indexAxis:'y', responsive:true, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>'$'+ctx.raw+' ('+top[ctx.dataIndex].winrate+'% WR)'}}}, scales:{x:{ticks:{callback:v=>'$'+v}}} }
+        options: { indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{callback:v=>'$'+v}}} }
       });
 
       const tbody = $('rtd-tbody');
-      if (!d.recent || d.recent.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="rtd-loading">No trades found.</td></tr>';
-      } else {
-        tbody.innerHTML = d.recent.map(t => {
-          const pnl  = t.pnl || 0;
-          const col  = clr(pnl);
-          const sign = pnl >= 0 ? '+' : '';
-          const badge = pnl > 0 ? '<span class="badge-w">WIN</span>' : '<span class="badge-l">LOSS</span>';
-          return `<tr>
-            <td style="color:${MUTED}">${t.date||'—'}</td>
-            <td><span class="sym">${t.underlying||t.symbol||'—'}</span></td>
-            <td>${t.option_type||'—'}</td>
-            <td>${t.strike||'—'}</td>
-            <td>${t.entry_price!=null?fmt(t.entry_price):'—'}</td>
-            <td>${t.exit_price!=null?fmt(t.exit_price):'—'}</td>
-            <td>${t.qty||'—'}</td>
-            <td style="color:${col};font-weight:700">${sign}${fmt(pnl)}</td>
-            <td style="color:${MUTED}">${t.setup||'—'}</td>
-            <td>${badge}</td>
-          </tr>`;
-        }).join('');
-      }
+      tbody.innerHTML = (d.recent || []).map(t => {
+        const pnl  = t.pnl || 0;
+        const col  = clr(pnl);
+        const sign = pnl >= 0 ? '+' : '';
+        const badge = pnl > 0 ? '<span class="badge-w">WIN</span>' : '<span class="badge-l">LOSS</span>';
+        return `<tr>
+          <td style="color:${MUTED}">${t.date||'—'}</td>
+          <td><span class="sym">${t.underlying||t.symbol||'—'}</span></td>
+          <td>${t.option_type||'—'}</td>
+          <td>${t.strike||'—'}</td>
+          <td>${t.entry_price!=null?fmt(t.entry_price):'—'}</td>
+          <td>${t.exit_price!=null?fmt(t.exit_price):'—'}</td>
+          <td>${t.qty||'—'}</td>
+          <td style="color:${col};font-weight:700">${sign}${fmt(pnl)}</td>
+          <td style="color:${MUTED}">${t.setup||'—'}</td>
+          <td>${badge}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="10" class="rtd-loading">No trades found.</td></tr>';
 
     } catch(err) {
       $('rtd-stamp').textContent = 'Error: ' + err.message;
