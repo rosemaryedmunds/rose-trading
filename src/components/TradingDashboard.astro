@@ -1,11 +1,11 @@
 ---
-// TradingDashboard.astro  — drop into src/components/
-// Reads from your GitHub Gist — updated each time you run analyze_trades.py
-const GIST_RAW_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL;
+const GIST_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL ?? '';
 ---
 
-<section class="rtd" id="trading-dashboard">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
 
+<section class="rtd" id="trading-dashboard">
   <div class="rtd-header">
     <div>
       <h2 class="rtd-title">Performance Dashboard</h2>
@@ -14,60 +14,29 @@ const GIST_RAW_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL;
     <span class="rtd-stamp" id="rtd-stamp">Loading…</span>
   </div>
 
-  <!-- KPI Cards -->
-  <div class="rtd-kpis" id="rtd-kpis">
-    <div class="kpi" id="kpi-pnl">
-      <span class="kpi-label">Total P&amp;L</span>
-      <span class="kpi-val" id="kv-pnl">—</span>
-    </div>
-    <div class="kpi" id="kpi-wr">
-      <span class="kpi-label">Win Rate</span>
-      <span class="kpi-val" id="kv-wr">—</span>
-    </div>
-    <div class="kpi" id="kpi-aw">
-      <span class="kpi-label">Avg Winner</span>
-      <span class="kpi-val green" id="kv-aw">—</span>
-    </div>
-    <div class="kpi" id="kpi-al">
-      <span class="kpi-label">Avg Loser</span>
-      <span class="kpi-val red" id="kv-al">—</span>
-    </div>
-    <div class="kpi" id="kpi-pf">
-      <span class="kpi-label">Profit Factor</span>
-      <span class="kpi-val" id="kv-pf">—</span>
-    </div>
-    <div class="kpi" id="kpi-tr">
-      <span class="kpi-label">Total Trades</span>
-      <span class="kpi-val" id="kv-tr">—</span>
-    </div>
+  <div class="rtd-kpis">
+    <div class="kpi"><span class="kpi-label">Total P&amp;L</span><span class="kpi-val" id="kv-pnl">—</span></div>
+    <div class="kpi"><span class="kpi-label">Win Rate</span><span class="kpi-val" id="kv-wr">—</span></div>
+    <div class="kpi"><span class="kpi-label">Avg Winner</span><span class="kpi-val green" id="kv-aw">—</span></div>
+    <div class="kpi"><span class="kpi-label">Avg Loser</span><span class="kpi-val red" id="kv-al">—</span></div>
+    <div class="kpi"><span class="kpi-label">Profit Factor</span><span class="kpi-val" id="kv-pf">—</span></div>
+    <div class="kpi"><span class="kpi-label">Total Trades</span><span class="kpi-val" id="kv-tr">—</span></div>
   </div>
 
-  <!-- Charts row -->
   <div class="rtd-charts">
-    <div class="chart-box wide">
-      <p class="chart-label">Equity Curve</p>
-      <canvas id="rtd-curve"></canvas>
-    </div>
-    <div class="chart-box">
-      <p class="chart-label">Win Rate by Hour</p>
-      <canvas id="rtd-hour"></canvas>
-    </div>
-    <div class="chart-box">
-      <p class="chart-label">P&amp;L by Setup</p>
-      <canvas id="rtd-setup"></canvas>
-    </div>
+    <div class="chart-box wide"><p class="chart-label">Equity Curve</p><canvas id="rtd-curve"></canvas></div>
+    <div class="chart-box"><p class="chart-label">Win Rate by Hour</p><canvas id="rtd-hour"></canvas></div>
+    <div class="chart-box"><p class="chart-label">P&amp;L by Setup</p><canvas id="rtd-setup"></canvas></div>
   </div>
 
-  <!-- Recent trades -->
   <div class="rtd-table-wrap">
     <p class="chart-label" style="margin-bottom:.75rem">Recent Trades</p>
     <div style="overflow-x:auto">
       <table class="rtd-table">
         <thead>
           <tr>
-            <th>Date</th><th>Symbol</th><th>Type</th>
-            <th>Strike</th><th>Entry</th><th>Exit</th>
-            <th>Qty</th><th>P&amp;L</th><th>Setup</th><th>Result</th>
+            <th>Date</th><th>Symbol</th><th>Type</th><th>Strike</th>
+            <th>Entry</th><th>Exit</th><th>Qty</th><th>P&amp;L</th><th>Setup</th><th>Result</th>
           </tr>
         </thead>
         <tbody id="rtd-tbody">
@@ -76,155 +45,91 @@ const GIST_RAW_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL;
       </table>
     </div>
   </div>
-
 </section>
-
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
 
 <style>
   .rtd {
-    --rose:    #c2185b;
-    --rose-d:  #8c1044;
-    --glow:    rgba(194,24,91,0.15);
-    --bg:      #0d0a0e;
-    --surf:    #16111a;
-    --surf2:   #1e1726;
-    --bdr:     rgba(194,24,91,0.2);
-    --txt:     #ede8f0;
-    --muted:   #7d6e87;
-    --green:   #4caf7d;
-    --red:     #e05c6a;
-    --gold:    #e8b84b;
-
+    --rose:  #c2185b; --glow: rgba(194,24,91,0.15);
+    --bg:    #0d0a0e; --surf: #16111a; --surf2: #1e1726;
+    --bdr:   rgba(194,24,91,0.2); --txt: #ede8f0; --muted: #7d6e87;
+    --green: #4caf7d; --red: #e05c6a; --gold: #e8b84b;
     font-family: 'DM Mono', monospace;
-    background: var(--bg);
-    color: var(--txt);
-    padding: 2rem 1.5rem 3rem;
-    border-radius: 1.25rem;
-    border: 1px solid var(--bdr);
-    max-width: 1140px;
-    margin: 0 auto;
+    background: var(--bg); color: var(--txt);
+    padding: 2rem 1.5rem 3rem; border-radius: 1.25rem;
+    border: 1px solid var(--bdr); max-width: 1140px; margin: 0 auto;
   }
-
-  /* Header */
-  .rtd-header {
-    display: flex; justify-content: space-between;
-    align-items: baseline; flex-wrap: wrap;
-    gap: .5rem; margin-bottom: 1.75rem;
-  }
-  .rtd-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.55rem; color: var(--rose); margin: 0;
-  }
-  .rtd-sub   { font-size: .72rem; color: var(--muted); margin: .2rem 0 0; }
-  .rtd-stamp { font-size: .68rem; color: var(--muted); letter-spacing:.05em; }
-
-  /* KPI grid */
-  .rtd-kpis {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: .9rem; margin-bottom: 1.75rem;
-  }
-  .kpi {
-    background: var(--surf);
-    border: 1px solid var(--bdr);
-    border-radius: .75rem;
-    padding: 1rem 1.15rem;
-    display: flex; flex-direction: column; gap: .35rem;
-    transition: border-color .2s;
-  }
-  .kpi:hover { border-color: var(--rose); }
-  .kpi-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-  .kpi-val   { font-size: 1.4rem; font-weight: 700; color: var(--txt); }
-  .kpi-val.green { color: var(--green); }
-  .kpi-val.red   { color: var(--red); }
-
-  /* Charts */
-  .rtd-charts {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: .9rem; margin-bottom: 1.75rem;
-  }
-  .chart-box {
-    background: var(--surf);
-    border: 1px solid var(--bdr);
-    border-radius: .75rem;
-    padding: 1.15rem;
-  }
-  .chart-label {
-    font-size: .65rem; text-transform: uppercase;
-    letter-spacing: .1em; color: var(--muted); margin: 0 0 .9rem;
-  }
-  canvas { max-height: 200px; }
-
-  /* Table */
-  .rtd-table-wrap {
-    background: var(--surf);
-    border: 1px solid var(--bdr);
-    border-radius: .75rem;
-    padding: 1.15rem;
-  }
-  .rtd-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
-  .rtd-table th {
-    font-size: .63rem; text-transform: uppercase; letter-spacing: .08em;
-    color: var(--muted); padding: .55rem .8rem;
-    text-align: left; border-bottom: 1px solid var(--bdr);
-    white-space: nowrap;
-  }
-  .rtd-table td {
-    padding: .55rem .8rem;
-    border-bottom: 1px solid rgba(194,24,91,.07);
-    color: var(--txt);
-  }
-  .rtd-table tr:last-child td { border-bottom: none; }
-  .rtd-table tr:hover td { background: var(--surf2); }
-  .rtd-loading { text-align:center; padding: 1.5rem !important; color: var(--muted); }
-  .badge-w { color: var(--green); font-weight: 700; }
-  .badge-l { color: var(--red);   font-weight: 700; }
-  .sym { color: var(--rose); font-weight: 700; }
-
-  @media (max-width:900px) {
-    .rtd-charts { grid-template-columns: 1fr; }
-  }
-  @media (max-width:600px) {
-    .rtd { padding: 1.25rem 1rem 2rem; }
-    .rtd-title { font-size: 1.2rem; }
-  }
+  .rtd-header { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.5rem; margin-bottom:1.75rem; }
+  .rtd-title  { font-family:'Playfair Display',serif; font-size:1.55rem; color:var(--rose); margin:0; }
+  .rtd-sub    { font-size:.72rem; color:var(--muted); margin:.2rem 0 0; }
+  .rtd-stamp  { font-size:.68rem; color:var(--muted); letter-spacing:.05em; }
+  .rtd-kpis   { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:.9rem; margin-bottom:1.75rem; }
+  .kpi        { background:var(--surf); border:1px solid var(--bdr); border-radius:.75rem; padding:1rem 1.15rem; display:flex; flex-direction:column; gap:.35rem; transition:border-color .2s; }
+  .kpi:hover  { border-color:var(--rose); }
+  .kpi-label  { font-size:.65rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+  .kpi-val    { font-size:1.4rem; font-weight:700; color:var(--txt); }
+  .kpi-val.green { color:var(--green); }
+  .kpi-val.red   { color:var(--red); }
+  .rtd-charts { display:grid; grid-template-columns:2fr 1fr 1fr; gap:.9rem; margin-bottom:1.75rem; }
+  .chart-box  { background:var(--surf); border:1px solid var(--bdr); border-radius:.75rem; padding:1.15rem; }
+  .chart-label { font-size:.65rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin:0 0 .9rem; }
+  canvas      { max-height:200px; }
+  .rtd-table-wrap { background:var(--surf); border:1px solid var(--bdr); border-radius:.75rem; padding:1.15rem; }
+  .rtd-table  { width:100%; border-collapse:collapse; font-size:.8rem; }
+  .rtd-table th { font-size:.63rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); padding:.55rem .8rem; text-align:left; border-bottom:1px solid var(--bdr); white-space:nowrap; }
+  .rtd-table td { padding:.55rem .8rem; border-bottom:1px solid rgba(194,24,91,.07); color:var(--txt); }
+  .rtd-table tr:last-child td { border-bottom:none; }
+  .rtd-table tr:hover td { background:var(--surf2); }
+  .rtd-loading { text-align:center; padding:1.5rem !important; color:var(--muted); }
+  .badge-w { color:#4caf7d; font-weight:700; }
+  .badge-l { color:#e05c6a; font-weight:700; }
+  .sym { color:#c2185b; font-weight:700; }
+  @media(max-width:900px){ .rtd-charts{ grid-template-columns:1fr; } }
 </style>
 
-<script define:vars={{ GIST_RAW_URL }}>
-  const $ = id => document.getElementById(id);
-  const fmt   = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
-  const fmtPct = n => (n>=0?'+':'')+n.toFixed(1)+'%';
-  const clr   = n => n>=0 ? '#4caf7d' : '#e05c6a';
-  const ROSE  = '#c2185b';
-  const MUTED = '#7d6e87';
-  const SURF  = '#1e1726';
+<script type="module" define:vars={{ GIST_URL }}>
+  // Load Chart.js from CDN
+  await import('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js').catch(() => {});
 
-  Chart.defaults.color          = MUTED;
-  Chart.defaults.borderColor    = 'rgba(194,24,91,0.15)';
-  Chart.defaults.font.family    = "'DM Mono', monospace";
-  Chart.defaults.font.size      = 11;
+  // If module import didn't work, fall back to script tag
+  if (!window.Chart) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  const $ = id => document.getElementById(id);
+  const fmt    = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
+  const clr    = n => n >= 0 ? '#4caf7d' : '#e05c6a';
+  const ROSE   = '#c2185b';
+  const MUTED  = '#7d6e87';
+
+  Chart.defaults.color       = MUTED;
+  Chart.defaults.borderColor = 'rgba(194,24,91,0.15)';
+  Chart.defaults.font.family = "'DM Mono', monospace";
+  Chart.defaults.font.size   = 11;
 
   async function load() {
     try {
-      // Add cache-bust so Netlify doesn't serve a stale Gist
-      const url = GIST_RAW_URL + '?t=' + Date.now();
+      if (!GIST_URL) {
+        $('rtd-stamp').textContent = 'Error: GIST_URL not configured';
+        return;
+      }
+
+      const url = GIST_URL + (GIST_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const d = await res.json();
 
-      // Stamp
       const gen = new Date(d.generated);
       $('rtd-stamp').textContent = 'Updated ' + gen.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
-      // KPIs
       const pnlEl = $('kv-pnl');
-      pnlEl.textContent = fmt(d.total_pnl);
-      pnlEl.style.color = clr(d.total_pnl);
-
+      pnlEl.textContent  = fmt(d.total_pnl);
+      pnlEl.style.color  = clr(d.total_pnl);
       $('kv-wr').textContent  = d.win_rate + '%';
       $('kv-wr').style.color  = d.win_rate >= 50 ? '#4caf7d' : '#e8b84b';
       $('kv-aw').textContent  = '+' + fmt(d.avg_winner);
@@ -233,85 +138,43 @@ const GIST_RAW_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL;
       $('kv-pf').style.color  = d.profit_factor >= 1 ? '#4caf7d' : '#e05c6a';
       $('kv-tr').textContent  = d.total_trades;
 
-      // Equity curve
       new Chart($('rtd-curve'), {
         type: 'line',
         data: {
-          labels: d.cumulative.map(x=>x.date),
-          datasets: [{
-            data: d.cumulative.map(x=>x.pnl),
-            borderColor: ROSE,
-            backgroundColor: 'rgba(194,24,91,0.08)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.3,
-            pointRadius: 2,
-          }]
+          labels: d.cumulative.map(x => x.date),
+          datasets: [{ data: d.cumulative.map(x => x.pnl), borderColor: ROSE, backgroundColor: 'rgba(194,24,91,0.08)', borderWidth:2, fill:true, tension:0.3, pointRadius:2 }]
         },
-        options: {
-          responsive:true,
-          plugins:{legend:{display:false}},
-          scales:{
-            x:{ticks:{maxTicksLimit:8,maxRotation:0}},
-            y:{ticks:{callback:v=>'$'+v.toLocaleString()}}
-          }
-        }
+        options: { responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{maxTicksLimit:8,maxRotation:0}}, y:{ticks:{callback:v=>'$'+v.toLocaleString()}} } }
       });
 
-      // Win rate by hour
       new Chart($('rtd-hour'), {
-        type:'bar',
-        data:{
-          labels: d.hour_winrate.map(x=>x.hour),
-          datasets:[{
-            data: d.hour_winrate.map(x=>x.winrate),
-            backgroundColor: d.hour_winrate.map(x=>x.winrate>=50?'rgba(76,175,125,0.7)':'rgba(224,92,106,0.7)'),
-            borderRadius:4,
-          }]
+        type: 'bar',
+        data: {
+          labels: d.hour_winrate.map(x => x.hour),
+          datasets: [{ data: d.hour_winrate.map(x => x.winrate), backgroundColor: d.hour_winrate.map(x => x.winrate>=50?'rgba(76,175,125,0.7)':'rgba(224,92,106,0.7)'), borderRadius:4 }]
         },
-        options:{
-          responsive:true,
-          plugins:{legend:{display:false},
-            tooltip:{callbacks:{label:ctx=>ctx.raw+'% ('+d.hour_winrate[ctx.dataIndex].total+' trades)'}}
-          },
-          scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}
-        }
+        options: { responsive:true, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.raw+'% ('+d.hour_winrate[ctx.dataIndex].total+' trades)'}}}, scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}} }
       });
 
-      // Setup P&L
       const top = d.setup_data.slice(0,8);
       new Chart($('rtd-setup'), {
-        type:'bar',
-        data:{
-          labels: top.map(x=>x.setup.length>18?x.setup.slice(0,18)+'…':x.setup),
-          datasets:[{
-            data: top.map(x=>x.pnl),
-            backgroundColor: top.map(x=>x.pnl>=0?'rgba(76,175,125,0.7)':'rgba(224,92,106,0.7)'),
-            borderRadius:4,
-          }]
+        type: 'bar',
+        data: {
+          labels: top.map(x => x.setup.length>18?x.setup.slice(0,18)+'…':x.setup),
+          datasets: [{ data: top.map(x => x.pnl), backgroundColor: top.map(x => x.pnl>=0?'rgba(76,175,125,0.7)':'rgba(224,92,106,0.7)'), borderRadius:4 }]
         },
-        options:{
-          indexAxis:'y',
-          responsive:true,
-          plugins:{legend:{display:false},
-            tooltip:{callbacks:{label:ctx=>'$'+ctx.raw+' ('+top[ctx.dataIndex].winrate+'% WR)'}}
-          },
-          scales:{x:{ticks:{callback:v=>'$'+v}}}
-        }
+        options: { indexAxis:'y', responsive:true, plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>'$'+ctx.raw+' ('+top[ctx.dataIndex].winrate+'% WR)'}}}, scales:{x:{ticks:{callback:v=>'$'+v}}} }
       });
 
-      // Recent trades table
       const tbody = $('rtd-tbody');
       if (!d.recent || d.recent.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" class="rtd-loading">No trades found.</td></tr>';
       } else {
         tbody.innerHTML = d.recent.map(t => {
-          const pnl = t.pnl || 0;
-          const col = clr(pnl);
+          const pnl  = t.pnl || 0;
+          const col  = clr(pnl);
           const sign = pnl >= 0 ? '+' : '';
-          const badge = pnl > 0
-            ? '<span class="badge-w">WIN</span>'
-            : '<span class="badge-l">LOSS</span>';
+          const badge = pnl > 0 ? '<span class="badge-w">WIN</span>' : '<span class="badge-l">LOSS</span>';
           return `<tr>
             <td style="color:${MUTED}">${t.date||'—'}</td>
             <td><span class="sym">${t.underlying||t.symbol||'—'}</span></td>
@@ -328,19 +191,10 @@ const GIST_RAW_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL;
       }
 
     } catch(err) {
-      $('rtd-stamp').textContent = 'Error loading data';
+      $('rtd-stamp').textContent = 'Error: ' + err.message;
       console.error('Dashboard error:', err);
     }
   }
 
-  // Dynamically load Chart.js then run
-  function loadChartJs(cb) {
-    if (window.Chart) { cb(); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
-    s.onload = cb;
-    document.head.appendChild(s);
-  }
-
-  loadChartJs(load);
+  load();
 </script>
