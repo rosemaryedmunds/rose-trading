@@ -79,10 +79,9 @@ const GIST_RAW_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL;
 
 </section>
 
-<!-- Chart.js -->
+<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
 <style>
   .rtd {
@@ -334,5 +333,14 @@ const GIST_RAW_URL = import.meta.env.PUBLIC_DASHBOARD_GIST_URL;
     }
   }
 
-  load();
+  // Dynamically load Chart.js then run
+  function loadChartJs(cb) {
+    if (window.Chart) { cb(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+    s.onload = cb;
+    document.head.appendChild(s);
+  }
+
+  loadChartJs(load);
 </script>
