@@ -5,24 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rose Trading Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg:        #080a0f;
-    --bg2:       #0d1117;
-    --bg3:       #111620;
-    --border:    #1e2535;
-    --border2:   #2a3347;
-    --accent:    #00e5ff;
-    --accent2:   #7c3aed;
-    --green:     #00ff88;
-    --red:       #ff3b5c;
-    --orange:    #ff9500;
-    --yellow:    #ffe600;
-    --text:      #e2e8f0;
-    --muted:     #64748b;
-    --mono:      'Space Mono', monospace;
-    --sans:      'Syne', sans-serif;
+    --bg:        #0f0e1a;
+    --bg2:       #161428;
+    --bg3:       #1e1b35;
+    --border:    rgba(109,86,255,0.25);
+    --border2:   rgba(109,86,255,0.45);
+    --accent:    #7c6fff;
+    --accent2:   #5b4fe0;
+    --green:     #4caf7d;
+    --red:       #e05c6a;
+    --orange:    #e8b84b;
+    --yellow:    #e8b84b;
+    --text:      #ffffff;
+    --muted:     #8b85b0;
+    --mono:      'DM Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -62,7 +63,7 @@
   }
 
   .login-logo {
-    font-family: var(--sans);
+    font-family: 'DM Sans', sans-serif;
     font-size: 1.1rem;
     font-weight: 800;
     letter-spacing: 0.2em;
@@ -776,7 +777,6 @@
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="showTab('alerts')">🚨 Live Alerts</button>
     <button class="tab-btn" onclick="showTab('pnl')">💰 P&amp;L</button>
-    <button class="tab-btn" onclick="showTab('journal')">📓 Journal</button>
     <button class="tab-btn" onclick="showTab('playbook')">📋 Playbook</button>
     <button class="tab-btn" onclick="showTab('settings')">⚙ Settings</button>
   </nav>
@@ -903,6 +903,53 @@
         </div>
       </div>
 
+      <!-- ── NOTION LIVE DATA ─────────────────────────── -->
+      <div id="notion-dashboard" style="margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+          <div style="font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);opacity:.7;">// Notion Journal — Live Data</div>
+          <span id="notion-stamp" style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Loading…</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem;">
+          <div class="stat-card green"><div class="stat-label">Avg Winner</div><div class="stat-value pos" id="n-avg-win">—</div></div>
+          <div class="stat-card red"><div class="stat-label">Avg Loser</div><div class="stat-value neg" id="n-avg-loss">—</div></div>
+          <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-value neu" id="n-pf">—</div></div>
+          <div class="stat-card"><div class="stat-label">Expectancy</div><div class="stat-value neu" id="n-exp">—</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:.75rem;margin-bottom:.75rem;">
+          <div class="panel" style="padding:1.25rem;">
+            <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">Equity Curve</div>
+            <canvas id="n-curve" height="180"></canvas>
+          </div>
+          <div class="panel" style="padding:1.25rem;">
+            <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">Win Rate by Hour</div>
+            <canvas id="n-hour" height="180"></canvas>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;">
+          <div class="panel" style="padding:1.25rem;">
+            <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">P&L by Setup</div>
+            <canvas id="n-setup" height="160"></canvas>
+          </div>
+          <div class="panel" style="padding:1.25rem;">
+            <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">P&L by Emotional Grade</div>
+            <canvas id="n-grade" height="160"></canvas>
+          </div>
+        </div>
+        <div class="panel" style="padding:1.25rem;">
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">Recent Trades</div>
+          <div style="overflow-x:auto;">
+            <table class="journal-table">
+              <thead><tr>
+                <th>Date</th><th>Symbol</th><th>Type</th><th>Strike</th>
+                <th>Entry</th><th>Exit</th><th>Qty</th><th>P&L</th><th>Setup</th><th>Result</th>
+              </tr></thead>
+              <tbody id="n-tbody"><tr><td colspan="10" style="text-align:center;padding:1rem;color:var(--muted);">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- ── END NOTION LIVE DATA ──────────────────────── -->
+
       <div class="pnl-grid">
         <div class="equity-chart panel">
           <div class="panel-header">
@@ -958,43 +1005,7 @@
       </div>
     </div>
 
-    <!-- ── JOURNAL TAB ───────────────────────────────── -->
-    <div id="tab-journal" class="tab-panel">
-      <div class="config-row">
-        <input class="config-input" id="notion-key" placeholder="Notion Integration Token (secret_xxx...)">
-        <input class="config-input" id="notion-db" placeholder="Database ID" style="max-width:320px;">
-        <button class="config-btn" onclick="loadNotion()">LOAD JOURNAL</button>
-      </div>
-      <div id="notion-status" style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:1rem;"></div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Trade Journal</div>
-          <div class="panel-badge" id="journal-count">0 trades</div>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="journal-table" style="min-width:800px;">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Setup</th>
-                <th>Direction</th>
-                <th>Entry</th>
-                <th>Exit</th>
-                <th>P&amp;L</th>
-                <th>Grade</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody id="journal-body">
-              <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">Enter your Notion token and database ID above to load journal</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── PLAYBOOK TAB ──────────────────────────────── -->
+        <!-- ── PLAYBOOK TAB ──────────────────────────────── -->
     <div id="tab-playbook" class="tab-panel">
       <div class="playbook-grid">
 
@@ -1242,8 +1253,426 @@ function showTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
+  if (name === 'pnl') loadNotionDashboard();
 }
 
+
+// ── NOTION DASHBOARD LOADER ──────────────────────────────────────────────
+Chart.defaults.color = '#8b85b0';
+  const NOTION_GIST = "https://gist.githubusercontent.com/rosemaryedmunds/71cd654520bdf101719c9cb726dc7084/raw/dashboard.json";
+let nCharts = {};
+
+async function loadNotionDashboard() {
+  try {
+    const res = await fetch(NOTION_GIST + '?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+
+    document.getElementById('notion-stamp').textContent =
+      'Updated ' + new Date(d.generated).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+    const fmt  = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+    // Update main KPI cards
+    const pnlEl = document.getElementById('total-pnl');
+    pnlEl.textContent = (d.total_pnl >= 0 ? '+' : '-') + fmt(d.total_pnl);
+    pnlEl.className   = 'stat-value ' + (d.total_pnl >= 0 ? 'pos' : 'neg');
+    document.getElementById('total-pnl-sub').textContent = d.total_trades + ' trades from Notion';
+    document.getElementById('win-rate').textContent = d.win_rate + '%';
+    document.getElementById('win-rate-sub').textContent = d.total_winners + 'W / ' + d.total_losers + 'L';
+
+    if (d.daily_pnl && d.daily_pnl.length > 0) {
+      const best  = d.daily_pnl.reduce((a,b) => b.pnl > a.pnl ? b : a);
+      const worst = d.daily_pnl.reduce((a,b) => b.pnl < a.pnl ? b : a);
+      document.getElementById('best-day').textContent      = '+' + fmt(best.pnl);
+      document.getElementById('best-day-date').textContent = best.date;
+      document.getElementById('worst-day').textContent     = '-' + fmt(Math.abs(worst.pnl));
+      document.getElementById('worst-day-date').textContent = worst.date;
+    }
+
+    // Extra KPIs
+    document.getElementById('n-avg-win').textContent  = '+' + fmt(d.avg_winner);
+    document.getElementById('n-avg-loss').textContent = '-' + fmt(Math.abs(d.avg_loser));
+    const pfEl = document.getElementById('n-pf');
+    pfEl.textContent   = d.profit_factor + 'x';
+    pfEl.style.color   = d.profit_factor >= 1 ? 'var(--green)' : 'var(--red)';
+    const exp = d.total_trades > 0 ? d.total_pnl / d.total_trades : 0;
+    const expEl = document.getElementById('n-exp');
+    expEl.textContent  = (exp >= 0 ? '+' : '-') + fmt(Math.abs(exp));
+    expEl.style.color  = exp >= 0 ? 'var(--green)' : 'var(--red)';
+
+    const ROSE  = '#7c6fff';
+    const GREEN = 'rgba(76,175,125,0.75)';
+    const RED   = 'rgba(224,92,106,0.75)';
+    const GRID  = 'rgba(194,24,91,0.08)';
+    const TICK  = '#7d6e87';
+
+    const baseOpts = {
+      responsive: true,
+      plugins: { legend: { display: false } },
+    };
+    const scaleStyle = {
+      ticks: { color: TICK, font: { family: "'DM Mono', monospace", size: 10 } },
+      grid:  { color: GRID }
+    };
+
+    Object.values(nCharts).forEach(c => c && c.destroy());
+    nCharts = {};
+
+    // Equity curve
+    nCharts.curve = new Chart(document.getElementById('n-curve'), {
+      type: 'line',
+      data: {
+        labels: d.cumulative.map(x => x.date),
+        datasets: [{ data: d.cumulative.map(x => x.pnl), borderColor: ROSE, backgroundColor: 'rgba(124,111,255,0.12)', borderWidth:2, fill:true, tension:0.3, pointRadius:2 }]
+      },
+      options: { ...baseOpts, scales: {
+        x: { ...scaleStyle, ticks: { ...scaleStyle.ticks, maxTicksLimit:6, maxRotation:0 } },
+        y: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$'+v.toLocaleString() } }
+      }}
+    });
+
+    // Win rate by hour
+    nCharts.hour = new Chart(document.getElementById('n-hour'), {
+      type: 'bar',
+      data: {
+        labels: d.hour_winrate.map(x => x.hour),
+        datasets: [{ data: d.hour_winrate.map(x => x.winrate), backgroundColor: d.hour_winrate.map(x => x.winrate>=50?GREEN:RED), borderRadius:4 }]
+      },
+      options: { ...baseOpts, scales: {
+        y: { ...scaleStyle, min:0, max:100, ticks: { ...scaleStyle.ticks, callback: v => v+'%' } },
+        x: { ...scaleStyle, grid: { display:false } }
+      }}
+    });
+
+    // Setup P&L
+    const top = (d.setup_data||[]).slice(0,8);
+    nCharts.setup = new Chart(document.getElementById('n-setup'), {
+      type: 'bar',
+      data: {
+        labels: top.map(x => x.setup.length>16?x.setup.slice(0,16)+'…':x.setup),
+        datasets: [{ data: top.map(x => x.pnl), backgroundColor: top.map(x => x.pnl>=0?GREEN:RED), borderRadius:4 }]
+      },
+      options: { ...baseOpts, indexAxis:'y', scales: {
+        x: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$'+v } },
+        y: { ...scaleStyle, grid: { display:false } }
+      }}
+    });
+
+    // Grade P&L
+    nCharts.grade = new Chart(document.getElementById('n-grade'), {
+      type: 'bar',
+      data: {
+        labels: (d.grade_data||[]).map(x => x.grade),
+        datasets: [{ data: (d.grade_data||[]).map(x => x.pnl), backgroundColor: (d.grade_data||[]).map(x => x.pnl>=0?GREEN:RED), borderRadius:4 }]
+      },
+      options: { ...baseOpts, scales: {
+        x: { ...scaleStyle, grid: { display:false } },
+        y: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$'+v } }
+      }}
+    });
+
+    // Recent trades
+    const fmtP = n => (n>=0?'+$':'-$') + Math.abs(n).toFixed(2);
+    document.getElementById('n-tbody').innerHTML = (d.recent||[]).slice(0,20).map(t => {
+      const pnl = t.pnl||0;
+      const col = pnl>=0?'var(--green)':'var(--red)';
+      const badge = pnl>0?'<span style="color:var(--green);font-weight:700">WIN</span>':'<span style="color:var(--red);font-weight:700">LOSS</span>';
+      return `<tr>
+        <td style="color:var(--muted)">${t.date||'—'}</td>
+        <td style="color:var(--accent);font-weight:700">${t.underlying||t.symbol||'—'}</td>
+        <td>${t.option_type||'—'}</td>
+        <td>${t.strike||'—'}</td>
+        <td>${t.entry_price!=null?'$'+t.entry_price:'—'}</td>
+        <td>${t.exit_price!=null?'$'+t.exit_price:'—'}</td>
+        <td>${t.qty||'—'}</td>
+        <td style="color:${col};font-weight:700">${fmtP(pnl)}</td>
+        <td style="color:var(--muted)">${t.setup||'—'}</td>
+        <td>${badge}</td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:1rem">No trades found</td></tr>';
+
+  } catch(err) {
+    const stamp = document.getElementById('notion-stamp');
+    if (stamp) stamp.textContent = 'Error: ' + err.message;
+    console.error('Notion dashboard error:', err);
+  }
+}
+// ── END NOTION DASHBOARD LOADER ──────────────────────────────────────────
+
+// ── CLOCK ─────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const h = et.getHours().toString().padStart(2,'0');
+  const m = et.getMinutes().toString().padStart(2,'0');
+  const s = et.getSeconds().toString().padStart(2,'0');
+  const d = et.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  document.getElementById('clock').textContent = `${d} ${h}:${m}:${s} ET`;
+}
+
+// ── POLLING ───────────────────────────────────────────
+function startPolling() {
+  const url = document.getElementById('server-url').value.trim().replace(/\/$/, '');
+  if (!url) return;
+  localStorage.setItem('server_url', url);
+  document.getElementById('saved-url').textContent = url;
+  if (pollInterval) clearInterval(pollInterval);
+  fetchAlerts(url);
+  pollInterval = setInterval(() => fetchAlerts(url), 10000);
+}
+
+async function fetchAlerts(url) {
+  try {
+    const res = await fetch(url + '/alerts');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.alerts && Array.isArray(data.alerts)) {
+      const newAlerts = data.alerts.filter(a => !alerts.find(ex => ex.id === a.id));
+      if (newAlerts.length > 0) {
+        alerts = [...newAlerts, ...alerts];
+        renderAlerts();
+        updateStats();
+      }
+    }
+  } catch(e) {
+    // Server not yet supporting /alerts endpoint — use demo mode
+  }
+}
+
+// ── RENDER ALERTS ─────────────────────────────────────
+function renderAlerts() {
+  const list = document.getElementById('alerts-list');
+  if (alerts.length === 0) {
+    list.innerHTML = '<div class="empty-state">No alerts yet. Waiting for TradingView signals...</div>';
+    return;
+  }
+
+  list.innerHTML = alerts.slice(0, 20).map(a => {
+    const go = a.should_trade;
+    const conf = a.confidence || 'medium';
+    const warnings = a.risk_warnings || [];
+    const sl = a.saty_levels || {};
+    const ctx = a.context || {};
+    const mo = a.momentum || {};
+    const time = a.timestamp ? new Date(a.timestamp).toLocaleTimeString('en-US', {
+      hour:'2-digit', minute:'2-digit', timeZone:'America/New_York'
+    }) : '—';
+
+    return `
+    <div class="alert-item" onclick="this.querySelector('.alert-levels').style.display = this.querySelector('.alert-levels').style.display === 'none' ? 'grid' : 'none'">
+      <div class="alert-top">
+        <div class="alert-setup ${go ? 'alert-go' : 'alert-nogo'}">
+          ${go ? '🟢' : '🔴'} ${a.setup || 'Unknown Setup'}
+          <span style="font-size:0.7rem;font-weight:400;color:var(--muted);margin-left:0.5rem;">${a.action?.toUpperCase() || ''} ${a.ticker || 'SPX'}</span>
+        </div>
+        <div class="alert-meta">
+          <span class="conf-badge conf-${conf}">${conf}</span>
+          <span>${time}</span>
+          <span style="color:var(--accent);font-family:var(--mono);">$${a.price || '—'}</span>
+        </div>
+      </div>
+      <div class="alert-reasoning">${a.reasoning || ''}</div>
+      ${a.entry_plan ? `<div style="font-size:0.72rem;color:var(--accent);font-family:var(--mono);margin-bottom:0.35rem;">↳ ${a.entry_plan}</div>` : ''}
+      <div class="alert-levels" style="display:none;">
+        <div class="level-item">
+          <div class="level-label">Entry</div>
+          <div class="level-val entry">${a.entry_plan?.match(/\d+\.?\d*/)?.[0] || '—'}</div>
+        </div>
+        <div class="level-item">
+          <div class="level-label">Stop</div>
+          <div class="level-val stop">${a.stop_level || '—'}</div>
+        </div>
+        <div class="level-item">
+          <div class="level-label">Target</div>
+          <div class="level-val target">${a.targets?.split(',')[0] || '—'}</div>
+        </div>
+        ${sl.nearest_level ? `<div class="level-item"><div class="level-label">Nearest Level</div><div class="level-val" style="color:var(--muted)">${sl.nearest_level}</div></div>` : ''}
+        ${sl.range_juice ? `<div class="level-item"><div class="level-label">Range Juice</div><div class="level-val" style="color:${sl.range_juice==='green'?'var(--green)':sl.range_juice==='red'?'var(--red)':'var(--orange)'}">${sl.range_juice?.toUpperCase()}</div></div>` : ''}
+        ${mo.po_zone ? `<div class="level-item"><div class="level-label">PO Zone</div><div class="level-val" style="color:var(--muted)">${mo.po_zone}</div></div>` : ''}
+      </div>
+      ${warnings.length > 0 ? `<div class="alert-warnings">${warnings.map(w => `<span class="warning-tag">⚠ ${w}</span>`).join('')}</div>` : ''}
+      ${a.committee_check ? `<div style="font-size:0.68rem;color:var(--muted);font-family:var(--mono);margin-top:0.5rem;line-height:1.4;border-left:2px solid var(--border2);padding-left:0.5rem;">${a.committee_check}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // Update market context from latest alert
+  if (alerts[0]) updateMarketContext(alerts[0]);
+  document.getElementById('alert-count').textContent = `${alerts.length} alert${alerts.length !== 1 ? 's' : ''}`;
+}
+
+function updateMarketContext(a) {
+  const sl = a.saty_levels || {};
+  const tb = a.trigger_box || {};
+  const mo = a.momentum || {};
+  const ctx = a.context || {};
+
+  const set = (id, val, cls) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = val || '—'; if (cls) el.className = 'ms-val ' + cls; }
+  };
+
+  set('ctx-session', ctx.session || a.session, 'ms-cyan');
+  set('ctx-setup', a.setup);
+  set('ctx-action', a.action?.toUpperCase(), a.action === 'buy' ? 'ms-green' : 'ms-red');
+  set('ctx-price', a.price ? '$' + a.price : null, 'ms-cyan');
+  set('ctx-level', sl.nearest_level);
+  const juice = sl.range_juice;
+  set('ctx-juice', juice?.toUpperCase(), juice === 'green' ? 'ms-green' : juice === 'red' ? 'ms-red' : 'ms-yellow');
+  set('ctx-po', mo.po_zone);
+  set('ctx-box', tb.in_box ? '⚠ YES' : 'No', tb.in_box ? 'ms-yellow' : 'ms-green');
+  set('ctx-chop', tb.chop_warning ? '⚠ ' + tb.chop_reason : 'Clear', tb.chop_warning ? 'ms-yellow' : 'ms-green');
+  const cvBull = mo.conviction_arrow_bull;
+  const cvBear = mo.conviction_arrow_bear;
+  set('ctx-conviction', cvBull ? '↑ Bull Arrow' : cvBear ? '↓ Bear Arrow' : 'None', cvBull ? 'ms-green' : cvBear ? 'ms-red' : '');
+}
+
+function updateStats() {
+  const total = alerts.length;
+  const go = alerts.filter(a => a.should_trade).length;
+  const nogo = total - go;
+  const last = alerts[0];
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-go').textContent = go;
+  document.getElementById('stat-nogo').textContent = nogo;
+  if (last) {
+    document.getElementById('stat-last').textContent = last.should_trade ? 'GO' : 'NO-GO';
+    document.getElementById('stat-last').className = 'stat-value ' + (last.should_trade ? 'pos' : 'neg');
+    document.getElementById('stat-last-setup').textContent = last.setup || '—';
+  }
+}
+
+function clearAlerts() {
+  alerts = [];
+  renderAlerts();
+  updateStats();
+}
+
+// Add alert manually (called from server SSE or webhook push in future)
+function addAlert(alertData) {
+  alertData.id = alertData.id || Date.now().toString();
+  alertData.timestamp = alertData.timestamp || new Date().toISOString();
+  alerts.unshift(alertData);
+  renderAlerts();
+  updateStats();
+}
+
+// ── P&L ──────────────────────────────────────────────
+function addPnlEntry() {
+  const date   = document.getElementById('pnl-date').value;
+  const setup  = document.getElementById('pnl-setup').value;
+  const dir    = document.getElementById('pnl-dir').value;
+  const amount = parseFloat(document.getElementById('pnl-amount').value);
+  const notes  = document.getElementById('pnl-notes').value;
+
+  if (!date || !setup || isNaN(amount)) return;
+
+  pnlData.push({ date, setup, dir, amount, notes });
+  pnlData.sort((a,b) => new Date(b.date) - new Date(a.date));
+  localStorage.setItem('pnl_data', JSON.stringify(pnlData));
+
+  document.getElementById('pnl-amount').value = '';
+  document.getElementById('pnl-notes').value = '';
+
+  renderPnl();
+  drawEquityCurve();
+}
+
+function renderPnl() {
+  const body = document.getElementById('pnl-table-body');
+  if (pnlData.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades logged yet</td></tr>';
+    return;
+  }
+
+  body.innerHTML = pnlData.map(t => `
+    <tr>
+      <td>${t.date}</td>
+      <td>${t.setup}</td>
+      <td style="color:${t.dir==='Call'?'var(--green)':'var(--red)'}">${t.dir}</td>
+      <td class="${t.amount >= 0 ? 'pnl-pos' : 'pnl-neg'}">${t.amount >= 0 ? '+' : ''}$${t.amount.toFixed(2)}</td>
+      <td style="color:var(--muted);font-size:0.65rem;">${t.notes || '—'}</td>
+    </tr>
+  `).join('');
+
+  // Update stat cards
+  const total = pnlData.reduce((s,t) => s + t.amount, 0);
+  const wins = pnlData.filter(t => t.amount > 0).length;
+  const losses = pnlData.filter(t => t.amount < 0).length;
+  const best = pnlData.reduce((a,b) => b.amount > a.amount ? b : a, pnlData[0]);
+  const worst = pnlData.reduce((a,b) => b.amount < a.amount ? b : a, pnlData[0]);
+
+  document.getElementById('total-pnl').textContent = (total >= 0 ? '+' : '') + '$' + Math.abs(total).toFixed(2);
+  document.getElementById('total-pnl').className = 'stat-value ' + (total >= 0 ? 'pos' : 'neg');
+  document.getElementById('win-rate').textContent = pnlData.length ? Math.round(wins/pnlData.length*100) + '%' : '0%';
+  document.getElementById('win-rate-sub').textContent = `${wins}W / ${losses}L`;
+  document.getElementById('best-day').textContent = '+$' + best.amount.toFixed(2);
+  document.getElementById('best-day-date').textContent = best.date;
+  document.getElementById('worst-day').textContent = '$' + worst.amount.toFixed(2);
+  document.getElementById('worst-day-date').textContent = worst.date;
+}
+
+function drawEquityCurve() {
+  const canvas = document.getElementById('equity-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth;
+  canvas.width = W;
+  canvas.height = 280;
+
+  if (pnlData.length < 2) return;
+
+  const sorted = [...pnlData].sort((a,b) => new Date(a.date) - new Date(b.date));
+  let running = 0;
+  const points = sorted.map(t => { running += t.amount; return running; });
+  const min = Math.min(0, ...points);
+  const max = Math.max(0, ...points);
+  const range = max - min || 1;
+  const pad = { t:20, b:40, l:60, r:20 };
+  const cw = W - pad.l - pad.r;
+  const ch = canvas.height - pad.t - pad.b;
+
+  const toX = i => pad.l + (i / (points.length - 1)) * cw;
+  const toY = v => pad.t + ch - ((v - min) / range) * ch;
+
+  // Zero line
+  ctx.strokeStyle = '#2a3347';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, toY(0));
+  ctx.lineTo(pad.l + cw, toY(0));
+  ctx.stroke();
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  const isPos = points[points.length-1] >= 0;
+  grad.addColorStop(0, isPos ? 'rgba(0,255,136,0.3)' : 'rgba(255,59,92,0.3)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+  ctx.beginPath();
+  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.lineTo(toX(points.length-1), toY(0));
+  ctx.lineTo(toX(0), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = isPos ? '#00ff88' : '#ff3b5c';
+  ctx.lineWidth = 2;
+  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = '#64748b';
+  ctx.font = '10px Space Mono, monospace';
+  ctx.fillText('$' + max.toFixed(0), 4, toY(max) + 4);
+  ctx.fillText('$' + min.toFixed(0), 4, toY(min) + 4);
+}
+
+
+// ── NOTION DASHBOARD LOADER ──────────────────────────────────────────────
 // ── CLOCK ─────────────────────────────────────────────
 function updateClock() {
   const now = new Date();
@@ -1626,6 +2055,8 @@ function init() {
     document.getElementById('saved-notion').textContent = 'Connected';
     document.getElementById('saved-notion').style.color = 'var(--green)';
   }
+
+  loadNotionDashboard();
 
   const savedPnl = localStorage.getItem('pnl_data');
   if (savedPnl) {
