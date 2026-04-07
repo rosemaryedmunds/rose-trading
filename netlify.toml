@@ -3,7 +3,10 @@
   publish = "dist"
   functions = "netlify/functions"
 
-[functions]
+[functions."notion-proxy"]
+  timeout = 26
+
+[functions."anthropic-proxy"]
   timeout = 26
 
 [[headers]]
