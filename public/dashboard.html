@@ -1864,17 +1864,46 @@ function addPnlEntry() {
 }
 
 function renderPnl() {
+  const fmt = n => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const filtered = getFilteredPnlData();
   const body = document.getElementById('pnl-table-body');
+
+  // Always update ALL KPI cards based on filtered data
+  const total    = filtered.reduce((s,t) => s + t.amount, 0);
+  const winArr   = filtered.filter(t => t.amount > 0);
+  const lossArr  = filtered.filter(t => t.amount < 0);
+  const winCount = winArr.length;
+  const lossCount= lossArr.length;
+  const winRate  = filtered.length ? Math.round(winCount / filtered.length * 100) : 0;
+  const avgWin   = winCount  ? winArr.reduce((s,t)=>s+t.amount,0)/winCount   : 0;
+  const avgLoss  = lossCount ? lossArr.reduce((s,t)=>s+t.amount,0)/lossCount : 0;
+  const pf       = lossCount && avgLoss !== 0 ? Math.abs(winArr.reduce((s,t)=>s+t.amount,0) / lossArr.reduce((s,t)=>s+t.amount,0)).toFixed(2) : '\u221e';
+  const exp      = filtered.length ? total / filtered.length : 0;
+
+  const pnlEl = document.getElementById('total-pnl');
+  if (pnlEl) { pnlEl.textContent = (total>=0?'+':'-') + fmt(total); pnlEl.className = 'stat-value ' + (total>=0?'pos':'neg'); }
+  const subEl = document.getElementById('total-pnl-sub');
+  if (subEl) subEl.textContent = filtered.length + ' trades';
+  const wrEl = document.getElementById('win-rate');
+  if (wrEl) wrEl.textContent = winRate + '%';
+  const wrSub = document.getElementById('win-rate-sub');
+  if (wrSub) wrSub.textContent = winCount + 'W / ' + lossCount + 'L';
+  const avgWinEl = document.getElementById('n-avg-win');
+  if (avgWinEl) avgWinEl.textContent = avgWin ? '+' + fmt(avgWin) : '—';
+  const avgLossEl = document.getElementById('n-avg-loss');
+  if (avgLossEl) avgLossEl.textContent = avgLoss ? '-' + fmt(Math.abs(avgLoss)) : '—';
+  const pfEl = document.getElementById('n-pf');
+  if (pfEl) { pfEl.textContent = pf + 'x'; pfEl.style.color = parseFloat(pf) >= 1 ? 'var(--green)' : 'var(--red)'; }
+  const expEl = document.getElementById('n-exp');
+  if (expEl) { expEl.textContent = (exp>=0?'+':'-') + fmt(Math.abs(exp)); expEl.style.color = exp>=0?'var(--green)':'var(--red)'; }
+
+  if (!body) return;
   if (pnlData.length === 0) {
     body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades logged yet</td></tr>';
     return;
   }
   if (filtered.length === 0) {
     body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades in this period</td></tr>';
-    document.getElementById('total-pnl').textContent = '$0.00';
-    document.getElementById('win-rate').textContent = '0%';
-    document.getElementById('win-rate-sub').textContent = '0W / 0L';
     return;
   }
   body.innerHTML = filtered.map(t => {
@@ -1886,24 +1915,13 @@ function renderPnl() {
     return `
     <tr>
       <td style="white-space:nowrap;">${t.date}</td>
-      <td style="color:var(--muted);font-size:.65rem;">${symbol}${strike}<br><span style="color:var(--text);font-size:.7rem;">${t.setup || '—'}</span></td>
+      <td style="color:var(--muted);font-size:.65rem;">${symbol}${strike}<br><span style="color:var(--text);font-size:.7rem;">${t.setup || '\u2014'}</span></td>
       <td style="color:${t.dir==='Call'?'var(--green)':'var(--red)'}">${t.dir}${entryTime}</td>
       <td class="${t.amount >= 0 ? 'pnl-pos' : 'pnl-neg'}" style="font-weight:600;">${t.amount >= 0 ? '+' : ''}$${t.amount.toFixed(0)}</td>
-      <td style="color:${gradeColor};font-weight:700;text-align:center;">${t.grade || '—'}</td>
+      <td style="color:${gradeColor};font-weight:700;text-align:center;">${t.grade || '\u2014'}</td>
     </tr>`;
   }).join('');
-  const total  = filtered.reduce((s,t) => s + t.amount, 0);
-  const wins   = filtered.filter(t => t.amount > 0).length;
-  const losses = filtered.filter(t => t.amount < 0).length;
-  const best   = filtered.reduce((a,b) => b.amount > a.amount ? b : a, filtered[0]);
-  const worst  = filtered.reduce((a,b) => b.amount < a.amount ? b : a, filtered[0]);
-  document.getElementById('total-pnl').textContent = (total >= 0 ? '+' : '') + '$' + Math.abs(total).toFixed(2);
-  document.getElementById('total-pnl').className = 'stat-value ' + (total >= 0 ? 'pos' : 'neg');
-  document.getElementById('win-rate').textContent = filtered.length ? Math.round(wins/filtered.length*100) + '%' : '0%';
-  document.getElementById('win-rate-sub').textContent = `${wins}W / ${losses}L`;
 }
-
-// ── INIT ─────────────────────────────────────────────
 function init() {
   activePeriod = 'all';
   activeJournalPeriod = 'all';
