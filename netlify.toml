@@ -3,6 +3,9 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[functions]
+  timeout = 26
+
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
