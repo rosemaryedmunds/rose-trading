@@ -670,6 +670,89 @@
   .pnl-pos { color: var(--green); font-weight: 700; }
   .pnl-neg { color: var(--red);   font-weight: 700; }
 
+  /* ── PERIOD SLICER ─────────────────────────────────── */
+  .period-btn {
+    padding: .45rem 1rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .period-btn:hover { border-color: var(--border2); color: var(--text); }
+  .period-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 700; }
+
+  /* ── JOURNAL GRADE EXPANSION ───────────────────────── */
+  .grade-badge {
+    display: inline-block;
+    padding: .25rem .55rem;
+    font-family: var(--mono);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    border-radius: 2px;
+    min-width: 28px;
+    text-align: center;
+  }
+  .grade-A { background: rgba(76,175,125,.15); color: var(--green); border: 1px solid rgba(76,175,125,.4); }
+  .grade-B { background: rgba(124,111,255,.12); color: var(--accent); border: 1px solid rgba(124,111,255,.35); }
+  .grade-C { background: rgba(232,184,75,.1); color: var(--orange); border: 1px solid rgba(232,184,75,.3); }
+  .grade-D { background: rgba(224,92,106,.1); color: var(--red); border: 1px solid rgba(224,92,106,.3); }
+  .grade-F { background: rgba(224,92,106,.2); color: var(--red); border: 1px solid var(--red); }
+  .grade-- { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+  .claude-notes-cell {
+    font-size: .68rem;
+    color: var(--muted);
+    line-height: 1.5;
+    max-width: 320px;
+  }
+  .claude-notes-cell .notes-preview { display: block; }
+  .claude-notes-cell .notes-full { display: none; }
+  .claude-notes-cell.expanded .notes-preview { display: none; }
+  .claude-notes-cell.expanded .notes-full { display: block; }
+  .notes-expand-btn {
+    background: none; border: none;
+    color: var(--accent); font-family: var(--mono); font-size: .58rem;
+    cursor: pointer; padding: 0; margin-top: .2rem;
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+  .notes-expand-btn:hover { opacity: .7; }
+
+  /* ── CHART ANALYSIS ────────────────────────────────── */
+  #chart-drop-zone:hover { border-color: var(--accent); }
+  #chart-analysis-output h3 {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 1rem 0 .4rem;
+    padding-bottom: .3rem;
+    border-bottom: 1px solid var(--border);
+  }
+  #chart-analysis-output p { margin-bottom: .75rem; font-size: .8rem; line-height: 1.65; }
+  #chart-analysis-output ul { padding-left: 1.2rem; margin-bottom: .75rem; }
+  #chart-analysis-output li { font-size: .78rem; line-height: 1.6; color: var(--muted); }
+  #chart-analysis-output strong { color: var(--text); }
+  .analysis-verdict {
+    display: inline-block;
+    padding: .35rem .85rem;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .8rem;
+    letter-spacing: .1em;
+    margin-bottom: 1rem;
+    border-radius: 2px;
+  }
+  .verdict-go { background: rgba(76,175,125,.15); color: var(--green); border: 1px solid rgba(76,175,125,.4); }
+  .verdict-nogo { background: rgba(224,92,106,.15); color: var(--red); border: 1px solid rgba(224,92,106,.4); }
+  .verdict-wait { background: rgba(232,184,75,.1); color: var(--orange); border: 1px solid rgba(232,184,75,.3); }
+
   /* ── SCROLLBAR ─────────────────────────────────────── */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -777,6 +860,8 @@
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="showTab('alerts')">🚨 Live Alerts</button>
     <button class="tab-btn" onclick="showTab('pnl')">💰 P&amp;L</button>
+    <button class="tab-btn" onclick="showTab('journal')">📓 Journal</button>
+    <button class="tab-btn" onclick="showTab('chart')">📊 Chart Analysis</button>
     <button class="tab-btn" onclick="showTab('playbook')">📋 Playbook</button>
     <button class="tab-btn" onclick="showTab('settings')">⚙ Settings</button>
   </nav>
@@ -878,8 +963,216 @@
       </div>
     </div>
 
+    <!-- ── JOURNAL TAB ──────────────────────────────────── -->
+    <div id="tab-journal" class="tab-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);margin-bottom:.25rem;">// Notion Trading Journal</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);" id="journal-last-sync">Not synced yet</div>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+          <input class="config-input" style="width:220px;" id="j-notion-key" placeholder="Notion Integration Token" type="password">
+          <input class="config-input" style="width:220px;" id="j-notion-db" placeholder="Database ID">
+          <button class="config-btn" onclick="loadJournalFromNotion()">SYNC JOURNAL</button>
+        </div>
+      </div>
+
+      <!-- Journal Stats Row -->
+      <div class="stat-row" id="journal-stat-row" style="margin-bottom:1.25rem;">
+        <div class="stat-card green">
+          <div class="stat-label">Total Trades</div>
+          <div class="stat-value neu" id="j-total">—</div>
+          <div class="stat-sub" id="j-total-sub">From Notion</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value neu" id="j-winrate">—</div>
+          <div class="stat-sub" id="j-wr-sub">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Avg Grade</div>
+          <div class="stat-value neu" id="j-avg-grade">—</div>
+          <div class="stat-sub">Process score</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Total P&amp;L</div>
+          <div class="stat-value" id="j-pnl">—</div>
+          <div class="stat-sub">Journal total</div>
+        </div>
+      </div>
+
+      <!-- Date Period Filter -->
+      <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;">
+        <span style="font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:.25rem;">Period</span>
+        <button class="period-btn active" id="j-period-all"   onclick="setJournalPeriod('all')">All Time</button>
+        <button class="period-btn" id="j-period-month"        onclick="setJournalPeriod('month')">This Month</button>
+        <button class="period-btn" id="j-period-week"         onclick="setJournalPeriod('week')">This Week</button>
+        <button class="period-btn" id="j-period-day"          onclick="setJournalPeriod('day')">Today</button>
+        <button class="period-btn" id="j-period-range"        onclick="toggleJournalDateRange()">Date Range</button>
+        <div id="j-date-range-wrap" style="display:none;align-items:center;gap:.4rem;flex-wrap:wrap;">
+          <input type="date" id="j-date-from" class="pnl-input" style="width:140px;margin-bottom:0;" onchange="setJournalPeriod('range')">
+          <span style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">to</span>
+          <input type="date" id="j-date-to"   class="pnl-input" style="width:140px;margin-bottom:0;" onchange="setJournalPeriod('range')">
+        </div>
+        <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-left:auto;" id="j-period-label">All Time</div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div style="display:flex;gap:.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+        <select class="pnl-input" id="j-filter-setup" style="width:auto;margin-bottom:0;cursor:pointer;" onchange="filterJournal()">
+          <option value="">All Setups</option>
+          <option>ORB</option><option>Vomy</option><option>iVomy</option>
+          <option>Flag Into Ribbon</option><option>Divergence From Extreme</option>
+          <option>1min EOD Divergence</option><option>Tweezer Bottom</option>
+        </select>
+        <select class="pnl-input" id="j-filter-grade" style="width:auto;margin-bottom:0;cursor:pointer;" onchange="filterJournal()">
+          <option value="">All Grades</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option><option>F</option>
+        </select>
+        <select class="pnl-input" id="j-filter-result" style="width:auto;margin-bottom:0;cursor:pointer;" onchange="filterJournal()">
+          <option value="">Win &amp; Loss</option>
+          <option value="win">Wins Only</option>
+          <option value="loss">Losses Only</option>
+        </select>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-left:auto;" id="j-count">0 trades</div>
+      </div>
+
+      <!-- Journal Table -->
+      <div class="panel" style="overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table class="journal-table" id="journal-table">
+            <thead><tr>
+              <th>Date</th>
+              <th>Setup</th>
+              <th>Direction</th>
+              <th>Entry</th>
+              <th>Exit</th>
+              <th>P&amp;L</th>
+              <th>Grade</th>
+              <th>Notes / Claude Analysis</th>
+            </tr></thead>
+            <tbody id="journal-tbody">
+              <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2.5rem;font-family:var(--mono);font-size:.7rem;">
+                Enter your Notion token and database ID above, then click SYNC JOURNAL
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CHART ANALYSIS TAB ────────────────────────── -->
+    <div id="tab-chart" class="tab-panel">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+
+        <!-- Left: Input -->
+        <div style="flex:0 0 320px;">
+          <div class="panel" style="padding:1.5rem;">
+            <div class="panel-title" style="margin-bottom:1.25rem;">Chart Screenshot Analysis</div>
+
+            <label class="pnl-form-label">TradingView Screenshot URL</label>
+            <input class="pnl-input" id="chart-url" placeholder="https://www.tradingview.com/x/ABC123/" style="margin-bottom:.5rem;">
+            <div style="font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-bottom:.5rem;line-height:1.6;">
+              📷 TradingView → Camera icon → <strong style="color:var(--accent);">Copy image link</strong> → paste /x/... URL above.<br>
+              Then click <strong style="color:var(--accent);">Load URL</strong> to fetch it before analyzing.
+            </div>
+            <button class="config-btn" style="width:100%;margin-bottom:1rem;font-size:.65rem;" onclick="loadChartFromUrl()">LOAD URL → FETCH IMAGE</button>
+            <div id="url-load-status" style="font-family:var(--mono);font-size:.62rem;margin-bottom:.75rem;display:none;"></div>
+
+            <label class="pnl-form-label">Or Upload / Drop Screenshot</label>
+            <div id="chart-drop-zone" style="border:1px dashed var(--border2);padding:1.25rem;text-align:center;cursor:pointer;margin-bottom:.75rem;transition:border-color .2s;" onclick="document.getElementById('chart-file-input').click()">
+              <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">📁 Drop image or click to upload</div>
+              <input type="file" id="chart-file-input" accept="image/*" style="display:none;" onchange="handleChartFile(this.files[0])">
+            </div>
+            <div id="chart-preview-wrap" style="display:none;margin-bottom:.75rem;">
+              <img id="chart-preview" style="width:100%;border:1px solid var(--border);border-radius:2px;" alt="Chart preview">
+              <div style="font-family:var(--mono);font-size:.58rem;color:var(--green);margin-top:.35rem;">✓ Image loaded — ready to analyze</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:0;">
+              <div>
+                <label class="pnl-form-label">Symbol</label>
+                <select class="pnl-input" id="chart-symbol" style="cursor:pointer;margin-bottom:1rem;">
+                  <option value="ES">ES (S&amp;P 500 Futures)</option>
+                  <option value="SPX" selected>SPX (S&amp;P 500 Index)</option>
+                  <option value="SPY">SPY (S&amp;P 500 ETF)</option>
+                  <option value="NQ">NQ (Nasdaq Futures)</option>
+                  <option value="QQQ">QQQ (Nasdaq ETF)</option>
+                  <option value="MES">MES (Micro ES Futures)</option>
+                  <option value="MNQ">MNQ (Micro NQ Futures)</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="pnl-form-label">Timeframe</label>
+                <select class="pnl-input" id="chart-tf" style="cursor:pointer;margin-bottom:1rem;">
+                  <option value="1m">1-Minute</option>
+                  <option value="2m">2-Minute</option>
+                  <option value="3m">3-Minute</option>
+                  <option value="5m" selected>5-Minute</option>
+                  <option value="10m">10-Minute</option>
+                  <option value="15m">15-Minute</option>
+                  <option value="30m">30-Minute</option>
+                  <option value="1h">1-Hour</option>
+                  <option value="2h">2-Hour</option>
+                  <option value="4h">4-Hour</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                </select>
+              </div>
+            </div>
+
+            <label class="pnl-form-label">Additional Context (optional)</label>
+            <textarea class="pnl-input" id="chart-context" placeholder="e.g. Pre-market gap up, FOMC day, watching for Vomy..." style="height:80px;resize:vertical;margin-bottom:1rem;"></textarea>
+
+            <button class="pnl-submit" onclick="analyzeChart()" id="chart-analyze-btn">ANALYZE CHART</button>
+            <div id="chart-status" style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:.75rem;display:none;"></div>
+          </div>
+        </div>
+
+        <!-- Right: Analysis Output -->
+        <div style="flex:1;min-width:320px;">
+          <div class="panel" style="padding:1.5rem;min-height:500px;" id="chart-analysis-panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+              <div class="panel-title">Analysis</div>
+              <div id="chart-analyzed-at" style="font-family:var(--mono);font-size:.6rem;color:var(--muted);"></div>
+            </div>
+            <div id="chart-analysis-output" style="font-size:.82rem;line-height:1.7;color:var(--text);">
+              <div style="text-align:center;padding:3rem;font-family:var(--mono);font-size:.7rem;color:var(--muted);">
+                Load a chart screenshot and click Analyze Chart to get a Saty-framework read
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview of loaded chart -->
+          <div id="chart-full-preview" style="margin-top:1rem;display:none;">
+            <div class="panel" style="padding:1rem;">
+              <div class="panel-title" style="margin-bottom:.75rem;">Chart</div>
+              <img id="chart-full-img" style="width:100%;border:1px solid var(--border);" alt="Chart">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ── P&L TAB ────────────────────────────────────── -->
     <div id="tab-pnl" class="tab-panel">
+      <!-- Period Slicer -->
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+        <span style="font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:.25rem;">Period</span>
+        <button class="period-btn active" id="period-all"   onclick="setPeriod('all')">All Time</button>
+        <button class="period-btn" id="period-month"        onclick="setPeriod('month')">This Month</button>
+        <button class="period-btn" id="period-week"         onclick="setPeriod('week')">This Week</button>
+        <button class="period-btn" id="period-day"          onclick="setPeriod('day')">Today</button>
+        <button class="period-btn" id="period-range-btn"    onclick="togglePnlDateRange()">Date Range</button>
+        <div id="pnl-date-range-wrap" style="display:none;align-items:center;gap:.4rem;flex-wrap:wrap;">
+          <input type="date" id="pnl-date-from" class="pnl-input" style="width:140px;margin-bottom:0;" onchange="setPeriod('range')">
+          <span style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">to</span>
+          <input type="date" id="pnl-date-to"   class="pnl-input" style="width:140px;margin-bottom:0;" onchange="setPeriod('range')">
+        </div>
+        <div style="margin-left:auto;font-family:var(--mono);font-size:.62rem;color:var(--muted);" id="pnl-period-label">Showing: All Time</div>
+      </div>
       <div class="stat-row">
         <div class="stat-card green">
           <div class="stat-label">Total P&amp;L</div>
@@ -936,14 +1229,15 @@
           </div>
         </div>
         <div class="panel" style="padding:1.25rem;">
-          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">Recent Trades</div>
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">Recent Trades — Grade &amp; Claude Analysis</div>
           <div style="overflow-x:auto;">
             <table class="journal-table">
               <thead><tr>
                 <th>Date</th><th>Symbol</th><th>Type</th><th>Strike</th>
-                <th>Entry</th><th>Exit</th><th>Qty</th><th>P&L</th><th>Setup</th><th>Result</th>
+                <th>Entry</th><th>Exit</th><th>Qty</th><th>P&L</th><th>Setup</th>
+                <th style="min-width:80px;">Grade</th><th style="min-width:280px;">Claude Notes</th>
               </tr></thead>
-              <tbody id="n-tbody"><tr><td colspan="10" style="text-align:center;padding:1rem;color:var(--muted);">Loading…</td></tr></tbody>
+              <tbody id="n-tbody"><tr><td colspan="11" style="text-align:center;padding:1rem;color:var(--muted);">Loading…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1254,6 +1548,8 @@ function showTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
   if (name === 'pnl') loadNotionDashboard();
+  if (name === 'journal') initJournalTab();
+  if (name === 'chart') initChartDropZone();
 }
 
 
@@ -1372,12 +1668,19 @@ async function loadNotionDashboard() {
       }}
     });
 
-    // Recent trades
+    // Recent trades with Grade + Claude Notes
     const fmtP = n => (n>=0?'+$':'-$') + Math.abs(n).toFixed(2);
-    document.getElementById('n-tbody').innerHTML = (d.recent||[]).slice(0,20).map(t => {
+    document.getElementById('n-tbody').innerHTML = (d.recent||[]).slice(0,25).map((t,i) => {
       const pnl = t.pnl||0;
       const col = pnl>=0?'var(--green)':'var(--red)';
-      const badge = pnl>0?'<span style="color:var(--green);font-weight:700">WIN</span>':'<span style="color:var(--red);font-weight:700">LOSS</span>';
+      const grade = t.grade || t.Grade || '—';
+      const gradeKey = grade === '—' ? '-' : grade;
+      const claudeNotes = t.claude_notes || t.notes || t.Notes || '';
+      const notesPreview = claudeNotes.length > 80 ? claudeNotes.slice(0,80) + '…' : claudeNotes;
+      const hasMore = claudeNotes.length > 80;
+      const notesHtml = hasMore
+        ? `<span class="notes-preview">${notesPreview}</span><span class="notes-full">${claudeNotes}</span><button class="notes-expand-btn" onclick="toggleNotes(this)">▾ More</button>`
+        : `<span>${claudeNotes||'—'}</span>`;
       return `<tr>
         <td style="color:var(--muted)">${t.date||'—'}</td>
         <td style="color:var(--accent);font-weight:700">${t.underlying||t.symbol||'—'}</td>
@@ -1388,9 +1691,10 @@ async function loadNotionDashboard() {
         <td>${t.qty||'—'}</td>
         <td style="color:${col};font-weight:700">${fmtP(pnl)}</td>
         <td style="color:var(--muted)">${t.setup||'—'}</td>
-        <td>${badge}</td>
+        <td><span class="grade-badge grade-${gradeKey}">${grade}</span></td>
+        <td class="claude-notes-cell">${notesHtml}</td>
       </tr>`;
-    }).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:1rem">No trades found</td></tr>';
+    }).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:1rem">No trades found</td></tr>';
 
   } catch(err) {
     const stamp = document.getElementById('notion-stamp');
@@ -1580,13 +1884,22 @@ function addPnlEntry() {
 }
 
 function renderPnl() {
+  const filtered = getFilteredPnlData();
   const body = document.getElementById('pnl-table-body');
   if (pnlData.length === 0) {
     body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades logged yet</td></tr>';
     return;
   }
-
-  body.innerHTML = pnlData.map(t => `
+  if (filtered.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades in this period</td></tr>';
+    document.getElementById('total-pnl').textContent = '$0.00';
+    document.getElementById('win-rate').textContent = '0%';
+    document.getElementById('win-rate-sub').textContent = '0W / 0L';
+    document.getElementById('best-day').textContent = '—';
+    document.getElementById('worst-day').textContent = '—';
+    return;
+  }
+  body.innerHTML = filtered.map(t => `
     <tr>
       <td>${t.date}</td>
       <td>${t.setup}</td>
@@ -1595,458 +1908,32 @@ function renderPnl() {
       <td style="color:var(--muted);font-size:0.65rem;">${t.notes || '—'}</td>
     </tr>
   `).join('');
-
-  // Update stat cards
-  const total = pnlData.reduce((s,t) => s + t.amount, 0);
-  const wins = pnlData.filter(t => t.amount > 0).length;
-  const losses = pnlData.filter(t => t.amount < 0).length;
-  const best = pnlData.reduce((a,b) => b.amount > a.amount ? b : a, pnlData[0]);
-  const worst = pnlData.reduce((a,b) => b.amount < a.amount ? b : a, pnlData[0]);
-
+  const total  = filtered.reduce((s,t) => s + t.amount, 0);
+  const wins   = filtered.filter(t => t.amount > 0).length;
+  const losses = filtered.filter(t => t.amount < 0).length;
+  const best   = filtered.reduce((a,b) => b.amount > a.amount ? b : a, filtered[0]);
+  const worst  = filtered.reduce((a,b) => b.amount < a.amount ? b : a, filtered[0]);
   document.getElementById('total-pnl').textContent = (total >= 0 ? '+' : '') + '$' + Math.abs(total).toFixed(2);
   document.getElementById('total-pnl').className = 'stat-value ' + (total >= 0 ? 'pos' : 'neg');
-  document.getElementById('win-rate').textContent = pnlData.length ? Math.round(wins/pnlData.length*100) + '%' : '0%';
+  document.getElementById('win-rate').textContent = filtered.length ? Math.round(wins/filtered.length*100) + '%' : '0%';
   document.getElementById('win-rate-sub').textContent = `${wins}W / ${losses}L`;
-  document.getElementById('best-day').textContent = '+$' + best.amount.toFixed(2);
-  document.getElementById('best-day-date').textContent = best.date;
+  document.getElementById('best-day').textContent  = '+$' + best.amount.toFixed(2);
+  document.getElementById('best-day-date').textContent  = best.date;
   document.getElementById('worst-day').textContent = '$' + worst.amount.toFixed(2);
   document.getElementById('worst-day-date').textContent = worst.date;
 }
 
-function drawEquityCurve() {
-  const canvas = document.getElementById('equity-canvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth;
-  canvas.width = W;
-  canvas.height = 280;
-
-  if (pnlData.length < 2) return;
-
-  const sorted = [...pnlData].sort((a,b) => new Date(a.date) - new Date(b.date));
-  let running = 0;
-  const points = sorted.map(t => { running += t.amount; return running; });
-  const min = Math.min(0, ...points);
-  const max = Math.max(0, ...points);
-  const range = max - min || 1;
-  const pad = { t:20, b:40, l:60, r:20 };
-  const cw = W - pad.l - pad.r;
-  const ch = canvas.height - pad.t - pad.b;
-
-  const toX = i => pad.l + (i / (points.length - 1)) * cw;
-  const toY = v => pad.t + ch - ((v - min) / range) * ch;
-
-  // Zero line
-  ctx.strokeStyle = '#2a3347';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(pad.l, toY(0));
-  ctx.lineTo(pad.l + cw, toY(0));
-  ctx.stroke();
-
-  // Gradient fill
-  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
-  const isPos = points[points.length-1] >= 0;
-  grad.addColorStop(0, isPos ? 'rgba(0,255,136,0.3)' : 'rgba(255,59,92,0.3)');
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-  ctx.beginPath();
-  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
-  ctx.lineTo(toX(points.length-1), toY(0));
-  ctx.lineTo(toX(0), toY(0));
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Line
-  ctx.beginPath();
-  ctx.strokeStyle = isPos ? '#00ff88' : '#ff3b5c';
-  ctx.lineWidth = 2;
-  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
-  ctx.stroke();
-
-  // Axis labels
-  ctx.fillStyle = '#64748b';
-  ctx.font = '10px Space Mono, monospace';
-  ctx.fillText('$' + max.toFixed(0), 4, toY(max) + 4);
-  ctx.fillText('$' + min.toFixed(0), 4, toY(min) + 4);
-}
-
-
-// ── NOTION DASHBOARD LOADER ──────────────────────────────────────────────
-// ── CLOCK ─────────────────────────────────────────────
-function updateClock() {
-  const now = new Date();
-  const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  const h = et.getHours().toString().padStart(2,'0');
-  const m = et.getMinutes().toString().padStart(2,'0');
-  const s = et.getSeconds().toString().padStart(2,'0');
-  const d = et.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-  document.getElementById('clock').textContent = `${d} ${h}:${m}:${s} ET`;
-}
-
-// ── POLLING ───────────────────────────────────────────
-function startPolling() {
-  const url = document.getElementById('server-url').value.trim().replace(/\/$/, '');
-  if (!url) return;
-  localStorage.setItem('server_url', url);
-  document.getElementById('saved-url').textContent = url;
-  if (pollInterval) clearInterval(pollInterval);
-  fetchAlerts(url);
-  pollInterval = setInterval(() => fetchAlerts(url), 10000);
-}
-
-async function fetchAlerts(url) {
-  try {
-    const res = await fetch(url + '/alerts');
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data.alerts && Array.isArray(data.alerts)) {
-      const newAlerts = data.alerts.filter(a => !alerts.find(ex => ex.id === a.id));
-      if (newAlerts.length > 0) {
-        alerts = [...newAlerts, ...alerts];
-        renderAlerts();
-        updateStats();
-      }
-    }
-  } catch(e) {
-    // Server not yet supporting /alerts endpoint — use demo mode
-  }
-}
-
-// ── RENDER ALERTS ─────────────────────────────────────
-function renderAlerts() {
-  const list = document.getElementById('alerts-list');
-  if (alerts.length === 0) {
-    list.innerHTML = '<div class="empty-state">No alerts yet. Waiting for TradingView signals...</div>';
-    return;
-  }
-
-  list.innerHTML = alerts.slice(0, 20).map(a => {
-    const go = a.should_trade;
-    const conf = a.confidence || 'medium';
-    const warnings = a.risk_warnings || [];
-    const sl = a.saty_levels || {};
-    const ctx = a.context || {};
-    const mo = a.momentum || {};
-    const time = a.timestamp ? new Date(a.timestamp).toLocaleTimeString('en-US', {
-      hour:'2-digit', minute:'2-digit', timeZone:'America/New_York'
-    }) : '—';
-
-    return `
-    <div class="alert-item" onclick="this.querySelector('.alert-levels').style.display = this.querySelector('.alert-levels').style.display === 'none' ? 'grid' : 'none'">
-      <div class="alert-top">
-        <div class="alert-setup ${go ? 'alert-go' : 'alert-nogo'}">
-          ${go ? '🟢' : '🔴'} ${a.setup || 'Unknown Setup'}
-          <span style="font-size:0.7rem;font-weight:400;color:var(--muted);margin-left:0.5rem;">${a.action?.toUpperCase() || ''} ${a.ticker || 'SPX'}</span>
-        </div>
-        <div class="alert-meta">
-          <span class="conf-badge conf-${conf}">${conf}</span>
-          <span>${time}</span>
-          <span style="color:var(--accent);font-family:var(--mono);">$${a.price || '—'}</span>
-        </div>
-      </div>
-      <div class="alert-reasoning">${a.reasoning || ''}</div>
-      ${a.entry_plan ? `<div style="font-size:0.72rem;color:var(--accent);font-family:var(--mono);margin-bottom:0.35rem;">↳ ${a.entry_plan}</div>` : ''}
-      <div class="alert-levels" style="display:none;">
-        <div class="level-item">
-          <div class="level-label">Entry</div>
-          <div class="level-val entry">${a.entry_plan?.match(/\d+\.?\d*/)?.[0] || '—'}</div>
-        </div>
-        <div class="level-item">
-          <div class="level-label">Stop</div>
-          <div class="level-val stop">${a.stop_level || '—'}</div>
-        </div>
-        <div class="level-item">
-          <div class="level-label">Target</div>
-          <div class="level-val target">${a.targets?.split(',')[0] || '—'}</div>
-        </div>
-        ${sl.nearest_level ? `<div class="level-item"><div class="level-label">Nearest Level</div><div class="level-val" style="color:var(--muted)">${sl.nearest_level}</div></div>` : ''}
-        ${sl.range_juice ? `<div class="level-item"><div class="level-label">Range Juice</div><div class="level-val" style="color:${sl.range_juice==='green'?'var(--green)':sl.range_juice==='red'?'var(--red)':'var(--orange)'}">${sl.range_juice?.toUpperCase()}</div></div>` : ''}
-        ${mo.po_zone ? `<div class="level-item"><div class="level-label">PO Zone</div><div class="level-val" style="color:var(--muted)">${mo.po_zone}</div></div>` : ''}
-      </div>
-      ${warnings.length > 0 ? `<div class="alert-warnings">${warnings.map(w => `<span class="warning-tag">⚠ ${w}</span>`).join('')}</div>` : ''}
-      ${a.committee_check ? `<div style="font-size:0.68rem;color:var(--muted);font-family:var(--mono);margin-top:0.5rem;line-height:1.4;border-left:2px solid var(--border2);padding-left:0.5rem;">${a.committee_check}</div>` : ''}
-    </div>`;
-  }).join('');
-
-  // Update market context from latest alert
-  if (alerts[0]) updateMarketContext(alerts[0]);
-  document.getElementById('alert-count').textContent = `${alerts.length} alert${alerts.length !== 1 ? 's' : ''}`;
-}
-
-function updateMarketContext(a) {
-  const sl = a.saty_levels || {};
-  const tb = a.trigger_box || {};
-  const mo = a.momentum || {};
-  const ctx = a.context || {};
-
-  const set = (id, val, cls) => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = val || '—'; if (cls) el.className = 'ms-val ' + cls; }
-  };
-
-  set('ctx-session', ctx.session || a.session, 'ms-cyan');
-  set('ctx-setup', a.setup);
-  set('ctx-action', a.action?.toUpperCase(), a.action === 'buy' ? 'ms-green' : 'ms-red');
-  set('ctx-price', a.price ? '$' + a.price : null, 'ms-cyan');
-  set('ctx-level', sl.nearest_level);
-  const juice = sl.range_juice;
-  set('ctx-juice', juice?.toUpperCase(), juice === 'green' ? 'ms-green' : juice === 'red' ? 'ms-red' : 'ms-yellow');
-  set('ctx-po', mo.po_zone);
-  set('ctx-box', tb.in_box ? '⚠ YES' : 'No', tb.in_box ? 'ms-yellow' : 'ms-green');
-  set('ctx-chop', tb.chop_warning ? '⚠ ' + tb.chop_reason : 'Clear', tb.chop_warning ? 'ms-yellow' : 'ms-green');
-  const cvBull = mo.conviction_arrow_bull;
-  const cvBear = mo.conviction_arrow_bear;
-  set('ctx-conviction', cvBull ? '↑ Bull Arrow' : cvBear ? '↓ Bear Arrow' : 'None', cvBull ? 'ms-green' : cvBear ? 'ms-red' : '');
-}
-
-function updateStats() {
-  const total = alerts.length;
-  const go = alerts.filter(a => a.should_trade).length;
-  const nogo = total - go;
-  const last = alerts[0];
-
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-go').textContent = go;
-  document.getElementById('stat-nogo').textContent = nogo;
-  if (last) {
-    document.getElementById('stat-last').textContent = last.should_trade ? 'GO' : 'NO-GO';
-    document.getElementById('stat-last').className = 'stat-value ' + (last.should_trade ? 'pos' : 'neg');
-    document.getElementById('stat-last-setup').textContent = last.setup || '—';
-  }
-}
-
-function clearAlerts() {
-  alerts = [];
-  renderAlerts();
-  updateStats();
-}
-
-// Add alert manually (called from server SSE or webhook push in future)
-function addAlert(alertData) {
-  alertData.id = alertData.id || Date.now().toString();
-  alertData.timestamp = alertData.timestamp || new Date().toISOString();
-  alerts.unshift(alertData);
-  renderAlerts();
-  updateStats();
-}
-
-// ── P&L ──────────────────────────────────────────────
-function addPnlEntry() {
-  const date   = document.getElementById('pnl-date').value;
-  const setup  = document.getElementById('pnl-setup').value;
-  const dir    = document.getElementById('pnl-dir').value;
-  const amount = parseFloat(document.getElementById('pnl-amount').value);
-  const notes  = document.getElementById('pnl-notes').value;
-
-  if (!date || !setup || isNaN(amount)) return;
-
-  pnlData.push({ date, setup, dir, amount, notes });
-  pnlData.sort((a,b) => new Date(b.date) - new Date(a.date));
-  localStorage.setItem('pnl_data', JSON.stringify(pnlData));
-
-  document.getElementById('pnl-amount').value = '';
-  document.getElementById('pnl-notes').value = '';
-
-  renderPnl();
-  drawEquityCurve();
-}
-
-function renderPnl() {
-  const body = document.getElementById('pnl-table-body');
-  if (pnlData.length === 0) {
-    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades logged yet</td></tr>';
-    return;
-  }
-
-  body.innerHTML = pnlData.map(t => `
-    <tr>
-      <td>${t.date}</td>
-      <td>${t.setup}</td>
-      <td style="color:${t.dir==='Call'?'var(--green)':'var(--red)'}">${t.dir}</td>
-      <td class="${t.amount >= 0 ? 'pnl-pos' : 'pnl-neg'}">${t.amount >= 0 ? '+' : ''}$${t.amount.toFixed(2)}</td>
-      <td style="color:var(--muted);font-size:0.65rem;">${t.notes || '—'}</td>
-    </tr>
-  `).join('');
-
-  // Update stat cards
-  const total = pnlData.reduce((s,t) => s + t.amount, 0);
-  const wins = pnlData.filter(t => t.amount > 0).length;
-  const losses = pnlData.filter(t => t.amount < 0).length;
-  const best = pnlData.reduce((a,b) => b.amount > a.amount ? b : a, pnlData[0]);
-  const worst = pnlData.reduce((a,b) => b.amount < a.amount ? b : a, pnlData[0]);
-
-  document.getElementById('total-pnl').textContent = (total >= 0 ? '+' : '') + '$' + Math.abs(total).toFixed(2);
-  document.getElementById('total-pnl').className = 'stat-value ' + (total >= 0 ? 'pos' : 'neg');
-  document.getElementById('win-rate').textContent = pnlData.length ? Math.round(wins/pnlData.length*100) + '%' : '0%';
-  document.getElementById('win-rate-sub').textContent = `${wins}W / ${losses}L`;
-  document.getElementById('best-day').textContent = '+$' + best.amount.toFixed(2);
-  document.getElementById('best-day-date').textContent = best.date;
-  document.getElementById('worst-day').textContent = '$' + worst.amount.toFixed(2);
-  document.getElementById('worst-day-date').textContent = worst.date;
-}
-
-function drawEquityCurve() {
-  const canvas = document.getElementById('equity-canvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth;
-  canvas.width = W;
-  canvas.height = 280;
-
-  if (pnlData.length < 2) return;
-
-  const sorted = [...pnlData].sort((a,b) => new Date(a.date) - new Date(b.date));
-  let running = 0;
-  const points = sorted.map(t => { running += t.amount; return running; });
-  const min = Math.min(0, ...points);
-  const max = Math.max(0, ...points);
-  const range = max - min || 1;
-  const pad = { t:20, b:40, l:60, r:20 };
-  const cw = W - pad.l - pad.r;
-  const ch = canvas.height - pad.t - pad.b;
-
-  const toX = i => pad.l + (i / (points.length - 1)) * cw;
-  const toY = v => pad.t + ch - ((v - min) / range) * ch;
-
-  // Zero line
-  ctx.strokeStyle = '#2a3347';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(pad.l, toY(0));
-  ctx.lineTo(pad.l + cw, toY(0));
-  ctx.stroke();
-
-  // Gradient fill
-  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
-  const isPos = points[points.length-1] >= 0;
-  grad.addColorStop(0, isPos ? 'rgba(0,255,136,0.3)' : 'rgba(255,59,92,0.3)');
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
-
-  ctx.beginPath();
-  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
-  ctx.lineTo(toX(points.length-1), toY(0));
-  ctx.lineTo(toX(0), toY(0));
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Line
-  ctx.beginPath();
-  ctx.strokeStyle = isPos ? '#00ff88' : '#ff3b5c';
-  ctx.lineWidth = 2;
-  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
-  ctx.stroke();
-
-  // Axis labels
-  ctx.fillStyle = '#64748b';
-  ctx.font = '10px Space Mono, monospace';
-  ctx.fillText('$' + max.toFixed(0), 4, toY(max) + 4);
-  ctx.fillText('$' + min.toFixed(0), 4, toY(min) + 4);
-}
-
-// ── NOTION JOURNAL ────────────────────────────────────
-async function loadNotion() {
-  const key = document.getElementById('notion-key').value.trim();
-  const db  = document.getElementById('notion-db').value.trim();
-  const status = document.getElementById('notion-status');
-
-  if (!key || !db) { status.textContent = '⚠ Enter both Notion token and database ID'; status.style.color='var(--red)'; return; }
-
-  localStorage.setItem('notion_key', key);
-  localStorage.setItem('notion_db', db);
-  document.getElementById('saved-notion').textContent = 'Connected';
-  document.getElementById('saved-notion').style.color = 'var(--green)';
-
-  status.innerHTML = '<span class="loading-spinner"></span> Loading from Notion...';
-  status.style.color = 'var(--muted)';
-
-  // Notion API requires a backend proxy due to CORS.
-  // Route through your Railway server's /notion endpoint.
-  const serverUrl = localStorage.getItem('server_url');
-  if (!serverUrl) {
-    status.textContent = '⚠ Connect to your Railway server first (Alerts tab) — Notion calls route through it to avoid CORS.';
-    status.style.color = 'var(--red)';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${serverUrl}/notion?db=${db}`, {
-      headers: { 'X-Notion-Key': key }
-    });
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    renderJournal(data.results || []);
-    status.textContent = `✓ Loaded ${data.results?.length || 0} trades from Notion`;
-    status.style.color = 'var(--green)';
-  } catch(e) {
-    status.textContent = '⚠ Could not load — add /notion endpoint to your Railway server (see settings)';
-    status.style.color = 'var(--orange)';
-    // Show demo data
-    renderJournal(getDemoJournal());
-  }
-}
-
-function renderJournal(results) {
-  const body = document.getElementById('journal-body');
-  document.getElementById('journal-count').textContent = `${results.length} trades`;
-
-  if (results.length === 0) {
-    body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades found</td></tr>';
-    return;
-  }
-
-  body.innerHTML = results.map(r => {
-    const p = r.properties || r;
-    const date   = p.Date?.date?.start || p.date || '—';
-    const setup  = p.Setup?.select?.name || p.setup || '—';
-    const dir    = p.Direction?.select?.name || p.direction || '—';
-    const entry  = p['Entry Price']?.number || p.entry || '—';
-    const exit   = p['Exit Price']?.number || p.exit || '—';
-    const pnl    = p['P&L']?.number ?? p.pnl ?? null;
-    const grade  = p.Grade?.select?.name || p.grade || '—';
-    const notes  = p.Notes?.rich_text?.[0]?.plain_text || p.notes || '—';
-
-    const pnlStr = pnl !== null ? `${pnl >= 0 ? '+' : ''}$${pnl}` : '—';
-    const pnlClass = pnl > 0 ? 'pnl-pos' : pnl < 0 ? 'pnl-neg' : '';
-
-    return `
-    <tr>
-      <td>${date}</td>
-      <td>${setup}</td>
-      <td style="color:${dir==='Call'||dir==='Long'?'var(--green)':'var(--red)'}">${dir}</td>
-      <td style="color:var(--accent)">${entry !== '—' ? '$'+entry : '—'}</td>
-      <td style="color:var(--muted)">${exit !== '—' ? '$'+exit : '—'}</td>
-      <td class="${pnlClass}">${pnlStr}</td>
-      <td><span class="grade-badge grade-${grade}">${grade}</span></td>
-      <td style="color:var(--muted);font-size:0.65rem;">${notes}</td>
-    </tr>`;
-  }).join('');
-}
-
-function getDemoJournal() {
-  return [
-    { date:'2026-04-03', setup:'Vomy', direction:'Put', entry:5920, exit:5878, pnl:480, grade:'A', notes:'Clean 48 EMA break, held to GG' },
-    { date:'2026-04-02', setup:'ORB', direction:'Call', entry:5888, exit:5902, pnl:320, grade:'B', notes:'Good retest, slight early entry' },
-    { date:'2026-04-01', setup:'Flag Into Ribbon', direction:'Put', entry:5910, exit:5892, pnl:-180, grade:'A', notes:'Valid setup, stop hit, process clean' },
-  ].map(t => ({ properties: null, ...t }));
-}
-
-// ── INIT ──────────────────────────────────────────────
+// ── INIT ─────────────────────────────────────────────
 function init() {
   setInterval(updateClock, 1000);
   updateClock();
-
-  // Set today's date in P&L form
   document.getElementById('pnl-date').valueAsDate = new Date();
-
-  // Restore saved data
   const savedUrl = localStorage.getItem('server_url');
   if (savedUrl) {
     document.getElementById('server-url').value = savedUrl;
     document.getElementById('saved-url').textContent = savedUrl;
     startPolling();
   }
-
   const savedKey = localStorage.getItem('notion_key');
   const savedDb  = localStorage.getItem('notion_db');
   if (savedKey) document.getElementById('notion-key').value = savedKey;
@@ -2055,9 +1942,11 @@ function init() {
     document.getElementById('saved-notion').textContent = 'Connected';
     document.getElementById('saved-notion').style.color = 'var(--green)';
   }
-
+  const jKey = localStorage.getItem('journal_notion_key') || savedKey || '';
+  const jDb  = localStorage.getItem('journal_notion_db')  || savedDb  || '';
+  if (jKey) document.getElementById('j-notion-key').value = jKey;
+  if (jDb)  document.getElementById('j-notion-db').value  = jDb;
   loadNotionDashboard();
-
   const savedPnl = localStorage.getItem('pnl_data');
   if (savedPnl) {
     pnlData = JSON.parse(savedPnl);
@@ -2077,6 +1966,691 @@ function clearAll() {
 }
 
 window.addEventListener('resize', drawEquityCurve);
+
+function drawEquityCurve() {
+  const canvas = document.getElementById('equity-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth;
+  canvas.width = W;
+  canvas.height = 280;
+
+  const filtered = getFilteredPnlData();
+  if (filtered.length < 2) { ctx.clearRect(0, 0, W, 280); return; }
+
+  const sorted = [...filtered].sort((a,b) => new Date(a.date) - new Date(b.date));
+  let running = 0;
+  const points = sorted.map(t => { running += t.amount; return running; });
+  const min = Math.min(0, ...points);
+  const max = Math.max(0, ...points);
+  const range = max - min || 1;
+  const pad = { t:20, b:40, l:60, r:20 };
+  const cw = W - pad.l - pad.r;
+  const ch = canvas.height - pad.t - pad.b;
+
+  const toX = i => pad.l + (i / (points.length - 1)) * cw;
+  const toY = v => pad.t + ch - ((v - min) / range) * ch;
+
+  // Zero line
+  ctx.strokeStyle = '#2a3347';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, toY(0));
+  ctx.lineTo(pad.l + cw, toY(0));
+  ctx.stroke();
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + ch);
+  const isPos = points[points.length-1] >= 0;
+  grad.addColorStop(0, isPos ? 'rgba(0,255,136,0.3)' : 'rgba(255,59,92,0.3)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+  ctx.beginPath();
+  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.lineTo(toX(points.length-1), toY(0));
+  ctx.lineTo(toX(0), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = isPos ? '#00ff88' : '#ff3b5c';
+  ctx.lineWidth = 2;
+  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = '#64748b';
+  ctx.font = '10px Space Mono, monospace';
+  ctx.fillText('$' + max.toFixed(0), 4, toY(max) + 4);
+  ctx.fillText('$' + min.toFixed(0), 4, toY(min) + 4);
+}
+
+
+
+// ══════════════════════════════════════════════════════
+// JOURNAL TAB — Notion Integration
+// ══════════════════════════════════════════════════════
+let journalData = [];
+let journalFiltered = [];
+
+function initJournalTab() {
+  const key = localStorage.getItem('journal_notion_key') || localStorage.getItem('notion_key') || '';
+  const db  = localStorage.getItem('journal_notion_db')  || localStorage.getItem('notion_db')  || '';
+  if (key) document.getElementById('j-notion-key').value = key;
+  if (db)  document.getElementById('j-notion-db').value  = db;
+  if (journalData.length > 0) renderJournalTab();
+}
+
+async function loadJournalFromNotion() {
+  const key = document.getElementById('j-notion-key').value.trim();
+  const db  = document.getElementById('j-notion-db').value.trim();
+  if (!key || !db) { alert('Enter Notion token and database ID'); return; }
+
+  localStorage.setItem('journal_notion_key', key);
+  localStorage.setItem('journal_notion_db', db);
+
+  document.getElementById('journal-last-sync').textContent = 'Syncing…';
+  document.getElementById('journal-tbody').innerHTML =
+    '<tr><td colspan="8" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:.7rem;color:var(--muted);"><span class="loading-spinner"></span> Loading from Notion…</td></tr>';
+
+  try {
+    // Use the Claude API to fetch Notion data (bypasses CORS)
+    const pages = await fetchNotionPages(key, db);
+    journalData = pages;
+    journalFiltered = pages;
+    renderJournalTab();
+    document.getElementById('journal-last-sync').textContent =
+      'Last synced: ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  } catch(e) {
+    document.getElementById('journal-last-sync').textContent = '⚠ ' + e.message;
+    // Show demo data if fetch fails
+    journalData = getDemoJournalRows();
+    journalFiltered = journalData;
+    renderJournalTab();
+  }
+}
+
+async function fetchNotionPages(token, dbId) {
+  // Route through Anthropic API using Claude as proxy to avoid CORS
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      system: `You are a Notion API proxy. The user will give you a Notion token and database ID. 
+Fetch the database pages from Notion and return ONLY a JSON array of trade objects with these fields:
+date, setup, direction, entry_price, exit_price, pnl, grade, claude_notes, symbol, option_type, strike, qty.
+Map Notion property names flexibly — look for Date, Setup, Direction/Type, Entry/Entry Price, Exit/Exit Price, P&L/PnL, Grade, Notes/Claude Notes/Analysis.
+Return ONLY the raw JSON array, no markdown, no explanation.`,
+      messages: [{
+        role: 'user',
+        content: `Fetch Notion database pages. Token: ${token} | Database ID: ${dbId}
+Use the Notion API: GET https://api.notion.com/v1/databases/${dbId}/query
+Headers: Authorization: Bearer ${token}, Notion-Version: 2022-06-28, Content-Type: application/json
+Body: {"page_size": 100, "sorts": [{"property": "Date", "direction": "descending"}]}
+Return the trades as a JSON array.`
+      }]
+    })
+  });
+
+  if (!response.ok) throw new Error('API error ' + response.status);
+  const data = await response.json();
+  const text = data.content?.[0]?.text || '[]';
+  try {
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch {
+    throw new Error('Could not parse response — showing demo data');
+  }
+}
+
+function getDemoJournalRows() {
+  return [
+    { date:'2026-04-04', setup:'Vomy', direction:'Put', entry_price:5920, exit_price:5878, pnl:480, grade:'A',
+      claude_notes:'✅ Clean Vomy setup — 48 EMA break confirmed on candle close. Held through GG with conviction arrow active. Exited at ATR target. No rule violations. Process was excellent — this is exactly what the playbook calls for.' },
+    { date:'2026-04-03', setup:'ORB', direction:'Call', entry_price:5888, exit_price:5902, pnl:320, grade:'B',
+      claude_notes:'⚠️ Valid ORB setup but entry was slightly ahead of the retest — entered mid-candle rather than waiting for close. Stop was properly placed at OR midpoint. R:R was 1:2.4 which meets minimum. Minor timing issue caps this at B.' },
+    { date:'2026-04-02', setup:'Flag Into Ribbon', direction:'Put', entry_price:5910, exit_price:5892, pnl:-180, grade:'A',
+      claude_notes:'✅ Losing trade, A grade. Flag Into Ribbon was textbook — wicks at the 21 EMA, ribbon stacked bearish, conviction arrow confirmed. Stop was hit at the other side of the ribbon as planned. Loss does not affect grade — process was clean.' },
+    { date:'2026-04-01', setup:'Divergence From Extreme', direction:'Call', entry_price:5870, exit_price:5895, pnl:540, grade:'A',
+      claude_notes:'✅ Phase Oscillator in accumulation zone (-65), Class A divergence — higher low on oscillator while price made lower low. Waited for candle close. Volume confirmed. Target hit at 21 EMA. Perfect execution.' },
+    { date:'2026-03-31', setup:'1min EOD Divergence', direction:'Put', entry_price:5945, exit_price:5940, pnl:-90, grade:'C',
+      claude_notes:'⚠️ Setup was valid (3:15pm, divergence present) but volume confirmation was weak. Should have waited for stronger volume signal. R:R at entry was only 1:1.5 — below the 1:2 minimum. Caps at C due to R:R violation.' },
+    { date:'2026-03-28', setup:'Tweezer Bottom', direction:'Call', entry_price:5862, exit_price:5888, pnl:620, grade:'A',
+      claude_notes:'✅ Perfect Tweezer Bottom — parallel wicks at identical lows, entered on 50% reclaim of down candle. Trailed stop to body lows once +$200 in, then to structure. Held for full target. A+ execution on every rule.' },
+  ];
+}
+
+function filterJournal() {
+  const setup  = document.getElementById('j-filter-setup').value;
+  const grade  = document.getElementById('j-filter-grade').value;
+  const result = document.getElementById('j-filter-result').value;
+
+  // First apply period filter, then setup/grade/result filters
+  const periodFiltered = getFilteredJournalData(journalData);
+  journalFiltered = periodFiltered.filter(t => {
+    if (setup  && t.setup !== setup) return false;
+    if (grade  && t.grade !== grade) return false;
+    if (result === 'win'  && (t.pnl||0) <= 0) return false;
+    if (result === 'loss' && (t.pnl||0) >= 0) return false;
+    return true;
+  });
+  renderJournalTab();
+}
+
+function renderJournalTab() {
+  const tbody = document.getElementById('journal-tbody');
+  document.getElementById('j-count').textContent = journalFiltered.length + ' trades';
+
+  // Stats
+  const total = journalFiltered.length;
+  const wins  = journalFiltered.filter(t => (t.pnl||0) > 0).length;
+  const totalPnl = journalFiltered.reduce((s, t) => s + (t.pnl||0), 0);
+  const grades = { A:0, B:0, C:0, D:0, F:0 };
+  journalFiltered.forEach(t => { if (grades[t.grade] !== undefined) grades[t.grade]++; });
+  const topGrade = Object.entries(grades).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+
+  document.getElementById('j-total').textContent = total;
+  document.getElementById('j-winrate').textContent = total ? Math.round(wins/total*100)+'%' : '—';
+  document.getElementById('j-wr-sub').textContent  = total ? `${wins}W / ${total-wins}L` : '—';
+  document.getElementById('j-avg-grade').textContent = topGrade;
+  document.getElementById('j-pnl').textContent = totalPnl >= 0
+    ? '+$'+totalPnl.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+    : '-$'+Math.abs(totalPnl).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('j-pnl').className = 'stat-value ' + (totalPnl>=0?'pos':'neg');
+
+  if (total === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:.7rem;">No trades match filters</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = journalFiltered.map((t, i) => {
+    const pnl = t.pnl || 0;
+    const pnlStr = pnl !== null ? (pnl>=0?'+':'') + '$' + Math.abs(pnl).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+    const pnlClass = pnl > 0 ? 'pnl-pos' : pnl < 0 ? 'pnl-neg' : '';
+    const grade = t.grade || '—';
+    const gradeKey = grade === '—' ? '-' : grade;
+    const dir = t.direction || '—';
+    const notes = t.claude_notes || t.notes || '—';
+    const notesPreview = notes.length > 100 ? notes.slice(0,100) + '…' : notes;
+    const hasMore = notes.length > 100;
+    const notesHtml = hasMore
+      ? `<span class="notes-preview">${notesPreview}</span><span class="notes-full" style="display:none;">${notes}</span><br><button class="notes-expand-btn" onclick="toggleNotes(this)">▾ Show full analysis</button>`
+      : notes;
+
+    return `<tr style="cursor:default;">
+      <td style="color:var(--muted);white-space:nowrap;">${t.date||'—'}</td>
+      <td style="font-weight:600;">${t.setup||'—'}</td>
+      <td style="color:${dir==='Call'||dir==='Long'?'var(--green)':'var(--red)'};font-weight:600;">${dir}</td>
+      <td style="color:var(--accent);">${t.entry_price!=null?'$'+t.entry_price:'—'}</td>
+      <td style="color:var(--muted);">${t.exit_price!=null?'$'+t.exit_price:'—'}</td>
+      <td class="${pnlClass}" style="font-weight:700;">${pnlStr}</td>
+      <td><span class="grade-badge grade-${gradeKey}">${grade}</span></td>
+      <td class="claude-notes-cell">${notesHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleNotes(btn) {
+  const cell = btn.closest('.claude-notes-cell') || btn.parentElement;
+  const preview = cell.querySelector('.notes-preview');
+  const full    = cell.querySelector('.notes-full');
+  const isExpanded = full && full.style.display !== 'none';
+  if (preview) preview.style.display = isExpanded ? 'inline' : 'none';
+  if (full)    full.style.display    = isExpanded ? 'none'   : 'inline';
+  btn.textContent = isExpanded ? '▾ Show full analysis' : '▴ Collapse';
+}
+
+// ══════════════════════════════════════════════════════
+// CHART ANALYSIS TAB
+// ══════════════════════════════════════════════════════
+let chartImageBase64 = null;
+let chartImageMime   = 'image/png';
+
+function handleChartFile(event) {
+  const file = event.target?.files?.[0] || event;
+  if (!file || !file.type) return;
+  chartImageMime = file.type.startsWith('image/') ? file.type : 'image/png';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const result = e.target.result;
+    chartImageBase64 = result.split(',')[1];
+    // Update preview
+    const prev = document.getElementById('chart-preview');
+    const prevWrap = document.getElementById('chart-preview-wrap');
+    const dz = document.getElementById('chart-drop-zone');
+    const fullImg = document.getElementById('chart-full-img');
+    const fullPrev = document.getElementById('chart-full-preview');
+    if (prev) prev.src = result;
+    if (prevWrap) prevWrap.style.display = 'block';
+    if (dz) dz.style.display = 'none';
+    if (fullImg) fullImg.src = result;
+    if (fullPrev) fullPrev.style.display = 'block';
+    // Update status
+    const statusEl = document.getElementById('chart-status');
+    if (statusEl) {
+      statusEl.textContent = '✓ Image ready — click Analyze Chart';
+      statusEl.style.color = 'var(--green)';
+      statusEl.style.display = 'block';
+    }
+    console.log('[Chart] Image loaded, base64 length:', chartImageBase64?.length);
+  };
+  reader.onerror = () => console.error('[Chart] FileReader failed');
+  reader.readAsDataURL(file);
+}
+
+// Attach drag-drop lazily when Chart tab is opened (not on DOMContentLoaded,
+// because the login screen hides everything and the element may not be visible)
+function initChartDropZone() {
+  const dz = document.getElementById('chart-drop-zone');
+  if (!dz || dz._dzInit) return;
+  dz._dzInit = true;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', () => { dz.style.borderColor = 'var(--border2)'; });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.style.borderColor = 'var(--border2)';
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleChartFile(file);
+  });
+}
+
+
+async function loadChartFromUrl() {
+  const url = document.getElementById('chart-url').value.trim();
+  const statusEl = document.getElementById('url-load-status');
+  if (!url) {
+    statusEl.textContent = '⚠ Paste a TradingView URL first.';
+    statusEl.style.color = 'var(--red)';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  statusEl.textContent = '⏳ Fetching image…';
+  statusEl.style.color = 'var(--muted)';
+  statusEl.style.display = 'block';
+
+  // Method 1: direct fetch (works if CORS headers allow it)
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    if (!blob.type.startsWith('image/')) throw new Error('Not an image');
+    chartImageMime = blob.type;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const result = e.target.result;
+      chartImageBase64 = result.split(',')[1];
+      document.getElementById('chart-preview').src = result;
+      document.getElementById('chart-preview-wrap').style.display = 'block';
+      document.getElementById('chart-drop-zone').style.display = 'none';
+      document.getElementById('chart-full-img').src = result;
+      document.getElementById('chart-full-preview').style.display = 'block';
+      statusEl.textContent = '✓ Image loaded — click Analyze Chart';
+      statusEl.style.color = 'var(--green)';
+    };
+    reader.readAsDataURL(blob);
+    return;
+  } catch(e) { /* fall through to method 2 */ }
+
+  // Method 2: Image element + canvas (works for images with permissive CORS)
+  try {
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        try {
+          const dataUrl = canvas.toDataURL('image/png');
+          chartImageBase64 = dataUrl.split(',')[1];
+          chartImageMime = 'image/png';
+          document.getElementById('chart-preview').src = dataUrl;
+          document.getElementById('chart-preview-wrap').style.display = 'block';
+          document.getElementById('chart-drop-zone').style.display = 'none';
+          document.getElementById('chart-full-img').src = dataUrl;
+          document.getElementById('chart-full-preview').style.display = 'block';
+          statusEl.textContent = '✓ Image loaded via canvas — click Analyze Chart';
+          statusEl.style.color = 'var(--green)';
+          resolve();
+        } catch(canvasErr) { reject(canvasErr); }
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+    return;
+  } catch(e) { /* fall through to instructions */ }
+
+  // Method 3: CORS blocked entirely — show clear instructions
+  statusEl.innerHTML = `<span style="color:var(--orange);">⚠ TradingView blocks direct loading (CORS).</span><br>
+    <span style="color:var(--muted);line-height:1.7;">
+    ① Open the URL in a new tab<br>
+    ② Right-click the image → <strong>Save image as…</strong><br>
+    ③ Use the <strong>file picker below</strong> to upload it
+    </span>`;
+  window.open(url, '_blank');
+}
+
+async function analyzeChart() {
+  const tf      = document.getElementById('chart-tf').value;
+  const symbol  = document.getElementById('chart-symbol').value;
+  const context = document.getElementById('chart-context').value.trim();
+  const btn     = document.getElementById('chart-analyze-btn');
+  const status  = document.getElementById('chart-status');
+  const output  = document.getElementById('chart-analysis-output');
+
+  if (!chartImageBase64) {
+    status.textContent = '⚠ Load an image first — use "Load URL" or upload/drop a file.';
+    status.style.color = 'var(--red)';
+    status.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'ANALYZING…';
+  status.textContent = `Analyzing ${symbol} ${tf} chart through Saty framework…`;
+  status.style.color = 'var(--muted)';
+  status.style.display = 'block';
+  output.innerHTML = `<div style="text-align:center;padding:3rem;">
+    <span class="loading-spinner"></span>
+    <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.75rem;">Reading ${symbol} ${tf} through Saty framework…</div>
+  </div>`;
+
+  // Determine instrument context
+  const isFutures = ['ES','NQ','MES','MNQ'].includes(symbol);
+  const instrNote = isFutures
+    ? `This is a ${symbol} futures chart. ATR levels and price context are for futures contract pricing.`
+    : `This is a ${symbol} index/ETF chart.`;
+
+  try {
+    const userContent = [
+      {
+        type: 'image',
+        source: { type: 'base64', media_type: chartImageMime, data: chartImageBase64 }
+      },
+      {
+        type: 'text',
+        text: `${symbol} ${tf} chart analysis. ${isFutures ? 'Futures pricing.' : 'Index/ETF pricing.'}${context ? ' Trader note: ' + context : ''}
+
+Complete ALL 8 sections concisely (2-4 sentences each):
+
+### 1. Market Structure
+### 2. Phase Oscillator
+### 3. Setup Identification
+### 4. Trade Thesis
+### 5. Entry Plan
+### 6. Targets
+### 7. Risk Flags
+### 8. Verdict
+
+Final line must be exactly: VERDICT: GO / NO-GO / WAIT — [one sentence reason]`
+      }
+    ];
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: `You are Rose's personal trading coach analyzing charts through the Saty indicator suite (Pivot Ribbon: 8/13/21/34/48 EMAs, Phase Oscillator, ATR Levels) and her playbook (ORB, Vomy, iVomy, Flag Into Ribbon, Divergence From Extreme, 1-min EOD Divergence, Tweezer Bottom).
+
+CRITICAL: You MUST complete ALL 8 sections and the VERDICT before stopping. Keep each section to 2-4 sentences max — be concise and direct. Never trail off mid-sentence. Rose is an experienced trader; no hand-holding needed.
+
+Format: ### headers, **bold** for prices/setups, bullet points for lists. Final line must be: VERDICT: GO / NO-GO / WAIT — one sentence.`,
+        messages: [{ role: 'user', content: userContent }]
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `API error ${response.status}`);
+    }
+    const data = await response.json();
+    const text = data.content?.[0]?.text || 'No response received.';
+    const stopReason = data.stop_reason;
+
+    let html = formatAnalysis(text, symbol, tf);
+    // Warn if truncated (hit token limit mid-response)
+    if (stopReason === 'max_tokens') {
+      html += `<div style="font-family:var(--mono);font-size:.62rem;color:var(--orange);margin-top:1rem;padding:.5rem;border:1px solid rgba(232,184,75,.3);background:rgba(232,184,75,.06);">
+        ⚠ Response was cut short — scroll up, all visible sections are complete. Try again if Verdict is missing.
+      </div>`;
+    }
+
+    output.innerHTML = html;
+    document.getElementById('chart-analyzed-at').textContent =
+      `${symbol} ${tf} · ` + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) + ' ET';
+    status.textContent = `✓ Analysis complete — ${symbol} ${tf}`;
+    status.style.color = 'var(--green)';
+
+  } catch(e) {
+    output.innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;padding:1rem;line-height:1.6;">
+      ⚠ Analysis failed: ${e.message}<br>
+      <span style="color:var(--muted);">Check that the image loaded correctly (preview should show above).</span>
+    </div>`;
+    status.textContent = '⚠ ' + e.message;
+    status.style.color = 'var(--red)';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'ANALYZE CHART';
+}
+
+function formatAnalysis(text, symbol, tf) {
+  // Extract verdict
+  let verdictHtml = '';
+  const verdictMatch = text.match(/\*{0,2}VERDICT\*{0,2}[:\s—-]*([^\n]+)/i);
+  if (verdictMatch) {
+    const v = verdictMatch[1].trim();
+    const isGo   = /^GO\b/i.test(v) && !/NO.GO/i.test(v);
+    const isNogo  = /NO.GO/i.test(v) || /^NO\b/i.test(v);
+    const cls = isGo ? 'verdict-go' : isNogo ? 'verdict-nogo' : 'verdict-wait';
+    const label = isGo ? '🟢 GO' : isNogo ? '🔴 NO-GO' : '🟡 WAIT';
+    verdictHtml = `<div class="analysis-verdict ${cls}">${label} — ${v.replace(/^(GO|NO-GO|NO|WAIT)[:\s—-]*/i,'')}</div>`;
+  }
+
+  // Convert markdown headers and formatting
+  let html = text
+    .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+    .replace(/^##\s+(.+)$/gm, '<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^[-•]\s+(.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .split('\n')
+    .map(line => {
+      if (line.startsWith('<h3>') || line.startsWith('<ul>') || line.startsWith('<li>')) return line;
+      if (line.trim() === '') return '';
+      return `<p>${line}</p>`;
+    })
+    .join('\n');
+
+  return verdictHtml + html;
+}
+
+// ══════════════════════════════════════════════════════
+// P&L PERIOD SLICER
+// ══════════════════════════════════════════════════════
+let activePeriod = 'all';
+
+function togglePnlDateRange() {
+  const wrap = document.getElementById('pnl-date-range-wrap');
+  const isVisible = wrap.style.display === 'flex';
+  wrap.style.display = isVisible ? 'none' : 'flex';
+  if (!isVisible) {
+    // Default dates: month start to today
+    const today = new Date().toISOString().slice(0,10);
+    const monthStart = today.slice(0,8) + '01';
+    document.getElementById('pnl-date-from').value = monthStart;
+    document.getElementById('pnl-date-to').value   = today;
+  }
+}
+
+function setPeriod(period) {
+  activePeriod = period;
+
+  // Update active button — only touch P&L period buttons (not journal ones)
+  ['period-all','period-month','period-week','period-day','period-range-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const btnId = period === 'range' ? 'period-range-btn' : 'period-' + period;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.classList.add('active');
+
+  // Show/hide date range inputs
+  const rangeWrap = document.getElementById('pnl-date-range-wrap');
+  if (rangeWrap) rangeWrap.style.display = period === 'range' ? 'flex' : 'none';
+
+  // Label
+  const labels = { all:'All Time', month:'This Month', week:'This Week', day:'Today', range:'Custom Range' };
+  const label = document.getElementById('pnl-period-label');
+  if (label) {
+    if (period === 'range') {
+      const from = document.getElementById('pnl-date-from')?.value;
+      const to   = document.getElementById('pnl-date-to')?.value;
+      label.textContent = (from && to) ? `${from} → ${to}` : 'Custom Range';
+    } else {
+      label.textContent = 'Showing: ' + (labels[period] || period);
+    }
+  }
+  renderPnl();
+  setTimeout(drawEquityCurve, 50);
+}
+
+// Keep for backward compat (old "Pick Month" button)
+function setPeriodCustomMonth(val) {
+  activePeriod = 'range';
+  const [y, m] = val.split('-');
+  const from = `${y}-${m}-01`;
+  const lastDay = new Date(+y, +m, 0).getDate();
+  const to = `${y}-${m}-${String(lastDay).padStart(2,'0')}`;
+  const fromEl = document.getElementById('pnl-date-from');
+  const toEl   = document.getElementById('pnl-date-to');
+  if (fromEl) fromEl.value = from;
+  if (toEl)   toEl.value   = to;
+  setPeriod('range');
+}
+
+function getFilteredPnlData() {
+  if (activePeriod === 'all') return pnlData;
+  const etNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+
+  return pnlData.filter(t => {
+    const d = new Date(t.date + 'T12:00:00');
+    if (activePeriod === 'day') {
+      return d.toDateString() === etNow.toDateString();
+    }
+    if (activePeriod === 'week') {
+      const weekStart = new Date(etNow);
+      weekStart.setDate(etNow.getDate() - etNow.getDay());
+      weekStart.setHours(0,0,0,0);
+      return d >= weekStart;
+    }
+    if (activePeriod === 'month') {
+      return d.getMonth() === etNow.getMonth() && d.getFullYear() === etNow.getFullYear();
+    }
+    if (activePeriod === 'range') {
+      const from = document.getElementById('pnl-date-from')?.value;
+      const to   = document.getElementById('pnl-date-to')?.value;
+      if (!from && !to) return true;
+      const dStr = t.date;
+      if (from && dStr < from) return false;
+      if (to   && dStr > to)   return false;
+      return true;
+    }
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// JOURNAL PERIOD SLICER
+// ══════════════════════════════════════════════════════
+let activeJournalPeriod = 'all';
+
+function toggleJournalDateRange() {
+  const wrap = document.getElementById('j-date-range-wrap');
+  const isVisible = wrap.style.display === 'flex';
+  wrap.style.display = isVisible ? 'none' : 'flex';
+  if (!isVisible) {
+    const today = new Date().toISOString().slice(0,10);
+    const monthStart = today.slice(0,8) + '01';
+    document.getElementById('j-date-from').value = monthStart;
+    document.getElementById('j-date-to').value   = today;
+    setJournalPeriod('range');
+  }
+}
+
+function setJournalPeriod(period) {
+  activeJournalPeriod = period;
+
+  // Update active button
+  ['j-period-all','j-period-month','j-period-week','j-period-day','j-period-range'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const btnId = period === 'range' ? 'j-period-range' : 'j-period-' + period;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.classList.add('active');
+
+  // Show/hide date range inputs
+  const rangeWrap = document.getElementById('j-date-range-wrap');
+  if (rangeWrap) rangeWrap.style.display = period === 'range' ? 'flex' : 'none';
+
+  // Label
+  const labels = { all:'All Time', month:'This Month', week:'This Week', day:'Today', range:'Custom Range' };
+  const label = document.getElementById('j-period-label');
+  if (label) {
+    if (period === 'range') {
+      const from = document.getElementById('j-date-from')?.value;
+      const to   = document.getElementById('j-date-to')?.value;
+      label.textContent = (from && to) ? `${from} → ${to}` : 'Custom Range';
+    } else {
+      label.textContent = labels[period] || period;
+    }
+  }
+  filterJournal();
+}
+
+function getFilteredJournalData(data) {
+  if (activeJournalPeriod === 'all') return data;
+  const etNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+
+  return data.filter(t => {
+    const dateStr = t.date || '';
+    if (!dateStr) return true;
+    const d = new Date(dateStr + 'T12:00:00');
+
+    if (activeJournalPeriod === 'day') {
+      return d.toDateString() === etNow.toDateString();
+    }
+    if (activeJournalPeriod === 'week') {
+      const weekStart = new Date(etNow);
+      weekStart.setDate(etNow.getDate() - etNow.getDay());
+      weekStart.setHours(0,0,0,0);
+      return d >= weekStart;
+    }
+    if (activeJournalPeriod === 'month') {
+      return d.getMonth() === etNow.getMonth() && d.getFullYear() === etNow.getFullYear();
+    }
+    if (activeJournalPeriod === 'range') {
+      const from = document.getElementById('j-date-from')?.value;
+      const to   = document.getElementById('j-date-to')?.value;
+      if (!from && !to) return true;
+      if (from && dateStr < from) return false;
+      if (to   && dateStr > to)   return false;
+      return true;
+    }
+    return true;
+  });
+}
+
 </script>
 </body>
 </html>
