@@ -2077,6 +2077,7 @@ async function loadJournalFromNotion() {
   }
 
   journalFiltered = [...journalData];
+  activeJournalPeriod = activePeriod; // restore selected period after sync
   filterJournal();
 
   // ── Sync P&L tab from same data ───────────────────────────────────────
@@ -2095,13 +2096,10 @@ async function loadJournalFromNotion() {
       symbol:     t.symbol || 'SPX'
     }))
     .sort((a, b) => new Date(b.date) - new Date(a.date));
-// Sync journal period to match
-  activeJournalPeriod = period;
-  filterJournal();
-
   renderPnl();
-  setTimeout(drawEquityCurve, 50);
-  setTimeout(loadNotionDashboard, 60);
+  setTimeout(drawEquityCurve, 100);
+  setTimeout(loadNotionDashboard, 150);
+  // ─────────────────────────────────────────────────────────────────────
 }
 
 async function fetchNotionPages(token, dbId) {
@@ -2661,8 +2659,9 @@ function togglePnlDateRange() {
 
 function setPeriod(period) {
   activePeriod = period;
+  activeJournalPeriod = period; // keep journal in sync
 
-  // Update active button — only touch P&L period buttons (not journal ones)
+  // Update active button
   ['period-all','period-month','period-week','period-day','period-range-btn'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
@@ -2687,9 +2686,10 @@ function setPeriod(period) {
       label.textContent = 'Showing: ' + (labels[period] || period);
     }
   }
+  filterJournal(); // re-render journal rows with new period
   renderPnl();
   setTimeout(drawEquityCurve, 50);
-  setTimeout(loadNotionDashboard, 60); // refresh all charts with new period filter
+  setTimeout(loadNotionDashboard, 60);
 }
 
 // Keep for backward compat (old "Pick Month" button)
@@ -2708,29 +2708,28 @@ function setPeriodCustomMonth(val) {
 
 function getFilteredPnlData() {
   if (activePeriod === 'all') return pnlData;
+
   const etNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const todayStr = etNow.toISOString().slice(0,10);
+
+  const weekStartDate = new Date(etNow);
+  weekStartDate.setDate(etNow.getDate() - etNow.getDay());
+  const weekStartStr = weekStartDate.toISOString().slice(0,10);
+
+  const monthStartStr = todayStr.slice(0,7) + '-01';
 
   return pnlData.filter(t => {
-    const d = new Date(t.date + 'T12:00:00');
-    if (activePeriod === 'day') {
-      return d.toDateString() === etNow.toDateString();
-    }
-    if (activePeriod === 'week') {
-      const weekStart = new Date(etNow);
-      weekStart.setDate(etNow.getDate() - etNow.getDay());
-      weekStart.setHours(0,0,0,0);
-      return d >= weekStart;
-    }
-    if (activePeriod === 'month') {
-      return d.getMonth() === etNow.getMonth() && d.getFullYear() === etNow.getFullYear();
-    }
+    const dateStr = t.date || '';
+    if (!dateStr) return false;
+    if (activePeriod === 'day')   return dateStr === todayStr;
+    if (activePeriod === 'week')  return dateStr >= weekStartStr;
+    if (activePeriod === 'month') return dateStr >= monthStartStr && dateStr.slice(0,7) === todayStr.slice(0,7);
     if (activePeriod === 'range') {
       const from = document.getElementById('pnl-date-from')?.value;
       const to   = document.getElementById('pnl-date-to')?.value;
       if (!from && !to) return true;
-      const dStr = t.date;
-      if (from && dStr < from) return false;
-      if (to   && dStr > to)   return false;
+      if (from && dateStr < from) return false;
+      if (to   && dateStr > to)   return false;
       return true;
     }
     return true;
@@ -2788,28 +2787,29 @@ function setJournalPeriod(period) {
 
 function getFilteredJournalData(data) {
   if (activeJournalPeriod === 'all') return data;
+
+  // Use ET date string for reliable comparison
   const etNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const todayStr = etNow.toISOString().slice(0,10);
+
+  // Week start (Sunday) as YYYY-MM-DD
+  const weekStartDate = new Date(etNow);
+  weekStartDate.setDate(etNow.getDate() - etNow.getDay());
+  const weekStartStr = weekStartDate.toISOString().slice(0,10);
+
+  // Month start as YYYY-MM-DD
+  const monthStartStr = todayStr.slice(0,7) + '-01';
 
   return data.filter(t => {
     const dateStr = t.date || '';
-    if (!dateStr) return true;
-    const d = new Date(dateStr + 'T12:00:00');
+    if (!dateStr) return false;
 
-    if (activeJournalPeriod === 'day') {
-      return d.toDateString() === etNow.toDateString();
-    }
-    if (activeJournalPeriod === 'week') {
-      const weekStart = new Date(etNow);
-      weekStart.setDate(etNow.getDate() - etNow.getDay());
-      weekStart.setHours(0,0,0,0);
-      return d >= weekStart;
-    }
-    if (activeJournalPeriod === 'month') {
-      return d.getMonth() === etNow.getMonth() && d.getFullYear() === etNow.getFullYear();
-    }
+    if (activeJournalPeriod === 'day')   return dateStr === todayStr;
+    if (activeJournalPeriod === 'week')  return dateStr >= weekStartStr;
+    if (activeJournalPeriod === 'month') return dateStr >= monthStartStr && dateStr.slice(0,7) === todayStr.slice(0,7);
     if (activeJournalPeriod === 'range') {
-      const from = document.getElementById('j-date-from')?.value;
-      const to   = document.getElementById('j-date-to')?.value;
+      const from = document.getElementById('pnl-date-from')?.value || document.getElementById('j-date-from')?.value;
+      const to   = document.getElementById('pnl-date-to')?.value   || document.getElementById('j-date-to')?.value;
       if (!from && !to) return true;
       if (from && dateStr < from) return false;
       if (to   && dateStr > to)   return false;
