@@ -1125,19 +1125,7 @@
             </div>
 
             <label class="pnl-form-label">Additional Context (optional)</label>
-            <textarea class="pnl-input" id="chart-context" placeholder="e.g. Pre-market gap up, FOMC day, watching for Vomy..." style="height:70px;resize:vertical;margin-bottom:.5rem;"></textarea>
-
-            <!-- Quick prompt chips -->
-            <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem;">
-              <button onclick="setChartPrompt('Full Saty read — give me market structure, Phase Oscillator zone, any active setup, and your GO/NO-GO verdict.')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">📊 Full read</button>
-              <button onclick="setChartPrompt('Is there a valid playbook setup forming right now? If so, what is it and what is the ideal entry trigger?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🎯 Setup check</button>
-              <button onclick="setChartPrompt('What is the Phase Oscillator telling me right now? Is there divergence present? What zone are we in?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">〰 Phase Osc</button>
-              <button onclick="setChartPrompt('Read the Pivot Ribbon — is it bullish or bearish stacked? Any fins forming? Where is price relative to key EMAs?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🎀 Ribbon</button>
-              <button onclick="setChartPrompt('What ATR levels are in play? Where is the Call Trigger, Golden Gate, and Put Trigger? Which is the most relevant target from current price?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">📏 ATR levels</button>
-              <button onclick="setChartPrompt('Is this a Vomy or iVomy setup? Walk me through whether the criteria are met — ribbon cross, Phase Oscillator zone, conviction arrow.')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">⚡ Vomy check</button>
-              <button onclick="setChartPrompt('Grade my trade process on this chart. Did I enter at the right time relative to the Saty setup rules? What should I have done differently?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">📝 Grade entry</button>
-              <button onclick="setChartPrompt('Is this a good time to be in a trade? Check for chop box, conviction arrow, and session timing. Should I be sitting on hands?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🚫 Should I sit?</button>
-            </div>
+            <textarea class="pnl-input" id="chart-context" placeholder="e.g. Pre-market gap up, FOMC day, watching for Vomy..." style="height:80px;resize:vertical;margin-bottom:1rem;"></textarea>
 
             <button class="pnl-submit" onclick="analyzeChart()" id="chart-analyze-btn">ANALYZE CHART</button>
             <div id="chart-status" style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:.75rem;display:none;"></div>
@@ -1239,10 +1227,10 @@
             <table class="journal-table">
               <thead><tr>
                 <th>Date</th><th>Symbol</th><th>Type</th><th>Strike</th>
-                <th>P&amp;L</th><th>Setup</th>
-                <th style="min-width:60px;">Grade</th><th style="min-width:280px;">Notes</th>
+                <th>Entry</th><th>Exit</th><th>Qty</th><th>P&L</th><th>Setup</th>
+                <th style="min-width:80px;">Grade</th><th style="min-width:280px;">Claude Notes</th>
               </tr></thead>
-              <tbody id="n-tbody"><tr><td colspan="8" style="text-align:center;padding:1rem;color:var(--muted);">Loading…</td></tr></tbody>
+              <tbody id="n-tbody"><tr><td colspan="11" style="text-align:center;padding:1rem;color:var(--muted);">Loading…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1473,21 +1461,6 @@
     <!-- ── SETTINGS TAB ──────────────────────────────── -->
     <div id="tab-settings" class="tab-panel">
       <div style="max-width:600px;">
-
-        <!-- API Key Panel -->
-        <div class="panel" style="padding:1.5rem; margin-bottom:1rem;">
-          <div class="panel-title" style="margin-bottom:.5rem;">Anthropic API Key</div>
-          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
-            Required for Chart Analysis. Get yours at
-            <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent);">console.anthropic.com</a>.
-            Stored only in your browser — never sent anywhere except Anthropic.
-          </div>
-          <label class="pnl-form-label">API Key</label>
-          <input class="pnl-input" type="password" id="api-key-input" placeholder="sk-ant-...">
-          <button class="pnl-submit" onclick="saveApiKey()" style="margin-top:.5rem;">SAVE KEY</button>
-          <div id="api-key-msg" style="font-family:var(--mono);font-size:.7rem;margin-top:.75rem;"></div>
-        </div>
-
         <div class="panel" style="padding:1.5rem; margin-bottom:1rem;">
           <div class="panel-title" style="margin-bottom:1.5rem;">Change Dashboard Password</div>
           <label class="pnl-form-label">New Password</label>
@@ -1500,10 +1473,6 @@
 
         <div class="panel" style="padding:1.5rem;">
           <div class="panel-title" style="margin-bottom:1.5rem;">Saved Configuration</div>
-          <div class="ms-row">
-            <span class="ms-label">API Key</span>
-            <span class="ms-val" id="api-key-status">Not set</span>
-          </div>
           <div class="ms-row">
             <span class="ms-label">Server URL</span>
             <span class="ms-val ms-cyan" id="saved-url">Not set</span>
@@ -1553,36 +1522,6 @@ document.getElementById('pw-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') checkPassword();
 });
 
-function saveApiKey() {
-  const key = document.getElementById('api-key-input').value.trim();
-  const msg = document.getElementById('api-key-msg');
-  if (!key.startsWith('sk-ant-')) {
-    msg.textContent = '⚠ Key should start with sk-ant-';
-    msg.style.color = 'var(--red)';
-    return;
-  }
-  localStorage.setItem('anthropic_api_key', key);
-  document.getElementById('api-key-input').value = '';
-  msg.textContent = '✓ API key saved — Chart Analysis is ready';
-  msg.style.color = 'var(--green)';
-  updateApiKeyStatus();
-  setTimeout(() => msg.textContent = '', 4000);
-}
-
-function updateApiKeyStatus() {
-  const key = localStorage.getItem('anthropic_api_key');
-  const el = document.getElementById('api-key-status');
-  if (el) {
-    if (key) {
-      el.textContent = '✓ Set (' + key.slice(0, 14) + '…)';
-      el.style.color = 'var(--green)';
-    } else {
-      el.textContent = 'Not set — go to Settings';
-      el.style.color = 'var(--red)';
-    }
-  }
-}
-
 function changePassword() {
   const np = document.getElementById('new-pw').value;
   const cp = document.getElementById('confirm-pw').value;
@@ -1609,54 +1548,54 @@ function showTab(name) {
 
 // ── NOTION DASHBOARD LOADER ──────────────────────────────────────────────
 Chart.defaults.color = '#8b85b0';
+  const NOTION_GIST = "https://gist.githubusercontent.com/rosemaryedmunds/71cd654520bdf101719c9cb726dc7084/raw/dashboard.json";
 let nCharts = {};
 
 async function loadNotionDashboard() {
-  // All charts now computed live from pnlData (populated from Notion journal)
-  // No Gist fetch needed — data is already in memory
   try {
-    const filtered = getFilteredPnlData();
-    if (!filtered || filtered.length === 0) return;
+    const res = await fetch(NOTION_GIST + '?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
 
-    const fmt = n => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    document.getElementById('notion-stamp').textContent =
+      'Updated ' + new Date(d.generated).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
-    // ── KPI cards ──────────────────────────────────────────
-    const total    = filtered.reduce((s, t) => s + t.amount, 0);
-    const wins     = filtered.filter(t => t.amount > 0);
-    const losses   = filtered.filter(t => t.amount < 0);
-    const winRate  = filtered.length ? Math.round(wins.length / filtered.length * 100) : 0;
-    const avgWin   = wins.length   ? wins.reduce((s,t)=>s+t.amount,0)/wins.length   : 0;
-    const avgLoss  = losses.length ? losses.reduce((s,t)=>s+t.amount,0)/losses.length : 0;
-    const pf       = losses.length && avgLoss !== 0 ? Math.abs((wins.reduce((s,t)=>s+t.amount,0)) / (losses.reduce((s,t)=>s+t.amount,0))).toFixed(2) : '∞';
-    const exp      = filtered.length ? total / filtered.length : 0;
+    const fmt  = n => '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
+    // Update main KPI cards
     const pnlEl = document.getElementById('total-pnl');
-    if (pnlEl) { pnlEl.textContent = (total>=0?'+':'-') + fmt(total); pnlEl.className = 'stat-value ' + (total>=0?'pos':'neg'); }
-    const subEl = document.getElementById('total-pnl-sub');
-    if (subEl) subEl.textContent = filtered.length + ' trades';
-    const wrEl = document.getElementById('win-rate');
-    if (wrEl) wrEl.textContent = winRate + '%';
-    const wrSub = document.getElementById('win-rate-sub');
-    if (wrSub) wrSub.textContent = wins.length + 'W / ' + losses.length + 'L';
+    pnlEl.textContent = (d.total_pnl >= 0 ? '+' : '-') + fmt(d.total_pnl);
+    pnlEl.className   = 'stat-value ' + (d.total_pnl >= 0 ? 'pos' : 'neg');
+    document.getElementById('total-pnl-sub').textContent = d.total_trades + ' trades from Notion';
+    document.getElementById('win-rate').textContent = d.win_rate + '%';
+    document.getElementById('win-rate-sub').textContent = d.total_winners + 'W / ' + d.total_losers + 'L';
 
-    const avgWinEl = document.getElementById('n-avg-win');
-    if (avgWinEl) avgWinEl.textContent = '+' + fmt(avgWin);
-    const avgLossEl = document.getElementById('n-avg-loss');
-    if (avgLossEl) avgLossEl.textContent = '-' + fmt(Math.abs(avgLoss));
+    if (d.daily_pnl && d.daily_pnl.length > 0) {
+      const best  = d.daily_pnl.reduce((a,b) => b.pnl > a.pnl ? b : a);
+      const worst = d.daily_pnl.reduce((a,b) => b.pnl < a.pnl ? b : a);
+    }
+
+    // Extra KPIs
+    document.getElementById('n-avg-win').textContent  = '+' + fmt(d.avg_winner);
+    document.getElementById('n-avg-loss').textContent = '-' + fmt(Math.abs(d.avg_loser));
     const pfEl = document.getElementById('n-pf');
-    if (pfEl) { pfEl.textContent = pf + 'x'; pfEl.style.color = parseFloat(pf) >= 1 ? 'var(--green)' : 'var(--red)'; }
+    pfEl.textContent   = d.profit_factor + 'x';
+    pfEl.style.color   = d.profit_factor >= 1 ? 'var(--green)' : 'var(--red)';
+    const exp = d.total_trades > 0 ? d.total_pnl / d.total_trades : 0;
     const expEl = document.getElementById('n-exp');
-    if (expEl) { expEl.textContent = (exp>=0?'+':'-') + fmt(Math.abs(exp)); expEl.style.color = exp>=0?'var(--green)':'var(--red)'; }
-
-    const stamp = document.getElementById('notion-stamp');
-    if (stamp) stamp.textContent = filtered.length + ' trades loaded';
+    expEl.textContent  = (exp >= 0 ? '+' : '-') + fmt(Math.abs(exp));
+    expEl.style.color  = exp >= 0 ? 'var(--green)' : 'var(--red)';
 
     const ROSE  = '#7c6fff';
     const GREEN = 'rgba(76,175,125,0.75)';
     const RED   = 'rgba(224,92,106,0.75)';
     const GRID  = 'rgba(194,24,91,0.08)';
     const TICK  = '#7d6e87';
-    const baseOpts = { responsive: true, plugins: { legend: { display: false } } };
+
+    const baseOpts = {
+      responsive: true,
+      plugins: { legend: { display: false } },
+    };
     const scaleStyle = {
       ticks: { color: TICK, font: { family: "'DM Mono', monospace", size: 10 } },
       grid:  { color: GRID }
@@ -1665,140 +1604,86 @@ async function loadNotionDashboard() {
     Object.values(nCharts).forEach(c => c && c.destroy());
     nCharts = {};
 
-    // ── Equity curve — cumulative P&L by date ──────────────
-    const byDate = {};
-    [...filtered].sort((a,b) => a.date.localeCompare(b.date)).forEach(t => {
-      byDate[t.date] = (byDate[t.date] || 0) + t.amount;
+    // Equity curve
+    nCharts.curve = new Chart(document.getElementById('n-curve'), {
+      type: 'line',
+      data: {
+        labels: d.cumulative.map(x => x.date),
+        datasets: [{ data: d.cumulative.map(x => x.pnl), borderColor: ROSE, backgroundColor: 'rgba(124,111,255,0.12)', borderWidth:2, fill:true, tension:0.3, pointRadius:2 }]
+      },
+      options: { ...baseOpts, scales: {
+        x: { ...scaleStyle, ticks: { ...scaleStyle.ticks, maxTicksLimit:6, maxRotation:0 } },
+        y: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$'+v.toLocaleString() } }
+      }}
     });
-    const dates = Object.keys(byDate).sort();
-    let running = 0;
-    const cumulative = dates.map(d => { running += byDate[d]; return { date: d, pnl: Math.round(running) }; });
 
-    const curveEl = document.getElementById('n-curve');
-    if (curveEl) {
-      nCharts.curve = new Chart(curveEl, {
-        type: 'line',
-        data: {
-          labels: cumulative.map(x => x.date.slice(5)), // MM-DD
-          datasets: [{ data: cumulative.map(x => x.pnl), borderColor: ROSE, backgroundColor: 'rgba(124,111,255,0.12)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }]
-        },
-        options: { ...baseOpts, scales: {
-          x: { ...scaleStyle, ticks: { ...scaleStyle.ticks, maxTicksLimit: 8, maxRotation: 0 } },
-          y: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$' + v.toLocaleString() } }
-        }}
-      });
-    }
-
-    // ── Win rate by entry hour ─────────────────────────────
-    const hourMap = {};
-    filtered.forEach(t => {
-      if (!t.entry_time) return;
-      const h = parseInt(t.entry_time.split(':')[0]);
-      if (isNaN(h)) return;
-      if (!hourMap[h]) hourMap[h] = { wins: 0, total: 0 };
-      hourMap[h].total++;
-      if (t.amount > 0) hourMap[h].wins++;
+    // Win rate by hour
+    nCharts.hour = new Chart(document.getElementById('n-hour'), {
+      type: 'bar',
+      data: {
+        labels: d.hour_winrate.map(x => x.hour),
+        datasets: [{ data: d.hour_winrate.map(x => x.winrate), backgroundColor: d.hour_winrate.map(x => x.winrate>=50?GREEN:RED), borderRadius:4 }]
+      },
+      options: { ...baseOpts, scales: {
+        y: { ...scaleStyle, min:0, max:100, ticks: { ...scaleStyle.ticks, callback: v => v+'%' } },
+        x: { ...scaleStyle, grid: { display:false } }
+      }}
     });
-    const hours = Object.keys(hourMap).map(Number).sort((a,b)=>a-b);
-    const hourLabels = hours.map(h => (h % 12 || 12) + (h < 12 ? 'am' : 'pm'));
-    const hourWinRates = hours.map(h => Math.round(hourMap[h].wins / hourMap[h].total * 100));
 
-    const hourEl = document.getElementById('n-hour');
-    if (hourEl && hours.length > 0) {
-      nCharts.hour = new Chart(hourEl, {
-        type: 'bar',
-        data: {
-          labels: hourLabels,
-          datasets: [{ data: hourWinRates, backgroundColor: hourWinRates.map(r => r >= 50 ? GREEN : RED), borderRadius: 4 }]
-        },
-        options: { ...baseOpts, scales: {
-          y: { ...scaleStyle, min: 0, max: 100, ticks: { ...scaleStyle.ticks, callback: v => v + '%' } },
-          x: { ...scaleStyle, grid: { display: false } }
-        }}
-      });
-    }
-
-    // ── P&L by Saty Setup ──────────────────────────────────
-    const setupMap = {};
-    filtered.forEach(t => {
-      const s = (t.setup && t.setup.trim() && t.setup !== '—') ? t.setup.trim() : 'No Setup';
-      if (!setupMap[s]) setupMap[s] = 0;
-      setupMap[s] += t.amount;
+    // Setup P&L
+    const top = (d.setup_data||[]).slice(0,8);
+    nCharts.setup = new Chart(document.getElementById('n-setup'), {
+      type: 'bar',
+      data: {
+        labels: top.map(x => x.setup.length>16?x.setup.slice(0,16)+'…':x.setup),
+        datasets: [{ data: top.map(x => x.pnl), backgroundColor: top.map(x => x.pnl>=0?GREEN:RED), borderRadius:4 }]
+      },
+      options: { ...baseOpts, indexAxis:'y', scales: {
+        x: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$'+v } },
+        y: { ...scaleStyle, grid: { display:false } }
+      }}
     });
-    const setupEntries = Object.entries(setupMap)
-      .map(([setup, pnl]) => ({ setup, pnl: Math.round(pnl) }))
-      .sort((a, b) => b.pnl - a.pnl);
 
-    const setupEl = document.getElementById('n-setup');
-    if (setupEl && setupEntries.length > 0) {
-      nCharts.setup = new Chart(setupEl, {
-        type: 'bar',
-        data: {
-          labels: setupEntries.map(x => x.setup.length > 18 ? x.setup.slice(0,18) + '…' : x.setup),
-          datasets: [{ data: setupEntries.map(x => x.pnl), backgroundColor: setupEntries.map(x => x.pnl >= 0 ? GREEN : RED), borderRadius: 4 }]
-        },
-        options: { ...baseOpts, indexAxis: 'y', scales: {
-          x: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$' + v } },
-          y: { ...scaleStyle, grid: { display: false } }
-        }}
-      });
-    }
-
-    // ── P&L by Grade ──────────────────────────────────────
-    const gradeOrder = ['A','B','C','D','F',''];
-    const gradeMap = {};
-    filtered.forEach(t => {
-      const g = t.grade || 'Ungraded';
-      if (!gradeMap[g]) gradeMap[g] = 0;
-      gradeMap[g] += t.amount;
+    // Grade P&L
+    nCharts.grade = new Chart(document.getElementById('n-grade'), {
+      type: 'bar',
+      data: {
+        labels: (d.grade_data||[]).map(x => x.grade),
+        datasets: [{ data: (d.grade_data||[]).map(x => x.pnl), backgroundColor: (d.grade_data||[]).map(x => x.pnl>=0?GREEN:RED), borderRadius:4 }]
+      },
+      options: { ...baseOpts, scales: {
+        x: { ...scaleStyle, grid: { display:false } },
+        y: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$'+v } }
+      }}
     });
-    const gradeEntries = gradeOrder
-      .map(g => ({ grade: g || 'Ungraded', pnl: Math.round(gradeMap[g] || gradeMap['Ungraded'] || 0) }))
-      .filter(x => gradeMap[x.grade] !== undefined || gradeMap['Ungraded'] !== undefined);
-    const gradeFiltered = Object.entries(gradeMap).map(([grade, pnl]) => ({ grade, pnl: Math.round(pnl) }))
-      .sort((a,b) => gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade));
 
-    const gradeEl = document.getElementById('n-grade');
-    if (gradeEl && gradeFiltered.length > 0) {
-      nCharts.grade = new Chart(gradeEl, {
-        type: 'bar',
-        data: {
-          labels: gradeFiltered.map(x => x.grade),
-          datasets: [{ data: gradeFiltered.map(x => x.pnl), backgroundColor: gradeFiltered.map(x => x.pnl >= 0 ? GREEN : RED), borderRadius: 4 }]
-        },
-        options: { ...baseOpts, scales: {
-          x: { ...scaleStyle, grid: { display: false } },
-          y: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$' + v } }
-        }}
-      });
-    }
-
-    // ── Recent trades table ────────────────────────────────
-    const fmtP = n => (n >= 0 ? '+$' : '-$') + Math.abs(n).toFixed(0);
-    const tbodyEl = document.getElementById('n-tbody');
-    if (tbodyEl) {
-      tbodyEl.innerHTML = filtered.slice(0, 25).map(t => {
-        const col = t.amount >= 0 ? 'var(--green)' : 'var(--red)';
-        const grade = t.grade || '—';
-        const gradeKey = grade === '—' ? '-' : grade;
-        const notes = t.notes || t.claude_notes || '';
-        const notesPreview = notes.length > 80 ? notes.slice(0, 80) + '…' : notes;
-        const hasMore = notes.length > 80;
-        const notesHtml = hasMore
-          ? `<span class="notes-preview">${notesPreview}</span><span class="notes-full">${notes}</span><button class="notes-expand-btn" onclick="toggleNotes(this)">▾ More</button>`
-          : `<span>${notes || '—'}</span>`;
-        return `<tr>
-          <td style="color:var(--muted)">${t.date || '—'}</td>
-          <td style="color:var(--accent);font-weight:700">${t.symbol || 'SPX'}</td>
-          <td>${t.dir || '—'}</td>
-          <td>${t.strike || '—'}</td>
-          <td>${t.amount != null ? fmtP(t.amount) : '—'}</td>
-          <td style="color:var(--muted);font-size:.65rem;">${t.setup || '—'}</td>
-          <td><span class="grade-badge grade-${gradeKey}">${grade}</span></td>
-          <td class="claude-notes-cell">${notesHtml}</td>
-        </tr>`;
-      }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1rem">No trades</td></tr>';
-    }
+    // Recent trades with Grade + Claude Notes
+    const fmtP = n => (n>=0?'+$':'-$') + Math.abs(n).toFixed(2);
+    document.getElementById('n-tbody').innerHTML = (d.recent||[]).slice(0,25).map((t,i) => {
+      const pnl = t.pnl||0;
+      const col = pnl>=0?'var(--green)':'var(--red)';
+      const grade = t.grade || t.Grade || '—';
+      const gradeKey = grade === '—' ? '-' : grade;
+      const claudeNotes = t.claude_notes || t.notes || t.Notes || '';
+      const notesPreview = claudeNotes.length > 80 ? claudeNotes.slice(0,80) + '…' : claudeNotes;
+      const hasMore = claudeNotes.length > 80;
+      const notesHtml = hasMore
+        ? `<span class="notes-preview">${notesPreview}</span><span class="notes-full">${claudeNotes}</span><button class="notes-expand-btn" onclick="toggleNotes(this)">▾ More</button>`
+        : `<span>${claudeNotes||'—'}</span>`;
+      return `<tr>
+        <td style="color:var(--muted)">${t.date||'—'}</td>
+        <td style="color:var(--accent);font-weight:700">${t.underlying||t.symbol||'—'}</td>
+        <td>${t.option_type||'—'}</td>
+        <td>${t.strike||'—'}</td>
+        <td>${t.entry_price!=null?'$'+t.entry_price:'—'}</td>
+        <td>${t.exit_price!=null?'$'+t.exit_price:'—'}</td>
+        <td>${t.qty||'—'}</td>
+        <td style="color:${col};font-weight:700">${fmtP(pnl)}</td>
+        <td style="color:var(--muted)">${t.setup||'—'}</td>
+        <td><span class="grade-badge grade-${gradeKey}">${grade}</span></td>
+        <td class="claude-notes-cell">${notesHtml}</td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:1rem">No trades found</td></tr>';
 
   } catch(err) {
     const stamp = document.getElementById('notion-stamp');
@@ -1806,6 +1691,7 @@ async function loadNotionDashboard() {
     console.error('Notion dashboard error:', err);
   }
 }
+// ── END NOTION DASHBOARD LOADER ──────────────────────────────────────────
 
 // ── CLOCK ─────────────────────────────────────────────
 function updateClock() {
@@ -2037,10 +1923,21 @@ function init() {
     document.getElementById('saved-url').textContent = savedUrl;
     startPolling();
   }
+  const savedKey = localStorage.getItem('notion_key');
+  const savedDb  = localStorage.getItem('notion_db');
+  if (savedKey) document.getElementById('notion-key').value = savedKey;
+  if (savedDb)  document.getElementById('notion-db').value  = savedDb;
+  if (savedKey && savedDb) {
+    document.getElementById('saved-notion').textContent = 'Connected';
+    document.getElementById('saved-notion').style.color = 'var(--green)';
+  }
+  const jKey = localStorage.getItem('journal_notion_key') || savedKey || '';
+  const jDb  = localStorage.getItem('journal_notion_db')  || savedDb  || '';
+  if (jKey) document.getElementById('j-notion-key').value = jKey;
+  if (jDb)  document.getElementById('j-notion-db').value  = jDb;
   // Always load journal + P&L from baked-in Notion data
   loadJournalFromNotion();
   loadNotionDashboard();
-  updateApiKeyStatus();
 }
 
 function clearAll() {
@@ -2124,6 +2021,10 @@ let journalData = [];
 let journalFiltered = [];
 
 function initJournalTab() {
+  const key = localStorage.getItem('journal_notion_key') || localStorage.getItem('notion_key') || '';
+  const db  = localStorage.getItem('journal_notion_db')  || localStorage.getItem('notion_db')  || '';
+  if (key) document.getElementById('j-notion-key').value = key;
+  if (db)  document.getElementById('j-notion-db').value  = db;
   if (journalData.length > 0) renderJournalTab();
 }
 
@@ -2541,85 +2442,6 @@ async function loadChartFromUrl() {
   window.open(url, '_blank');
 }
 
-function setChartPrompt(text) {
-  const el = document.getElementById('chart-context');
-  if (el) {
-    el.value = text;
-    el.focus();
-    el.style.borderColor = 'var(--accent)';
-    setTimeout(() => el.style.borderColor = '', 600);
-  }
-}
-
-// ── Proxy detection — checks once if local server is running ─────────────────
-let proxyAvailable = null; // null = not yet checked, true/false = result
-
-async function checkProxy() {
-  if (proxyAvailable !== null) return proxyAvailable;
-  try {
-    const res = await fetch('http://localhost:3001/ping', { signal: AbortSignal.timeout(800) });
-    proxyAvailable = res.ok;
-  } catch {
-    proxyAvailable = false;
-  }
-  return proxyAvailable;
-}
-
-async function callAnthropicAPI(payload) {
-  const useProxy = await checkProxy();
-  const storedKey = localStorage.getItem('anthropic_api_key');
-
-  if (useProxy) {
-    // Route through local proxy (works from file:// — proxy holds the key)
-    const res = await fetch('http://localhost:3001/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `Proxy error ${res.status}`);
-    }
-    return res.json();
-
-  } else if (storedKey) {
-    // Direct call with user's API key (works from Netlify or any hosted URL)
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': storedKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-calls': 'true'
-      },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `API error ${res.status}`);
-    }
-    return res.json();
-
-  } else {
-    // No proxy, no key — try direct (works inside claude.ai sandbox)
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      const msg = err.error?.message || `API error ${res.status}`;
-      if (res.status === 401 || res.status === 403) {
-        throw new Error('No API key set — go to Settings tab and add your Anthropic API key');
-      }
-      throw new Error(msg);
-    }
-    return res.json();
-  }
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
 async function analyzeChart() {
   const tf      = document.getElementById('chart-tf').value;
   const symbol  = document.getElementById('chart-symbol').value;
@@ -2629,23 +2451,27 @@ async function analyzeChart() {
   const output  = document.getElementById('chart-analysis-output');
 
   if (!chartImageBase64) {
-    status.textContent = '\u26a0 Load an image first \u2014 use "Load URL" or upload/drop a file.';
+    status.textContent = '⚠ Load an image first — use "Load URL" or upload/drop a file.';
     status.style.color = 'var(--red)';
     status.style.display = 'block';
     return;
   }
 
   btn.disabled = true;
-  btn.textContent = 'ANALYZING\u2026';
-  status.textContent = `Analyzing ${symbol} ${tf} chart through Saty framework\u2026`;
+  btn.textContent = 'ANALYZING…';
+  status.textContent = `Analyzing ${symbol} ${tf} chart through Saty framework…`;
   status.style.color = 'var(--muted)';
   status.style.display = 'block';
   output.innerHTML = `<div style="text-align:center;padding:3rem;">
     <span class="loading-spinner"></span>
-    <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.75rem;">Reading ${symbol} ${tf} through Saty framework\u2026</div>
+    <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.75rem;">Reading ${symbol} ${tf} through Saty framework…</div>
   </div>`;
 
+  // Determine instrument context
   const isFutures = ['ES','NQ','MES','MNQ'].includes(symbol);
+  const instrNote = isFutures
+    ? `This is a ${symbol} futures chart. ATR levels and price context are for futures contract pricing.`
+    : `This is a ${symbol} index/ETF chart.`;
 
   try {
     const userContent = [
@@ -2668,42 +2494,53 @@ Complete ALL 8 sections concisely (2-4 sentences each):
 ### 7. Risk Flags
 ### 8. Verdict
 
-Final line must be exactly: VERDICT: GO / NO-GO / WAIT \u2014 [one sentence reason]`
+Final line must be exactly: VERDICT: GO / NO-GO / WAIT — [one sentence reason]`
       }
     ];
 
-    const data = await callAnthropicAPI({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
-      system: `You are Rose's personal trading coach analyzing charts through the Saty indicator suite (Pivot Ribbon: 8/13/21/34/48 EMAs, Phase Oscillator, ATR Levels) and her playbook (ORB, Vomy, iVomy, Flag Into Ribbon, Divergence From Extreme, 1-min EOD Divergence, Tweezer Bottom).
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: `You are Rose's personal trading coach analyzing charts through the Saty indicator suite (Pivot Ribbon: 8/13/21/34/48 EMAs, Phase Oscillator, ATR Levels) and her playbook (ORB, Vomy, iVomy, Flag Into Ribbon, Divergence From Extreme, 1-min EOD Divergence, Tweezer Bottom).
 
 CRITICAL: You MUST complete ALL 8 sections and the VERDICT before stopping. Keep each section to 2-4 sentences max — be concise and direct. Never trail off mid-sentence. Rose is an experienced trader; no hand-holding needed.
 
 Format: ### headers, **bold** for prices/setups, bullet points for lists. Final line must be: VERDICT: GO / NO-GO / WAIT — one sentence.`,
-      messages: [{ role: 'user', content: userContent }]
+        messages: [{ role: 'user', content: userContent }]
+      })
     });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `API error ${response.status}`);
+    }
+    const data = await response.json();
     const text = data.content?.[0]?.text || 'No response received.';
     const stopReason = data.stop_reason;
 
     let html = formatAnalysis(text, symbol, tf);
+    // Warn if truncated (hit token limit mid-response)
     if (stopReason === 'max_tokens') {
       html += `<div style="font-family:var(--mono);font-size:.62rem;color:var(--orange);margin-top:1rem;padding:.5rem;border:1px solid rgba(232,184,75,.3);background:rgba(232,184,75,.06);">
-        \u26a0 Response was cut short \u2014 scroll up, all visible sections are complete. Try again if Verdict is missing.
+        ⚠ Response was cut short — scroll up, all visible sections are complete. Try again if Verdict is missing.
       </div>`;
     }
 
     output.innerHTML = html;
     document.getElementById('chart-analyzed-at').textContent =
-      `${symbol} ${tf} \u00b7 ` + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) + ' ET';
-    status.textContent = `\u2713 Analysis complete \u2014 ${symbol} ${tf}`;
+      `${symbol} ${tf} · ` + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) + ' ET';
+    status.textContent = `✓ Analysis complete — ${symbol} ${tf}`;
     status.style.color = 'var(--green)';
 
   } catch(e) {
     output.innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;padding:1rem;line-height:1.6;">
-      \u26a0 Analysis failed: ${e.message}<br>
+      ⚠ Analysis failed: ${e.message}<br>
       <span style="color:var(--muted);">Check that the image loaded correctly (preview should show above).</span>
     </div>`;
-    status.textContent = '\u26a0 ' + e.message;
+    status.textContent = '⚠ ' + e.message;
     status.style.color = 'var(--red)';
   }
 
@@ -2791,7 +2628,6 @@ function setPeriod(period) {
   }
   renderPnl();
   setTimeout(drawEquityCurve, 50);
-  setTimeout(loadNotionDashboard, 60); // refresh all charts with new period filter
 }
 
 // Keep for backward compat (old "Pick Month" button)
