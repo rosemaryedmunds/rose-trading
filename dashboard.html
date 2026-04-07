@@ -5,24 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rose Trading Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg:        #080a0f;
-    --bg2:       #0d1117;
-    --bg3:       #111620;
-    --border:    #1e2535;
-    --border2:   #2a3347;
-    --accent:    #00e5ff;
-    --accent2:   #7c3aed;
-    --green:     #00ff88;
-    --red:       #ff3b5c;
-    --orange:    #ff9500;
-    --yellow:    #ffe600;
-    --text:      #e2e8f0;
-    --muted:     #64748b;
-    --mono:      'Space Mono', monospace;
-    --sans:      'Syne', sans-serif;
+    --bg:        #0f0e1a;
+    --bg2:       #161428;
+    --bg3:       #1e1b35;
+    --border:    rgba(109,86,255,0.25);
+    --border2:   rgba(109,86,255,0.45);
+    --accent:    #7c6fff;
+    --accent2:   #5b4fe0;
+    --green:     #4caf7d;
+    --red:       #e05c6a;
+    --orange:    #e8b84b;
+    --yellow:    #e8b84b;
+    --text:      #ffffff;
+    --muted:     #8b85b0;
+    --mono:      'DM Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -62,7 +63,7 @@
   }
 
   .login-logo {
-    font-family: var(--sans);
+    font-family: 'DM Sans', sans-serif;
     font-size: 1.1rem;
     font-weight: 800;
     letter-spacing: 0.2em;
@@ -669,6 +670,89 @@
   .pnl-pos { color: var(--green); font-weight: 700; }
   .pnl-neg { color: var(--red);   font-weight: 700; }
 
+  /* ── PERIOD SLICER ─────────────────────────────────── */
+  .period-btn {
+    padding: .45rem 1rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .period-btn:hover { border-color: var(--border2); color: var(--text); }
+  .period-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 700; }
+
+  /* ── JOURNAL GRADE EXPANSION ───────────────────────── */
+  .grade-badge {
+    display: inline-block;
+    padding: .25rem .55rem;
+    font-family: var(--mono);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    border-radius: 2px;
+    min-width: 28px;
+    text-align: center;
+  }
+  .grade-A { background: rgba(76,175,125,.15); color: var(--green); border: 1px solid rgba(76,175,125,.4); }
+  .grade-B { background: rgba(124,111,255,.12); color: var(--accent); border: 1px solid rgba(124,111,255,.35); }
+  .grade-C { background: rgba(232,184,75,.1); color: var(--orange); border: 1px solid rgba(232,184,75,.3); }
+  .grade-D { background: rgba(224,92,106,.1); color: var(--red); border: 1px solid rgba(224,92,106,.3); }
+  .grade-F { background: rgba(224,92,106,.2); color: var(--red); border: 1px solid var(--red); }
+  .grade-- { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+  .claude-notes-cell {
+    font-size: .68rem;
+    color: var(--muted);
+    line-height: 1.5;
+    max-width: 320px;
+  }
+  .claude-notes-cell .notes-preview { display: block; }
+  .claude-notes-cell .notes-full { display: none; }
+  .claude-notes-cell.expanded .notes-preview { display: none; }
+  .claude-notes-cell.expanded .notes-full { display: block; }
+  .notes-expand-btn {
+    background: none; border: none;
+    color: var(--accent); font-family: var(--mono); font-size: .58rem;
+    cursor: pointer; padding: 0; margin-top: .2rem;
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+  .notes-expand-btn:hover { opacity: .7; }
+
+  /* ── CHART ANALYSIS ────────────────────────────────── */
+  #chart-drop-zone:hover { border-color: var(--accent); }
+  #chart-analysis-output h3 {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 1rem 0 .4rem;
+    padding-bottom: .3rem;
+    border-bottom: 1px solid var(--border);
+  }
+  #chart-analysis-output p { margin-bottom: .75rem; font-size: .8rem; line-height: 1.65; }
+  #chart-analysis-output ul { padding-left: 1.2rem; margin-bottom: .75rem; }
+  #chart-analysis-output li { font-size: .78rem; line-height: 1.6; color: var(--muted); }
+  #chart-analysis-output strong { color: var(--text); }
+  .analysis-verdict {
+    display: inline-block;
+    padding: .35rem .85rem;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: .8rem;
+    letter-spacing: .1em;
+    margin-bottom: 1rem;
+    border-radius: 2px;
+  }
+  .verdict-go { background: rgba(76,175,125,.15); color: var(--green); border: 1px solid rgba(76,175,125,.4); }
+  .verdict-nogo { background: rgba(224,92,106,.15); color: var(--red); border: 1px solid rgba(224,92,106,.4); }
+  .verdict-wait { background: rgba(232,184,75,.1); color: var(--orange); border: 1px solid rgba(232,184,75,.3); }
+
   /* ── SCROLLBAR ─────────────────────────────────────── */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -775,8 +859,8 @@
 
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="showTab('alerts')">🚨 Live Alerts</button>
-    <button class="tab-btn" onclick="showTab('pnl')">💰 P&amp;L</button>
     <button class="tab-btn" onclick="showTab('journal')">📓 Journal</button>
+    <button class="tab-btn" onclick="showTab('chart')">📊 Chart Analysis</button>
     <button class="tab-btn" onclick="showTab('playbook')">📋 Playbook</button>
     <button class="tab-btn" onclick="showTab('settings')">⚙ Settings</button>
   </nav>
@@ -878,9 +962,45 @@
       </div>
     </div>
 
-    <!-- ── P&L TAB ────────────────────────────────────── -->
-    <div id="tab-pnl" class="tab-panel">
-      <div class="stat-row">
+    <!-- ── JOURNAL TAB ──────────────────────────────────── -->
+    <!-- ── JOURNAL TAB (merged with P&L) ──────────────── -->
+    <div id="tab-journal" class="tab-panel">
+
+      <!-- Notion connection banner -->
+      <div id="notion-connect-banner" style="display:flex;background:rgba(124,111,255,0.08);border:1px solid rgba(124,111,255,0.25);border-radius:8px;padding:.85rem 1.1rem;margin-bottom:1rem;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div style="font-family:var(--mono);font-size:.68rem;color:var(--text);line-height:1.6;">
+          🔗 <strong style="color:var(--accent);">Add your Anthropic API key</strong> in Settings to sync live from Notion automatically.
+        </div>
+        <button onclick="showTab('settings')" style="font-family:var(--mono);font-size:.65rem;padding:.3rem .85rem;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer;white-space:nowrap;">⚙ Go to Settings</button>
+      </div>
+
+      <!-- Header row: title + sync status + sync button -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+        <div>
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);margin-bottom:.2rem;">// Webull Journal — Live from Notion</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);" id="journal-last-sync">Loading…</div>
+        </div>
+        <button class="config-btn" onclick="loadJournalFromNotion()">↻ SYNC NOW</button>
+      </div>
+
+      <!-- Period Slicer -->
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+        <span style="font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:.25rem;">Period</span>
+        <button class="period-btn active" id="period-all"   onclick="setPeriod('all')">All Time</button>
+        <button class="period-btn" id="period-month"        onclick="setPeriod('month')">This Month</button>
+        <button class="period-btn" id="period-week"         onclick="setPeriod('week')">This Week</button>
+        <button class="period-btn" id="period-day"          onclick="setPeriod('day')">Today</button>
+        <button class="period-btn" id="period-range-btn"    onclick="togglePnlDateRange()">Date Range</button>
+        <div id="pnl-date-range-wrap" style="display:none;align-items:center;gap:.4rem;flex-wrap:wrap;">
+          <input type="date" id="pnl-date-from" class="pnl-input" style="width:140px;margin-bottom:0;" onchange="setPeriod('range')">
+          <span style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">to</span>
+          <input type="date" id="pnl-date-to"   class="pnl-input" style="width:140px;margin-bottom:0;" onchange="setPeriod('range')">
+        </div>
+        <div style="margin-left:auto;font-family:var(--mono);font-size:.62rem;color:var(--muted);" id="pnl-period-label">Showing: All Time</div>
+      </div>
+
+      <!-- KPI stat cards -->
+      <div class="stat-row" style="margin-bottom:1.25rem;">
         <div class="stat-card green">
           <div class="stat-label">Total P&amp;L</div>
           <div class="stat-value" id="total-pnl">$0</div>
@@ -891,110 +1011,192 @@
           <div class="stat-value neu" id="win-rate">0%</div>
           <div class="stat-sub" id="win-rate-sub">0W / 0L</div>
         </div>
-        <div class="stat-card green">
-          <div class="stat-label">Best Day</div>
-          <div class="stat-value pos" id="best-day">$0</div>
-          <div class="stat-sub" id="best-day-date">—</div>
+        <div class="stat-card green"><div class="stat-label">Avg Winner</div><div class="stat-value pos" id="n-avg-win">—</div></div>
+        <div class="stat-card red"><div class="stat-label">Avg Loser</div><div class="stat-value neg" id="n-avg-loss">—</div></div>
+        <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-value neu" id="n-pf">—</div></div>
+        <div class="stat-card"><div class="stat-label">Expectancy</div><div class="stat-value neu" id="n-exp">—</div></div>
+      </div>
+
+      <!-- Charts row -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:.75rem;margin-bottom:.75rem;">
+        <div class="panel" style="padding:1.25rem;">
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">Equity Curve</div>
+          <canvas id="n-curve" height="160"></canvas>
         </div>
-        <div class="stat-card red">
-          <div class="stat-label">Worst Day</div>
-          <div class="stat-value neg" id="worst-day">$0</div>
-          <div class="stat-sub" id="worst-day-date">—</div>
+        <div class="panel" style="padding:1.25rem;">
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">Win Rate by Hour</div>
+          <canvas id="n-hour" height="160"></canvas>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;">
+        <div class="panel" style="padding:1.25rem;">
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">P&amp;L by Setup</div>
+          <canvas id="n-setup" height="150"></canvas>
+        </div>
+        <div class="panel" style="padding:1.25rem;">
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.75rem;">P&amp;L by Grade</div>
+          <canvas id="n-grade" height="150"></canvas>
         </div>
       </div>
 
-      <div class="pnl-grid">
-        <div class="equity-chart panel">
-          <div class="panel-header">
-            <div class="panel-title">Equity Curve</div>
-          </div>
-          <div style="padding:1.5rem;">
-            <canvas id="equity-canvas" height="280"></canvas>
-          </div>
-          <div style="padding:0 1.5rem 1.5rem;">
-            <table class="journal-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Setup</th>
-                  <th>Direction</th>
-                  <th>P&amp;L</th>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody id="pnl-table-body"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="pnl-entry-panel">
-          <div class="panel-header" style="padding:0 0 1rem 0; border-bottom:1px solid var(--border); margin-bottom:1rem;">
-            <div class="panel-title">Log Trade P&amp;L</div>
-          </div>
-          <label class="pnl-form-label">Date</label>
-          <input class="pnl-input" type="date" id="pnl-date">
-          <label class="pnl-form-label">Setup</label>
-          <select class="pnl-input" id="pnl-setup" style="cursor:pointer;">
-            <option value="">Select setup...</option>
-            <option>ORB</option>
-            <option>Vomy</option>
-            <option>iVomy</option>
-            <option>Flag Into Ribbon</option>
-            <option>Divergence From Extreme</option>
-            <option>1min EOD Divergence</option>
-            <option>Tweezer Bottom</option>
-          </select>
-          <label class="pnl-form-label">Direction</label>
-          <select class="pnl-input" id="pnl-dir" style="cursor:pointer;">
-            <option value="Call">Call (Long)</option>
-            <option value="Put">Put (Short)</option>
-          </select>
-          <label class="pnl-form-label">P&amp;L ($)</label>
-          <input class="pnl-input" type="number" id="pnl-amount" placeholder="-250 or 480">
-          <label class="pnl-form-label">Notes</label>
-          <input class="pnl-input" type="text" id="pnl-notes" placeholder="Optional notes">
-          <button class="pnl-submit" onclick="addPnlEntry()">LOG TRADE</button>
-        </div>
+      <!-- Journal filter bar -->
+      <div style="display:flex;gap:.65rem;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;">
+        <select class="pnl-input" id="j-filter-setup" style="width:auto;margin-bottom:0;cursor:pointer;" onchange="filterJournal()">
+          <option value="">All Setups</option>
+          <option>ORB</option><option>Vomy</option><option>iVomy</option>
+          <option>Flag Into Ribbon</option><option>Flag into ribbon</option>
+          <option>Divergence From Extreme</option><option>PO Divergence</option>
+          <option>1min EOD Divergence</option><option>Tweezer Bottom</option>
+        </select>
+        <select class="pnl-input" id="j-filter-grade" style="width:auto;margin-bottom:0;cursor:pointer;" onchange="filterJournal()">
+          <option value="">All Grades</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option><option>F</option>
+        </select>
+        <select class="pnl-input" id="j-filter-result" style="width:auto;margin-bottom:0;cursor:pointer;" onchange="filterJournal()">
+          <option value="">Win &amp; Loss</option>
+          <option value="win">Wins Only</option>
+          <option value="loss">Losses Only</option>
+        </select>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-left:auto;" id="j-count">0 trades</div>
       </div>
-    </div>
 
-    <!-- ── JOURNAL TAB ───────────────────────────────── -->
-    <div id="tab-journal" class="tab-panel">
-      <div class="config-row">
-        <input class="config-input" id="notion-key" placeholder="Notion Integration Token (secret_xxx...)">
-        <input class="config-input" id="notion-db" placeholder="Database ID" style="max-width:320px;">
-        <button class="config-btn" onclick="loadNotion()">LOAD JOURNAL</button>
-      </div>
-      <div id="notion-status" style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:1rem;"></div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Trade Journal</div>
-          <div class="panel-badge" id="journal-count">0 trades</div>
-        </div>
+      <!-- Combined journal table -->
+      <div class="panel" style="overflow:hidden;">
         <div style="overflow-x:auto;">
-          <table class="journal-table" style="min-width:800px;">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Setup</th>
-                <th>Direction</th>
-                <th>Entry</th>
-                <th>Exit</th>
-                <th>P&amp;L</th>
-                <th>Grade</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody id="journal-body">
-              <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">Enter your Notion token and database ID above to load journal</td></tr>
+          <table class="journal-table" id="journal-table">
+            <thead><tr>
+              <th>Date</th>
+              <th>Setup</th>
+              <th>Type</th>
+              <th>Strike</th>
+              <th>Entry</th>
+              <th>Exit</th>
+              <th>P&amp;L</th>
+              <th>Grade</th>
+              <th style="min-width:280px;">Notes</th>
+            </tr></thead>
+            <tbody id="journal-tbody">
+              <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2.5rem;font-family:var(--mono);font-size:.7rem;">
+                Loading trades from Notion…
+              </td></tr>
             </tbody>
           </table>
         </div>
       </div>
+
     </div>
 
-    <!-- ── PLAYBOOK TAB ──────────────────────────────── -->
+
+    <!-- ── CHART ANALYSIS TAB ────────────────────────── -->
+    <div id="tab-chart" class="tab-panel">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+
+        <!-- Left: Input -->
+        <div style="flex:0 0 320px;">
+          <div class="panel" style="padding:1.5rem;">
+            <div class="panel-title" style="margin-bottom:1.25rem;">Chart Screenshot Analysis</div>
+
+            <label class="pnl-form-label">TradingView Screenshot URL</label>
+            <input class="pnl-input" id="chart-url" placeholder="https://www.tradingview.com/x/ABC123/" style="margin-bottom:.5rem;">
+            <div style="font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-bottom:.5rem;line-height:1.6;">
+              📷 TradingView → Camera icon → <strong style="color:var(--accent);">Copy image link</strong> → paste /x/... URL above.<br>
+              Then click <strong style="color:var(--accent);">Load URL</strong> to fetch it before analyzing.
+            </div>
+            <button class="config-btn" style="width:100%;margin-bottom:1rem;font-size:.65rem;" onclick="loadChartFromUrl()">LOAD URL → FETCH IMAGE</button>
+            <div id="url-load-status" style="font-family:var(--mono);font-size:.62rem;margin-bottom:.75rem;display:none;"></div>
+
+            <label class="pnl-form-label">Or Upload / Drop Screenshot</label>
+            <div id="chart-drop-zone" style="border:1px dashed var(--border2);padding:1.25rem;text-align:center;cursor:pointer;margin-bottom:.75rem;transition:border-color .2s;" onclick="document.getElementById('chart-file-input').click()">
+              <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">📁 Drop image or click to upload</div>
+              <input type="file" id="chart-file-input" accept="image/*" style="display:none;" onchange="handleChartFile(this.files[0])">
+            </div>
+            <div id="chart-preview-wrap" style="display:none;margin-bottom:.75rem;">
+              <img id="chart-preview" style="width:100%;border:1px solid var(--border);border-radius:2px;" alt="Chart preview">
+              <div style="font-family:var(--mono);font-size:.58rem;color:var(--green);margin-top:.35rem;">✓ Image loaded — ready to analyze</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:0;">
+              <div>
+                <label class="pnl-form-label">Symbol</label>
+                <select class="pnl-input" id="chart-symbol" style="cursor:pointer;margin-bottom:1rem;">
+                  <option value="ES">ES (S&amp;P 500 Futures)</option>
+                  <option value="SPX" selected>SPX (S&amp;P 500 Index)</option>
+                  <option value="SPY">SPY (S&amp;P 500 ETF)</option>
+                  <option value="NQ">NQ (Nasdaq Futures)</option>
+                  <option value="QQQ">QQQ (Nasdaq ETF)</option>
+                  <option value="MES">MES (Micro ES Futures)</option>
+                  <option value="MNQ">MNQ (Micro NQ Futures)</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="pnl-form-label">Timeframe</label>
+                <select class="pnl-input" id="chart-tf" style="cursor:pointer;margin-bottom:1rem;">
+                  <option value="1m">1-Minute</option>
+                  <option value="2m">2-Minute</option>
+                  <option value="3m">3-Minute</option>
+                  <option value="5m" selected>5-Minute</option>
+                  <option value="10m">10-Minute</option>
+                  <option value="15m">15-Minute</option>
+                  <option value="30m">30-Minute</option>
+                  <option value="1h">1-Hour</option>
+                  <option value="2h">2-Hour</option>
+                  <option value="4h">4-Hour</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                </select>
+              </div>
+            </div>
+
+            <label class="pnl-form-label">Additional Context (optional)</label>
+            <textarea class="pnl-input" id="chart-context" placeholder="e.g. Pre-market gap up, FOMC day, watching for Vomy..." style="height:70px;resize:vertical;margin-bottom:.5rem;"></textarea>
+
+            <!-- Quick prompt chips -->
+            <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem;">
+              <button onclick="setChartPrompt('Full Saty read — give me market structure, Phase Oscillator zone, any active setup, and your GO/NO-GO verdict.')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">📊 Full read</button>
+              <button onclick="setChartPrompt('Is there a valid playbook setup forming right now? If so, what is it and what is the ideal entry trigger?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🎯 Setup check</button>
+              <button onclick="setChartPrompt('What is the Phase Oscillator telling me right now? Is there divergence present? What zone are we in?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">〰 Phase Osc</button>
+              <button onclick="setChartPrompt('Read the Pivot Ribbon — is it bullish or bearish stacked? Any fins forming? Where is price relative to key EMAs?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🎀 Ribbon</button>
+              <button onclick="setChartPrompt('What ATR levels are in play? Where is the Call Trigger, Golden Gate, and Put Trigger? Which is the most relevant target from current price?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">📏 ATR levels</button>
+              <button onclick="setChartPrompt('Is this a Vomy or iVomy setup? Walk me through whether the criteria are met — ribbon cross, Phase Oscillator zone, conviction arrow.')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">⚡ Vomy check</button>
+              <button onclick="setChartPrompt('Grade my trade process on this chart. Did I enter at the right time relative to the Saty setup rules? What should I have done differently?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">📝 Grade entry</button>
+              <button onclick="setChartPrompt('Is this a good time to be in a trade? Check for chop box, conviction arrow, and session timing. Should I be sitting on hands?')" style="font-family:var(--mono);font-size:.58rem;padding:.25rem .5rem;background:var(--bg);border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🚫 Should I sit?</button>
+            </div>
+
+            <button class="pnl-submit" onclick="analyzeChart()" id="chart-analyze-btn">ANALYZE CHART</button>
+            <div id="chart-status" style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:.75rem;display:none;"></div>
+          </div>
+        </div>
+
+        <!-- Right: Analysis Output -->
+        <div style="flex:1;min-width:320px;">
+          <div class="panel" style="padding:1.5rem;min-height:500px;" id="chart-analysis-panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+              <div class="panel-title">Analysis</div>
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <div id="chart-analyzed-at" style="font-family:var(--mono);font-size:.6rem;color:var(--muted);"></div>
+                <button onclick="clearAnalysis()" id="clear-analysis-btn" style="display:none;font-family:var(--mono);font-size:.6rem;padding:.2rem .5rem;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:4px;cursor:pointer;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">✕ Clear</button>
+              </div>
+            </div>
+            <div id="chart-analysis-output" style="font-size:.82rem;line-height:1.7;color:var(--text);">
+              <div style="text-align:center;padding:3rem;font-family:var(--mono);font-size:.7rem;color:var(--muted);">
+                Load a chart screenshot and click Analyze Chart to get a Saty-framework read
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview of loaded chart -->
+          <div id="chart-full-preview" style="margin-top:1rem;display:none;">
+            <div class="panel" style="padding:1rem;">
+              <div class="panel-title" style="margin-bottom:.75rem;">Chart</div>
+              <img id="chart-full-img" style="width:100%;border:1px solid var(--border);" alt="Chart">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+        <!-- ── PLAYBOOK TAB ──────────────────────────────── -->
     <div id="tab-playbook" class="tab-panel">
       <div class="playbook-grid">
 
@@ -1163,6 +1365,35 @@
     <!-- ── SETTINGS TAB ──────────────────────────────── -->
     <div id="tab-settings" class="tab-panel">
       <div style="max-width:600px;">
+
+        <!-- API Key Panel -->
+        <div class="panel" style="padding:1.5rem; margin-bottom:1rem;">
+          <div class="panel-title" style="margin-bottom:.5rem;">Anthropic API Key</div>
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+            Required for Chart Analysis. Get yours at
+            <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent);">console.anthropic.com</a>.
+            Stored only in your browser — never sent anywhere except Anthropic.
+          </div>
+          <label class="pnl-form-label">API Key</label>
+          <input class="pnl-input" type="password" id="api-key-input" placeholder="sk-ant-...">
+          <button class="pnl-submit" onclick="saveApiKey()" style="margin-top:.5rem;">SAVE KEY</button>
+          <div id="api-key-msg" style="font-family:var(--mono);font-size:.7rem;margin-top:.75rem;"></div>
+        </div>
+
+        <!-- Notion Token Panel -->
+        <div class="panel" style="padding:1.5rem; margin-bottom:1rem;">
+          <div class="panel-title" style="margin-bottom:.5rem;">Notion Integration Token</div>
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+            Required for live journal sync. Get it at
+            <a href="https://www.notion.so/profile/integrations" target="_blank" style="color:var(--accent);">notion.so/profile/integrations</a>
+            → create an integration → copy the token. Make sure the integration has access to your Webull Journal database.
+          </div>
+          <label class="pnl-form-label">Integration Token</label>
+          <input class="pnl-input" type="password" id="notion-token-input" placeholder="secret_...">
+          <button class="pnl-submit" onclick="saveNotionToken()" style="margin-top:.5rem;">SAVE &amp; SYNC</button>
+          <div id="notion-token-msg" style="font-family:var(--mono);font-size:.7rem;margin-top:.75rem;"></div>
+        </div>
+
         <div class="panel" style="padding:1.5rem; margin-bottom:1rem;">
           <div class="panel-title" style="margin-bottom:1.5rem;">Change Dashboard Password</div>
           <label class="pnl-form-label">New Password</label>
@@ -1176,11 +1407,15 @@
         <div class="panel" style="padding:1.5rem;">
           <div class="panel-title" style="margin-bottom:1.5rem;">Saved Configuration</div>
           <div class="ms-row">
+            <span class="ms-label">API Key</span>
+            <span class="ms-val" id="api-key-status">Not set</span>
+          </div>
+          <div class="ms-row">
             <span class="ms-label">Server URL</span>
             <span class="ms-val ms-cyan" id="saved-url">Not set</span>
           </div>
           <div class="ms-row">
-            <span class="ms-label">Notion Connected</span>
+            <span class="ms-label">Notion Token</span>
             <span class="ms-val" id="saved-notion">Not set</span>
           </div>
           <div class="ms-row">
@@ -1224,6 +1459,36 @@ document.getElementById('pw-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') checkPassword();
 });
 
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  const msg = document.getElementById('api-key-msg');
+  if (!key.startsWith('sk-ant-')) {
+    msg.textContent = '⚠ Key should start with sk-ant-';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('api-key-input').value = '';
+  msg.textContent = '✓ API key saved — Chart Analysis is ready';
+  msg.style.color = 'var(--green)';
+  updateApiKeyStatus();
+  setTimeout(() => msg.textContent = '', 4000);
+}
+
+function updateApiKeyStatus() {
+  const key = localStorage.getItem('anthropic_api_key');
+  const el = document.getElementById('api-key-status');
+  if (el) {
+    if (key) {
+      el.textContent = '✓ Set (' + key.slice(0, 14) + '…)';
+      el.style.color = 'var(--green)';
+    } else {
+      el.textContent = 'Not set — go to Settings';
+      el.style.color = 'var(--red)';
+    }
+  }
+}
+
 function changePassword() {
   const np = document.getElementById('new-pw').value;
   const cp = document.getElementById('confirm-pw').value;
@@ -1242,6 +1507,181 @@ function showTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
+  if (name === 'journal') { setTimeout(loadNotionDashboard, 50); }
+  if (name === 'journal') { initJournalTab(); loadJournalFromNotion(); }
+  if (name === 'chart') initChartDropZone();
+}
+
+
+// ── NOTION DASHBOARD LOADER ──────────────────────────────────────────────
+Chart.defaults.color = '#8b85b0';
+let nCharts = {};
+
+async function loadNotionDashboard() {
+  // All charts now computed live from pnlData (populated from Notion journal)
+  // No Gist fetch needed — data is already in memory
+  try {
+    const filtered = getFilteredPnlData();
+    if (!filtered || filtered.length === 0) return;
+
+    const fmt = n => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+    // ── KPI cards ──────────────────────────────────────────
+    const total    = filtered.reduce((s, t) => s + t.amount, 0);
+    const wins     = filtered.filter(t => t.amount > 0);
+    const losses   = filtered.filter(t => t.amount < 0);
+    const winRate  = filtered.length ? Math.round(wins.length / filtered.length * 100) : 0;
+    const avgWin   = wins.length   ? wins.reduce((s,t)=>s+t.amount,0)/wins.length   : 0;
+    const avgLoss  = losses.length ? losses.reduce((s,t)=>s+t.amount,0)/losses.length : 0;
+    const pf       = losses.length && avgLoss !== 0 ? Math.abs((wins.reduce((s,t)=>s+t.amount,0)) / (losses.reduce((s,t)=>s+t.amount,0))).toFixed(2) : '∞';
+    const exp      = filtered.length ? total / filtered.length : 0;
+
+    const pnlEl = document.getElementById('total-pnl');
+    if (pnlEl) { pnlEl.textContent = (total>=0?'+':'-') + fmt(total); pnlEl.className = 'stat-value ' + (total>=0?'pos':'neg'); }
+    const subEl = document.getElementById('total-pnl-sub');
+    if (subEl) subEl.textContent = filtered.length + ' trades';
+    const wrEl = document.getElementById('win-rate');
+    if (wrEl) wrEl.textContent = winRate + '%';
+    const wrSub = document.getElementById('win-rate-sub');
+    if (wrSub) wrSub.textContent = wins.length + 'W / ' + losses.length + 'L';
+
+    const avgWinEl = document.getElementById('n-avg-win');
+    if (avgWinEl) avgWinEl.textContent = '+' + fmt(avgWin);
+    const avgLossEl = document.getElementById('n-avg-loss');
+    if (avgLossEl) avgLossEl.textContent = '-' + fmt(Math.abs(avgLoss));
+    const pfEl = document.getElementById('n-pf');
+    if (pfEl) { pfEl.textContent = pf + 'x'; pfEl.style.color = parseFloat(pf) >= 1 ? 'var(--green)' : 'var(--red)'; }
+    const expEl = document.getElementById('n-exp');
+    if (expEl) { expEl.textContent = (exp>=0?'+':'-') + fmt(Math.abs(exp)); expEl.style.color = exp>=0?'var(--green)':'var(--red)'; }
+
+    if (filtered.length > 0) {
+
+    const ROSE  = '#7c6fff';
+    const GREEN = 'rgba(76,175,125,0.75)';
+    const RED   = 'rgba(224,92,106,0.75)';
+    const GRID  = 'rgba(194,24,91,0.08)';
+    const TICK  = '#7d6e87';
+    const baseOpts = { responsive: true, plugins: { legend: { display: false } } };
+    const scaleStyle = {
+      ticks: { color: TICK, font: { family: "'DM Mono', monospace", size: 10 } },
+      grid:  { color: GRID }
+    };
+
+    Object.values(nCharts).forEach(c => c && c.destroy());
+    nCharts = {};
+
+    // ── Equity curve — cumulative P&L by date ──────────────
+    const byDate = {};
+    [...filtered].sort((a,b) => a.date.localeCompare(b.date)).forEach(t => {
+      byDate[t.date] = (byDate[t.date] || 0) + t.amount;
+    });
+    const dates = Object.keys(byDate).sort();
+    let running = 0;
+    const cumulative = dates.map(d => { running += byDate[d]; return { date: d, pnl: Math.round(running) }; });
+
+    const curveEl = document.getElementById('n-curve');
+    if (curveEl) {
+      nCharts.curve = new Chart(curveEl, {
+        type: 'line',
+        data: {
+          labels: cumulative.map(x => x.date.slice(5)), // MM-DD
+          datasets: [{ data: cumulative.map(x => x.pnl), borderColor: ROSE, backgroundColor: 'rgba(124,111,255,0.12)', borderWidth: 2, fill: true, tension: 0.3, pointRadius: 3 }]
+        },
+        options: { ...baseOpts, scales: {
+          x: { ...scaleStyle, ticks: { ...scaleStyle.ticks, maxTicksLimit: 8, maxRotation: 0 } },
+          y: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$' + v.toLocaleString() } }
+        }}
+      });
+    }
+
+    // ── Win rate by entry hour ─────────────────────────────
+    const hourMap = {};
+    filtered.forEach(t => {
+      if (!t.entry_time) return;
+      const h = parseInt(t.entry_time.split(':')[0]);
+      if (isNaN(h)) return;
+      if (!hourMap[h]) hourMap[h] = { wins: 0, total: 0 };
+      hourMap[h].total++;
+      if (t.amount > 0) hourMap[h].wins++;
+    });
+    const hours = Object.keys(hourMap).map(Number).sort((a,b)=>a-b);
+    const hourLabels = hours.map(h => (h % 12 || 12) + (h < 12 ? 'am' : 'pm'));
+    const hourWinRates = hours.map(h => Math.round(hourMap[h].wins / hourMap[h].total * 100));
+
+    const hourEl = document.getElementById('n-hour');
+    if (hourEl && hours.length > 0) {
+      nCharts.hour = new Chart(hourEl, {
+        type: 'bar',
+        data: {
+          labels: hourLabels,
+          datasets: [{ data: hourWinRates, backgroundColor: hourWinRates.map(r => r >= 50 ? GREEN : RED), borderRadius: 4 }]
+        },
+        options: { ...baseOpts, scales: {
+          y: { ...scaleStyle, min: 0, max: 100, ticks: { ...scaleStyle.ticks, callback: v => v + '%' } },
+          x: { ...scaleStyle, grid: { display: false } }
+        }}
+      });
+    }
+
+    // ── P&L by Saty Setup ──────────────────────────────────
+    const setupMap = {};
+    filtered.forEach(t => {
+      const s = (t.setup && t.setup.trim() && t.setup !== '—') ? t.setup.trim() : 'No Setup';
+      if (!setupMap[s]) setupMap[s] = 0;
+      setupMap[s] += t.amount;
+    });
+    const setupEntries = Object.entries(setupMap)
+      .map(([setup, pnl]) => ({ setup, pnl: Math.round(pnl) }))
+      .sort((a, b) => b.pnl - a.pnl);
+
+    const setupEl = document.getElementById('n-setup');
+    if (setupEl && setupEntries.length > 0) {
+      nCharts.setup = new Chart(setupEl, {
+        type: 'bar',
+        data: {
+          labels: setupEntries.map(x => x.setup.length > 18 ? x.setup.slice(0,18) + '…' : x.setup),
+          datasets: [{ data: setupEntries.map(x => x.pnl), backgroundColor: setupEntries.map(x => x.pnl >= 0 ? GREEN : RED), borderRadius: 4 }]
+        },
+        options: { ...baseOpts, indexAxis: 'y', scales: {
+          x: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$' + v } },
+          y: { ...scaleStyle, grid: { display: false } }
+        }}
+      });
+    }
+
+    // ── P&L by Grade ──────────────────────────────────────
+    const gradeOrder = ['A','B','C','D','F',''];
+    const gradeMap = {};
+    filtered.forEach(t => {
+      const g = t.grade || 'Ungraded';
+      if (!gradeMap[g]) gradeMap[g] = 0;
+      gradeMap[g] += t.amount;
+    });
+    const gradeEntries = gradeOrder
+      .map(g => ({ grade: g || 'Ungraded', pnl: Math.round(gradeMap[g] || gradeMap['Ungraded'] || 0) }))
+      .filter(x => gradeMap[x.grade] !== undefined || gradeMap['Ungraded'] !== undefined);
+    const gradeFiltered = Object.entries(gradeMap).map(([grade, pnl]) => ({ grade, pnl: Math.round(pnl) }))
+      .sort((a,b) => gradeOrder.indexOf(a.grade) - gradeOrder.indexOf(b.grade));
+
+    const gradeEl = document.getElementById('n-grade');
+    if (gradeEl && gradeFiltered.length > 0) {
+      nCharts.grade = new Chart(gradeEl, {
+        type: 'bar',
+        data: {
+          labels: gradeFiltered.map(x => x.grade),
+          datasets: [{ data: gradeFiltered.map(x => x.pnl), backgroundColor: gradeFiltered.map(x => x.pnl >= 0 ? GREEN : RED), borderRadius: 4 }]
+        },
+        options: { ...baseOpts, scales: {
+          x: { ...scaleStyle, grid: { display: false } },
+          y: { ...scaleStyle, ticks: { ...scaleStyle.ticks, callback: v => '$' + v } }
+        }}
+      });
+    }
+
+  }
+  } catch(err) {
+    console.error('Notion dashboard error:', err);
+  }
 }
 
 // ── CLOCK ─────────────────────────────────────────────
@@ -1424,49 +1864,87 @@ function addPnlEntry() {
 }
 
 function renderPnl() {
+  const filtered = getFilteredPnlData();
   const body = document.getElementById('pnl-table-body');
   if (pnlData.length === 0) {
     body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades logged yet</td></tr>';
     return;
   }
-
-  body.innerHTML = pnlData.map(t => `
+  if (filtered.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades in this period</td></tr>';
+    document.getElementById('total-pnl').textContent = '$0.00';
+    document.getElementById('win-rate').textContent = '0%';
+    document.getElementById('win-rate-sub').textContent = '0W / 0L';
+    return;
+  }
+  body.innerHTML = filtered.map(t => {
+    const gradeColors = { A:'var(--green)', B:'var(--purple)', C:'var(--orange)', D:'var(--red)', F:'var(--red)' };
+    const gradeColor = gradeColors[t.grade] || 'var(--muted)';
+    const symbol = t.symbol || 'SPX';
+    const strike = t.strike ? ' ' + t.strike : '';
+    const entryTime = t.entry_time ? ' @ ' + t.entry_time : '';
+    return `
     <tr>
-      <td>${t.date}</td>
-      <td>${t.setup}</td>
-      <td style="color:${t.dir==='Call'?'var(--green)':'var(--red)'}">${t.dir}</td>
-      <td class="${t.amount >= 0 ? 'pnl-pos' : 'pnl-neg'}">${t.amount >= 0 ? '+' : ''}$${t.amount.toFixed(2)}</td>
-      <td style="color:var(--muted);font-size:0.65rem;">${t.notes || '—'}</td>
-    </tr>
-  `).join('');
-
-  // Update stat cards
-  const total = pnlData.reduce((s,t) => s + t.amount, 0);
-  const wins = pnlData.filter(t => t.amount > 0).length;
-  const losses = pnlData.filter(t => t.amount < 0).length;
-  const best = pnlData.reduce((a,b) => b.amount > a.amount ? b : a, pnlData[0]);
-  const worst = pnlData.reduce((a,b) => b.amount < a.amount ? b : a, pnlData[0]);
-
+      <td style="white-space:nowrap;">${t.date}</td>
+      <td style="color:var(--muted);font-size:.65rem;">${symbol}${strike}<br><span style="color:var(--text);font-size:.7rem;">${t.setup || '—'}</span></td>
+      <td style="color:${t.dir==='Call'?'var(--green)':'var(--red)'}">${t.dir}${entryTime}</td>
+      <td class="${t.amount >= 0 ? 'pnl-pos' : 'pnl-neg'}" style="font-weight:600;">${t.amount >= 0 ? '+' : ''}$${t.amount.toFixed(0)}</td>
+      <td style="color:${gradeColor};font-weight:700;text-align:center;">${t.grade || '—'}</td>
+    </tr>`;
+  }).join('');
+  const total  = filtered.reduce((s,t) => s + t.amount, 0);
+  const wins   = filtered.filter(t => t.amount > 0).length;
+  const losses = filtered.filter(t => t.amount < 0).length;
+  const best   = filtered.reduce((a,b) => b.amount > a.amount ? b : a, filtered[0]);
+  const worst  = filtered.reduce((a,b) => b.amount < a.amount ? b : a, filtered[0]);
   document.getElementById('total-pnl').textContent = (total >= 0 ? '+' : '') + '$' + Math.abs(total).toFixed(2);
   document.getElementById('total-pnl').className = 'stat-value ' + (total >= 0 ? 'pos' : 'neg');
-  document.getElementById('win-rate').textContent = pnlData.length ? Math.round(wins/pnlData.length*100) + '%' : '0%';
+  document.getElementById('win-rate').textContent = filtered.length ? Math.round(wins/filtered.length*100) + '%' : '0%';
   document.getElementById('win-rate-sub').textContent = `${wins}W / ${losses}L`;
-  document.getElementById('best-day').textContent = '+$' + best.amount.toFixed(2);
-  document.getElementById('best-day-date').textContent = best.date;
-  document.getElementById('worst-day').textContent = '$' + worst.amount.toFixed(2);
-  document.getElementById('worst-day-date').textContent = worst.date;
 }
+
+// ── INIT ─────────────────────────────────────────────
+function init() {
+  setInterval(updateClock, 1000);
+  updateClock();
+  document.getElementById('pnl-date').valueAsDate = new Date();
+  const savedUrl = localStorage.getItem('server_url');
+  if (savedUrl) {
+    document.getElementById('server-url').value = savedUrl;
+    document.getElementById('saved-url').textContent = savedUrl;
+    startPolling();
+  }
+  // Always load journal + P&L from baked-in Notion data
+  loadJournalFromNotion();
+  loadNotionDashboard();
+  updateApiKeyStatus();
+  updateNotionStatus();
+}
+
+function clearAll() {
+  if (!confirm('Clear all saved data? This cannot be undone.')) return;
+  localStorage.clear();
+  pnlData = [];
+  alerts  = [];
+  renderPnl();
+  renderAlerts();
+  updateStats();
+}
+
+window.addEventListener('resize', drawEquityCurve);
 
 function drawEquityCurve() {
   const canvas = document.getElementById('equity-canvas');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const W = canvas.offsetWidth;
   canvas.width = W;
   canvas.height = 280;
 
-  if (pnlData.length < 2) return;
+  const filtered = getFilteredPnlData();
+  if (filtered.length < 2) { ctx.clearRect(0, 0, W, 280); return; }
 
-  const sorted = [...pnlData].sort((a,b) => new Date(a.date) - new Date(b.date));
+  const sorted = [...filtered].sort((a,b) => new Date(a.date) - new Date(b.date));
   let running = 0;
   const points = sorted.map(t => { running += t.amount; return running; });
   const min = Math.min(0, ...points);
@@ -1515,137 +1993,829 @@ function drawEquityCurve() {
   ctx.fillText('$' + min.toFixed(0), 4, toY(min) + 4);
 }
 
-// ── NOTION JOURNAL ────────────────────────────────────
-async function loadNotion() {
-  const key = document.getElementById('notion-key').value.trim();
-  const db  = document.getElementById('notion-db').value.trim();
-  const status = document.getElementById('notion-status');
 
-  if (!key || !db) { status.textContent = '⚠ Enter both Notion token and database ID'; status.style.color='var(--red)'; return; }
 
-  localStorage.setItem('notion_key', key);
-  localStorage.setItem('notion_db', db);
-  document.getElementById('saved-notion').textContent = 'Connected';
-  document.getElementById('saved-notion').style.color = 'var(--green)';
+// ══════════════════════════════════════════════════════
+// JOURNAL TAB — Notion Integration
+// ══════════════════════════════════════════════════════
+let journalData = [];
+let journalFiltered = [];
 
-  status.innerHTML = '<span class="loading-spinner"></span> Loading from Notion...';
-  status.style.color = 'var(--muted)';
-
-  // Notion API requires a backend proxy due to CORS.
-  // Route through your Railway server's /notion endpoint.
-  const serverUrl = localStorage.getItem('server_url');
-  if (!serverUrl) {
-    status.textContent = '⚠ Connect to your Railway server first (Alerts tab) — Notion calls route through it to avoid CORS.';
-    status.style.color = 'var(--red)';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${serverUrl}/notion?db=${db}`, {
-      headers: { 'X-Notion-Key': key }
-    });
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    renderJournal(data.results || []);
-    status.textContent = `✓ Loaded ${data.results?.length || 0} trades from Notion`;
-    status.style.color = 'var(--green)';
-  } catch(e) {
-    status.textContent = '⚠ Could not load — add /notion endpoint to your Railway server (see settings)';
-    status.style.color = 'var(--orange)';
-    // Show demo data
-    renderJournal(getDemoJournal());
-  }
+function initJournalTab() {
+  if (journalData.length > 0) renderJournalTab();
 }
 
-function renderJournal(results) {
-  const body = document.getElementById('journal-body');
-  document.getElementById('journal-count').textContent = `${results.length} trades`;
+function saveNotionToken() {
+  const token = document.getElementById('notion-token-input').value.trim();
+  const msg = document.getElementById('notion-token-msg');
+  if (!token.startsWith('secret_') && !token.startsWith('ntn_')) {
+    msg.textContent = '⚠ Token should start with secret_ or ntn_';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  localStorage.setItem('notion_token', token);
+  document.getElementById('notion-token-input').value = '';
+  msg.textContent = '✓ Token saved — syncing journal…';
+  msg.style.color = 'var(--green)';
+  updateNotionStatus();
+  loadJournalFromNotion();
+  setTimeout(() => { if (msg.textContent.startsWith('✓ Token')) msg.textContent = ''; }, 4000);
+}
 
-  if (results.length === 0) {
-    body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:0.7rem;">No trades found</td></tr>';
+function updateNotionStatus() {
+  const token = localStorage.getItem('notion_token');
+  const apiKey = localStorage.getItem('anthropic_api_key');
+  const el = document.getElementById('saved-notion');
+  const banner = document.getElementById('notion-connect-banner');
+  if (el) {
+    if (token) {
+      el.textContent = '✓ Set (' + token.slice(0, 14) + '…)';
+      el.style.color = 'var(--green)';
+    } else {
+      el.textContent = 'Not needed (uses Anthropic API key)';
+      el.style.color = 'var(--muted)';
+    }
+  }
+  // Show banner only if no API key set
+  if (banner) banner.style.display = apiKey ? 'none' : 'flex';
+}
+
+async function loadJournalFromNotion() {
+  const syncEl = document.getElementById('journal-last-sync');
+  syncEl.textContent = 'Syncing from Notion…';
+  syncEl.style.color = 'var(--muted)';
+
+  const apiKey = localStorage.getItem('anthropic_api_key');
+
+  // Route through Netlify serverless proxy — avoids all CORS issues
+  try {
+    syncEl.textContent = 'Fetching trades via Notion…';
+    const notionToken = localStorage.getItem('notion_token') || '';
+    const res = await fetch('/.netlify/functions/notion-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'fetch-journal', notion_token: notionToken })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Proxy error ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (!data.trades || !Array.isArray(data.trades)) throw new Error(data.error || 'No trade data returned');
+
+    journalData = data.trades.filter(t => t.date);
+    syncEl.textContent = `✓ Live from Notion — ${journalData.length} trades · ${new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})}`;
+    syncEl.style.color = 'var(--green)';
+
+  } catch(e) {
+    console.warn('Notion sync failed:', e.message);
+    syncEl.textContent = `⚠ Sync failed (${e.message}) — showing cached data`;
+    syncEl.style.color = 'var(--orange)';
+    journalData = getDemoJournalRows();
+  }
+
+  journalFiltered = [...journalData];
+  filterJournal();
+
+  // ── Sync P&L tab from same data ───────────────────────────────────────
+  pnlData = journalData
+    .filter(t => t.pnl != null)
+    .map(t => ({
+      date:       t.date,
+      setup:      t.setup || '—',
+      dir:        t.option_type === 'CALL' ? 'Call' : t.option_type === 'PUT' ? 'Put' : (t.direction || '—'),
+      amount:     t.pnl,
+      notes:      t.notes || t.claude_notes || '',
+      grade:      t.grade || '',
+      strike:     t.strike,
+      qty:        t.qty,
+      entry_time: t.entry_time,
+      symbol:     t.symbol || 'SPX'
+    }))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  renderPnl();
+  setTimeout(drawEquityCurve, 100);
+  setTimeout(loadNotionDashboard, 150);
+  // ─────────────────────────────────────────────────────────────────────
+}
+
+async function fetchNotionPages(token, dbId) {
+  // Route through Netlify proxy — server-side, no CORS issues
+  const notionToken = token || localStorage.getItem('notion_token') || '';
+  const response = await fetch('/.netlify/functions/notion-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'fetch-journal', notion_token: notionToken })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || 'Proxy error ' + response.status);
+  }
+
+  const data = await response.json();
+  if (!data.trades) throw new Error(data.error || 'No trade data returned');
+  return Array.isArray(data.trades) ? data.trades.filter(t => t.date) : [];
+}
+
+function getDemoJournalRows() {
+  // Real data from Webull Journal (Notion) — fully synced April 6, 2026
+  // To refresh: ask Claude in chat "update my dashboard journal"
+  return [
+    // ── Apr 6, 2026 ──
+    { date:'2026-04-06', setup:'ORB', direction:'CALL', option_type:'CALL', entry_price:2.15, exit_price:4.50, pnl:235, grade:'B', emotional_grade:'B', symbol:'SPX', strike:6605, qty:1, entry_time:'15:43', exit_time:'15:58', session:'PM', winner:true,
+      notes:'TRADE GRADE: B — Valid ORB setup during authorized PM window (15:43). Held top of OR, targeted Call trigger, stop at ORB loss. Clean 1:4.6 R:R. Excellent execution. For an A: document full checklist + verify risk sizing.' },
+    { date:'2026-04-06', setup:'ORB', direction:'CALL', option_type:'CALL', entry_price:5.60, exit_price:10.80, pnl:520, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6600, qty:1, entry_time:'13:14', exit_time:'15:49', session:'PM', winner:true,
+      notes:'TRADE GRADE: D — Great ORB entry at bottom of OR with stop below PDC. +92%. BUT entry at 13:14 violates 12:30-3pm break. ~1:1.86 R:R (just under 1:2 minimum). Good setup recognition, failed timing discipline.' },
+    { date:'2026-04-06', setup:'ORB', direction:'CALL', option_type:'CALL', entry_price:5.00, exit_price:15.70, pnl:1070, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6595, qty:1, entry_time:'14:07', exit_time:'15:59', session:'PM', winner:true,
+      notes:'TRADE GRADE: D — Great entry at bottom of OR confluencing with PDC ATR level and 3m/200. +214%. BUT entry at 14:07 violates break period. Good technical read, failed timing rule.' },
+    { date:'2026-04-06', setup:'ORB', direction:'CALL', option_type:'CALL', entry_price:7.05, exit_price:0.75, pnl:-1260, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6610, qty:2, entry_time:'12:46', exit_time:'15:41', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — First trade back in a while. Entry at 12:46 (break violation). Entered at resistance, should have waited. Price came back to breakeven and held too long. -89%. 2 contracts = $1,260 loss (>$1,000 risk limit).' },
+    // ── Mar 17, 2026 ──
+    { date:'2026-03-17', setup:'', direction:'SHORT', option_type:'CALL', entry_price:3.80, exit_price:2.30, pnl:300, grade:'', emotional_grade:'', symbol:'SPX', strike:6770, qty:2, entry_time:'10:09', exit_time:'10:13', session:'AM', winner:true,
+      notes:'SHORT CALL — Exited in 4 minutes for +$300. No setup documented. Not reviewed.' },
+    { date:'2026-03-17', setup:'', direction:'SHORT', option_type:'CALL', entry_price:0.35, exit_price:0, pnl:105, grade:'', emotional_grade:'', symbol:'SPX', strike:6770, qty:3, entry_time:'11:37', exit_time:'Expired', session:'AM', winner:true,
+      notes:'SHORT CALL — Sold to open, expired worthless. Full $105 premium kept. No setup. Not reviewed.' },
+    { date:'2026-03-17', setup:'', direction:'CALL', option_type:'CALL', entry_price:1.25, exit_price:0.10, pnl:-115, grade:'', emotional_grade:'', symbol:'SPX', strike:6755, qty:1, entry_time:'11:46', exit_time:'15:04', session:'AM', winner:false,
+      notes:'CALL — Held from 11:46am to 3:04pm. -92%. No setup, no notes. Not reviewed.' },
+    { date:'2026-03-17', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.50, exit_price:0.10, pnl:-340, grade:'', emotional_grade:'', symbol:'SPX', strike:6760, qty:1, entry_time:'10:18', exit_time:'14:36', session:'AM', winner:false,
+      notes:'CALL — -97%. Entry 10:18am, exit 2:36pm during break. No setup. Not reviewed.' },
+    { date:'2026-03-17', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.15, exit_price:0, pnl:null, grade:'', emotional_grade:'', symbol:'SPX', strike:6715, qty:1, entry_time:'15:59', exit_time:'', session:'PM', winner:false,
+      notes:'EOD PUT — Stop was 6700, was nervous. Entered 15:59. No P&L logged. Not reviewed.' },
+    // ── Mar 13, 2026 ──
+    { date:'2026-03-13', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:5.80, exit_price:4.00, pnl:-180, grade:'', emotional_grade:'A', symbol:'SPX', strike:6640, qty:1, entry_time:'10:20', exit_time:'10:34', session:'AM', winner:false,
+      notes:'Emotional Grade: A — Clean Vomy setup after upside GG completed. Planned to add into strength after 10m/21 rejection but accidentally sold — plan was solid, execution error. Loss not a reflection of process quality.' },
+    // ── Mar 11, 2026 ──
+    { date:'2026-03-11', setup:'Vomy', direction:'SHORT', option_type:'PUT', entry_price:2.00, exit_price:0.90, pnl:-110, grade:'', emotional_grade:'', symbol:'SPX', strike:6750, qty:1, entry_time:'15:30', exit_time:'15:36', session:'PM', winner:true,
+      notes:'SHORT PUT — Saty Setup: Vomy noted but self-described "no setup, overtraded in compression." Winner flag but -$110 P&L.' },
+    { date:'2026-03-11', setup:'', direction:'PUT', option_type:'PUT', entry_price:1.85, exit_price:0, pnl:-185, grade:'', emotional_grade:'', symbol:'SPX', strike:6765, qty:1, entry_time:'15:45', exit_time:'', session:'PM', winner:false,
+      notes:'No setup, over traded. Was up briefly and did not take profit. Expired worthless. -$185.' },
+    { date:'2026-03-11', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.45, exit_price:0, pnl:-90, grade:'', emotional_grade:'F', symbol:'SPX', strike:6770, qty:2, entry_time:'15:57', exit_time:'', session:'PM', winner:false,
+      notes:'Emotional Grade: F — No setup. EOD lotto, 2 contracts, expired worthless. -$90.' },
+    // ── Mar 5, 2026 ──
+    { date:'2026-03-05', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:5.30, exit_price:16.10, pnl:1080, grade:'', emotional_grade:'A', symbol:'SPX', strike:6800, qty:1, entry_time:'09:56', exit_time:'10:31', session:'AM', winner:true,
+      notes:'Emotional Grade: A — Amazing trade. Respected target, never got stopped out. 3m/10m Vomy setup. Would have had better entry waiting for gap fill and 3m/48 rejection, but execution was excellent. +204%.' },
+    { date:'2026-03-05', setup:'Flag Into Ribbon', direction:'PUT', option_type:'PUT', entry_price:3.50, exit_price:6.30, pnl:280, grade:'', emotional_grade:'A', symbol:'SPX', strike:6775, qty:1, entry_time:'10:58', exit_time:'11:10', session:'AM', winner:true,
+      notes:'Emotional Grade: A — 3m/21 rejection + 10min ORB rejection confluence. Sold at -1 ATR target, never got stopped out. FVG rejection ICT concept. Textbook execution. +80%.' },
+    { date:'2026-03-05', setup:'iVomy', direction:'CALL', option_type:'CALL', entry_price:0.45, exit_price:1.50, pnl:105, grade:'', emotional_grade:'B', symbol:'SPX', strike:6830, qty:1, entry_time:'15:56', exit_time:'15:59', session:'PM', winner:true,
+      notes:'Emotional Grade: B — Great EOD trade with iVomy forming and breaking out of compression. 1m/10m timeframe. +233% in 3 minutes.' },
+    // ── Mar 4, 2026 ──
+    { date:'2026-03-04', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:0.60, exit_price:0.30, pnl:-30, grade:'', emotional_grade:'D', symbol:'SPX', strike:6640, qty:1, entry_time:'09:43', exit_time:'10:09', session:'AM', winner:false,
+      notes:'Emotional Grade: D — Should not have traded. 3m and 10m were in compression. Entered Vomy setup prematurely. -50%.' },
+    // ── Mar 3, 2026 ──
+    { date:'2026-03-03', setup:'Flag into Ribbon', direction:'PUT', option_type:'PUT', entry_price:5.50, exit_price:0.35, pnl:-515, grade:'', emotional_grade:'C', symbol:'SPX', strike:6675, qty:1, entry_time:'10:14', exit_time:'12:45', session:'AM', winner:false,
+      notes:'Emotional Grade: C — Hit target while in profit at -2 ATR but got greedy and did not take profit. Did not respect stop loss either. -94%. Disappointed in the discipline failure.' },
+    { date:'2026-03-03', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:0.75, exit_price:0.30, pnl:-45, grade:'', emotional_grade:'B', symbol:'SPX', strike:6650, qty:1, entry_time:'11:14', exit_time:'12:23', session:'AM', winner:false,
+      notes:'Emotional Grade: B — Thought Vomy was forming but should have waited for a close below 3m/21. Got stopped out after ribbon flip. 3m/10m timeframe. -60%.' },
+    // ── Mar 10, 2026 ──
+    { date:'2026-03-10', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.70, exit_price:0.30, pnl:-40, grade:'', emotional_grade:'D', symbol:'SPX', strike:6715, qty:1, entry_time:'11:56', exit_time:'13:24', session:'AM', winner:false,
+      notes:'Emotional Grade: D — "Over trade no true setup." Exit at 13:24 = break violation. -57%.' },
+    { date:'2026-03-10', setup:'', direction:'CALL', option_type:'CALL', entry_price:0.15, exit_price:0, pnl:-15, grade:'', emotional_grade:'F', symbol:'SPX', strike:6785, qty:1, entry_time:'15:58', exit_time:'15:59', session:'PM', winner:false,
+      notes:'Emotional Grade: F — "EOD trade no setup just a lotto." Entered 15:58 with 1 minute to close. Expired worthless.' },
+    // ── Feb 27, 2026 ──
+    { date:'2026-02-27', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.70, exit_price:0, pnl:-70, grade:'', emotional_grade:'F', symbol:'SPX', strike:6845, qty:1, entry_time:'15:22', exit_time:'15:59', session:'PM', winner:false,
+      notes:'Emotional Grade: F — "Went to 0 EOD trade no setup." Entered 15:22, expired worthless. Pure EOD gamble.' },
+    // ── Feb 26, 2026 ──
+    { date:'2026-02-26', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:5.50, exit_price:17.40, pnl:2380, grade:'', emotional_grade:'A', symbol:'SPX', strike:6880, qty:2, entry_time:'09:43', exit_time:'10:17', session:'AM', winner:true,
+      notes:'Emotional Grade: A — Entered at 3m Vomy + ORB breakout. Stop at 3m/48, never hit. Took profit at SPX gap fill just below GG completion. +216%. NDOG ICT concept. Textbook execution.' },
+    { date:'2026-02-26', setup:'Flag into ribbon', direction:'PUT', option_type:'PUT', entry_price:4.00, exit_price:2.50, pnl:-150, grade:'', emotional_grade:'C', symbol:'SPX', strike:6800, qty:1, entry_time:'10:31', exit_time:'10:39', session:'AM', winner:true,
+      notes:'Emotional Grade: C — Flag into ribbon setup. FOMO entry. Stop at 3m/21 was hit fast. 8-minute trade. Should have had better entry patience.' },
+    { date:'2026-02-26', setup:'Flag into ribbon', direction:'PUT', option_type:'PUT', entry_price:5.50, exit_price:3.10, pnl:-240, grade:'', emotional_grade:'C', symbol:'SPX', strike:6840, qty:1, entry_time:'10:43', exit_time:'10:58', session:'AM', winner:false,
+      notes:'Emotional Grade: C — Flag into ribbon. Set stop on 3m/21 and it got hit again. Should have waited for better entry.' },
+    { date:'2026-02-26', setup:'Flag into ribbon', direction:'PUT', option_type:'PUT', entry_price:5.30, exit_price:2.15, pnl:-315, grade:'', emotional_grade:'B', symbol:'SPX', strike:6850, qty:1, entry_time:'10:53', exit_time:'11:16', session:'AM', winner:false,
+      notes:'Emotional Grade: B — Flag into ribbon. Got stopped out at 3m/21. Respected stop, good discipline.' },
+    { date:'2026-02-26', setup:'Flag into ribbon', direction:'PUT', option_type:'PUT', entry_price:5.30, exit_price:1.05, pnl:-425, grade:'', emotional_grade:'F', symbol:'SPX', strike:6860, qty:1, entry_time:'11:01', exit_time:'13:45', session:'AM', winner:false,
+      notes:'Emotional Grade: F — Flag into ribbon. Had stop at 3m/21 and target of -1 ATR. HIT TARGET and did not take profit — watched it immediately reverse. "Really mad at myself." Exit at 13:45 also violates break period.' },
+    { date:'2026-02-26', setup:'PO Divergence', direction:'PUT', option_type:'PUT', entry_price:1.30, exit_price:0.70, pnl:-60, grade:'', emotional_grade:'D', symbol:'SPX', strike:6860, qty:1, entry_time:'13:48', exit_time:'14:04', session:'PM', winner:false,
+      notes:'Emotional Grade: D — PO Divergence setup. Stop at 3m/48. Should have taken profit at 3m/200. Entry at 13:48 = break period violation.' },
+    // ── Feb 25, 2026 ──
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:5.80, exit_price:3.90, pnl:-190, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:1, entry_time:'09:42', exit_time:'09:47', session:'AM', winner:false,
+      notes:'SPX 6900 PUT — Exited in 5 min. -$190 (-33%). No setup, no grade.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.40, exit_price:3.00, pnl:-280, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:2, entry_time:'09:53', exit_time:'10:28', session:'AM', winner:false,
+      notes:'Part of 3-contract position — bought 2 @ $4.40, all sold @ $3.00. P&L: -$280.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.30, exit_price:3.00, pnl:-130, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:1, entry_time:'10:02', exit_time:'10:28', session:'AM', winner:false,
+      notes:'Part of 3-contract position — bought 1 @ $4.30, sold @ $3.00. P&L: -$130.' },
+    { date:'2026-02-25', setup:'', direction:'CALL', option_type:'CALL', entry_price:4.00, exit_price:2.40, pnl:-320, grade:'', emotional_grade:'', symbol:'SPX', strike:6940, qty:2, entry_time:'10:28', exit_time:'10:34', session:'AM', winner:false,
+      notes:'Part of 3-contract CALL position — bought 2 @ $4.00, sold all @ $2.40. P&L: -$320.' },
+    { date:'2026-02-25', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.60, exit_price:2.40, pnl:-120, grade:'', emotional_grade:'', symbol:'SPX', strike:6940, qty:1, entry_time:'10:31', exit_time:'10:34', session:'AM', winner:false,
+      notes:'Part of 3-contract CALL position — bought 1 @ $3.60, sold all @ $2.40. P&L: -$120.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.10, exit_price:1.90, pnl:-220, grade:'', emotional_grade:'', symbol:'SPX', strike:6915, qty:1, entry_time:'11:12', exit_time:'11:43', session:'AM', winner:false,
+      notes:'SPX 6915 PUT — -$220 (-54%). No setup, no grade.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.10, exit_price:1.35, pnl:-75, grade:'', emotional_grade:'', symbol:'SPX', strike:6920, qty:1, entry_time:'11:51', exit_time:'12:15', session:'AM', winner:false,
+      notes:'SPX 6920 PUT — -$75 (-36%). No setup, no grade.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.30, exit_price:1.00, pnl:-330, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:1, entry_time:'10:55', exit_time:'11:42', session:'AM', winner:false,
+      notes:'Part of 4-contract position — bought 1 @ $4.30, sold all @ $1.00. P&L: -$330.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:5.40, exit_price:2.60, pnl:-560, grade:'', emotional_grade:'', symbol:'SPX', strike:6890, qty:2, entry_time:'09:32', exit_time:'09:51', session:'AM', winner:false,
+      notes:'SPX 6890 PUT — 2 contracts, -$560 (-52%). No setup, no grade.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.60, exit_price:1.00, pnl:-1080, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:3, entry_time:'10:35', exit_time:'11:42', session:'AM', winner:false,
+      notes:'3 contracts @ $4.60, sold 4 total @ $1.00. P&L: -$1,080. Risk exceeded $1,000 limit — hard rule violation.' },
+    // ── Feb 20, 2026 ──
+    { date:'2026-02-20', setup:'Divergence From Extreme', direction:'PUT', option_type:'PUT', entry_price:4.20, exit_price:6.00, pnl:180, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6820, qty:1, entry_time:'10:30', exit_time:'12:16', session:'AM', winner:true,
+      notes:'TRADE GRADE: D — Valid Divergence From Extreme setup identified. Profitable +$180. Had predetermined stop. CRITICAL: Exit at 12:16 violates 12:30-3pm break. Grade capped at D despite good setup recognition.' },
+    { date:'2026-02-20', setup:'', direction:'PUT', option_type:'PUT', entry_price:5.20, exit_price:6.00, pnl:80, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6820, qty:1, entry_time:'10:04', exit_time:'12:16', session:'AM', winner:true,
+      notes:'TRADE GRADE: D — Profitable but break exit (12:16) and no documented setup.' },
+    // ── Feb 19, 2026 ──
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.10, exit_price:0.30, pnl:-280, grade:'', emotional_grade:'', symbol:'SPX', strike:6800, qty:1, entry_time:'09:57', exit_time:'14:07', session:'AM', winner:false,
+      notes:'Part of 5-contract position — all 5 sold @ $0.30 at 14:07. Exit during break (14:07).' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.70, exit_price:0.30, pnl:-240, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6800, qty:1, entry_time:'10:51', exit_time:'14:07', session:'AM', winner:false,
+      notes:'TRADE GRADE: D — Break exit (14:07). No playbook setup.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.45, exit_price:0.65, pnl:-180, grade:'', emotional_grade:'', symbol:'SPX', strike:6780, qty:1, entry_time:'09:54', exit_time:'11:18', session:'AM', winner:false,
+      notes:'Part of 3-contract position — all sold @ $0.65 at 11:18. No grade.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.20, exit_price:0.65, pnl:-355, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6780, qty:1, entry_time:'09:45', exit_time:'11:18', session:'AM', winner:false,
+      notes:'TRADE GRADE: D — No setup. 0DTE, 84.5% loss. Missing setup, bias, timeframe, exit plan.' },
+    { date:'2026-02-19', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.90, exit_price:2.35, pnl:-155, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6865, qty:1, entry_time:'14:19', exit_time:'14:29', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break period (14:19). No setup. Reactive trade.' },
+    { date:'2026-02-19', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.90, exit_price:2.35, pnl:-155, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6865, qty:1, entry_time:'14:20', exit_time:'14:29', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break period (14:20). No setup.' },
+    { date:'2026-02-19', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.20, exit_price:2.35, pnl:-85, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6865, qty:1, entry_time:'14:22', exit_time:'14:29', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break period, no setup, no checklist. 3 violations.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:1.75, exit_price:1.45, pnl:-30, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6830, qty:1, entry_time:'14:12', exit_time:'14:19', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Part of 5-contract position. Break period (14:12). No setup.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:1.45, exit_price:0, pnl:-145, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6840, qty:1, entry_time:'15:35', exit_time:'Expired', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — 0DTE at 15:35, no setup, expired worthless.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.70, exit_price:0, pnl:-370, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6840, qty:1, entry_time:'15:09', exit_time:'Expired', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — 0DTE, no setup, expired worthless.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.05, exit_price:0, pnl:-205, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6855, qty:1, entry_time:'15:54', exit_time:'Expired', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — 0DTE at 15:54 with 6 min to close, expired worthless.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.30, exit_price:0, pnl:90, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6830, qty:3, entry_time:'15:33', exit_time:'Expired', session:'PM', winner:true,
+      notes:'TRADE GRADE: D — Short puts expired worthless, +$90. No setup documented.' },
+    // ── Feb 18, 2026 ──
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.30, exit_price:0.20, pnl:-410, grade:'', emotional_grade:'', symbol:'SPX', strike:6780, qty:1, entry_time:'09:36', exit_time:'12:55', session:'AM', winner:false,
+      notes:'Part of 4-contract position — 2 @ $4.30 at 09:36, 2 @ $3.40 at 09:50, all sold @ $0.20 at 12:55. Averaging down + break exit.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.40, exit_price:0.20, pnl:-320, grade:'F', emotional_grade:'F', symbol:'SPX', strike:6780, qty:1, entry_time:'09:50', exit_time:'12:55', session:'AM', winner:false,
+      notes:'TRADE GRADE: F — 3 simultaneous violations: averaged down, break exit, no setup.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.40, exit_price:0.20, pnl:-320, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6780, qty:1, entry_time:'09:50', exit_time:'12:55', session:'AM', winner:false,
+      notes:'TRADE GRADE: D — Averaged down + break exit (12:55). No setup.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.80, exit_price:0.95, pnl:-285, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6850, qty:1, entry_time:'14:58', exit_time:'15:32', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Averaged down (added 2 @ $2.25 after 3 @ $3.80). Valid PM window. No setup.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.25, exit_price:0.95, pnl:-130, grade:'', emotional_grade:'', symbol:'SPX', strike:6850, qty:1, entry_time:'15:01', exit_time:'15:32', session:'PM', winner:false,
+      notes:'Add-on leg averaging down — 2 contracts @ $2.25 at 15:01, part of 5-contract position.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.80, exit_price:0.95, pnl:-285, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6850, qty:1, entry_time:'14:58', exit_time:'15:32', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Added contracts 3 min after initial entry (averaging down). No setup.' },
+    // ── Feb 17, 2026 ──
+    { date:'2026-02-17', setup:'None', direction:'PUT', option_type:'PUT', entry_price:2.35, exit_price:0.65, pnl:-170, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6830, qty:1, entry_time:'13:54', exit_time:'14:37', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break period entry + averaging down (scaled at $3.10, $2.35, $2.10).' },
+    { date:'2026-02-17', setup:'3m/200 rejection', direction:'PUT', option_type:'PUT', entry_price:5.20, exit_price:2.70, pnl:-250, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6800, qty:1, entry_time:'11:45', exit_time:'13:24', session:'AM', winner:false,
+      notes:'TRADE GRADE: D — No valid setup. Exit at 13:24 during break. Averaged down at $5.40, $5.20, $3.90.' },
+    { date:'2026-02-17', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.90, exit_price:2.70, pnl:-120, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6800, qty:1, entry_time:'12:39', exit_time:'13:24', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break entry (12:39). Averaging down. No setup.' },
+    { date:'2026-02-17', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.20, exit_price:0, pnl:-320, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6850, qty:1, entry_time:'14:35', exit_time:'Expired', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — "No setup, over traded." Expired worthless.' },
+  ];
+}
+
+
+function filterJournal() {
+  const setup  = document.getElementById('j-filter-setup').value;
+  const grade  = document.getElementById('j-filter-grade').value;
+  const result = document.getElementById('j-filter-result').value;
+
+  // First apply period filter, then setup/grade/result filters
+  const periodFiltered = getFilteredJournalData(journalData);
+  journalFiltered = periodFiltered.filter(t => {
+    if (setup  && t.setup !== setup) return false;
+    if (grade  && t.grade !== grade) return false;
+    if (result === 'win'  && (t.pnl||0) <= 0) return false;
+    if (result === 'loss' && (t.pnl||0) >= 0) return false;
+    return true;
+  });
+  renderJournalTab();
+}
+
+function renderJournalTab() {
+  const tbody = document.getElementById('journal-tbody');
+  document.getElementById('j-count').textContent = journalFiltered.length + ' trades';
+
+  if (journalFiltered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem;font-family:var(--mono);font-size:.7rem;">No trades match filters</td></tr>';
     return;
   }
 
-  body.innerHTML = results.map(r => {
-    const p = r.properties || r;
-    const date   = p.Date?.date?.start || p.date || '—';
-    const setup  = p.Setup?.select?.name || p.setup || '—';
-    const dir    = p.Direction?.select?.name || p.direction || '—';
-    const entry  = p['Entry Price']?.number || p.entry || '—';
-    const exit   = p['Exit Price']?.number || p.exit || '—';
-    const pnl    = p['P&L']?.number ?? p.pnl ?? null;
-    const grade  = p.Grade?.select?.name || p.grade || '—';
-    const notes  = p.Notes?.rich_text?.[0]?.plain_text || p.notes || '—';
-
-    const pnlStr = pnl !== null ? `${pnl >= 0 ? '+' : ''}$${pnl}` : '—';
+  tbody.innerHTML = journalFiltered.map(t => {
+    const pnl = t.pnl ?? null;
+    const pnlStr = pnl !== null ? (pnl >= 0 ? '+' : '') + '$' + Math.abs(pnl).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}) : '—';
     const pnlClass = pnl > 0 ? 'pnl-pos' : pnl < 0 ? 'pnl-neg' : '';
+    const grade = t.grade || '—';
+    const eGrade = t.emotional_grade || '';
+    const gradeKey = grade === '—' ? '-' : grade;
+    const optType = t.option_type || t.direction || '—';
+    const optColor = optType === 'CALL' || optType === 'Call' ? 'var(--green)' : optType === 'PUT' || optType === 'Put' ? 'var(--red)' : 'var(--muted)';
+    const notes = t.claude_notes || t.notes || '';
+    const notesPreview = notes.length > 120 ? notes.slice(0, 120) + '…' : notes;
+    const hasMore = notes.length > 120;
+    const notesHtml = hasMore
+      ? `<span class="notes-preview">${notesPreview}</span><span class="notes-full" style="display:none;">${notes}</span><br><button class="notes-expand-btn" onclick="toggleNotes(this)">▾ More</button>`
+      : (notes || '—');
 
-    return `
-    <tr>
-      <td>${date}</td>
-      <td>${setup}</td>
-      <td style="color:${dir==='Call'||dir==='Long'?'var(--green)':'var(--red)'}">${dir}</td>
-      <td style="color:var(--accent)">${entry !== '—' ? '$'+entry : '—'}</td>
-      <td style="color:var(--muted)">${exit !== '—' ? '$'+exit : '—'}</td>
-      <td class="${pnlClass}">${pnlStr}</td>
-      <td><span class="grade-badge grade-${grade}">${grade}</span></td>
-      <td style="color:var(--muted);font-size:0.65rem;">${notes}</td>
+    return `<tr>
+      <td style="color:var(--muted);white-space:nowrap;font-size:.68rem;">${t.date || '—'}</td>
+      <td style="font-weight:600;font-size:.72rem;">${t.setup || '—'}</td>
+      <td style="color:${optColor};font-weight:700;font-size:.7rem;">${optType}<br><span style="color:var(--muted);font-size:.6rem;font-weight:400;">${t.strike || ''}</span></td>
+      <td style="font-size:.68rem;">${t.strike ? '' : '—'}<span style="color:var(--accent);">${t.entry_price != null ? '$' + t.entry_price : ''}</span></td>
+      <td style="color:var(--muted);font-size:.68rem;">${t.exit_price != null ? '$' + t.exit_price : '—'}</td>
+      <td class="${pnlClass}" style="font-weight:700;font-size:.75rem;">${pnlStr}</td>
+      <td style="text-align:center;">
+        <span class="grade-badge grade-${gradeKey}">${grade}</span>
+        ${eGrade ? `<br><span style="font-family:var(--mono);font-size:.55rem;color:var(--muted);">E:${eGrade}</span>` : ''}
+      </td>
+      <td class="claude-notes-cell" style="font-size:.68rem;">${notesHtml}</td>
     </tr>`;
   }).join('');
 }
 
-function getDemoJournal() {
-  return [
-    { date:'2026-04-03', setup:'Vomy', direction:'Put', entry:5920, exit:5878, pnl:480, grade:'A', notes:'Clean 48 EMA break, held to GG' },
-    { date:'2026-04-02', setup:'ORB', direction:'Call', entry:5888, exit:5902, pnl:320, grade:'B', notes:'Good retest, slight early entry' },
-    { date:'2026-04-01', setup:'Flag Into Ribbon', direction:'Put', entry:5910, exit:5892, pnl:-180, grade:'A', notes:'Valid setup, stop hit, process clean' },
-  ].map(t => ({ properties: null, ...t }));
+function toggleNotes(btn) {
+  const cell = btn.closest('.claude-notes-cell') || btn.parentElement;
+  const preview = cell.querySelector('.notes-preview');
+  const full    = cell.querySelector('.notes-full');
+  const isExpanded = full && full.style.display !== 'none';
+  if (preview) preview.style.display = isExpanded ? 'inline' : 'none';
+  if (full)    full.style.display    = isExpanded ? 'none'   : 'inline';
+  btn.textContent = isExpanded ? '▾ Show full analysis' : '▴ Collapse';
 }
 
-// ── INIT ──────────────────────────────────────────────
-function init() {
-  setInterval(updateClock, 1000);
-  updateClock();
+// ══════════════════════════════════════════════════════
+// CHART ANALYSIS TAB
+// ══════════════════════════════════════════════════════
+let chartImageBase64 = null;
+let chartImageMime   = 'image/png';
 
-  // Set today's date in P&L form
-  document.getElementById('pnl-date').valueAsDate = new Date();
+function handleChartFile(event) {
+  const file = event.target?.files?.[0] || event;
+  if (!file || !file.type) return;
+  chartImageMime = file.type.startsWith('image/') ? file.type : 'image/png';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const result = e.target.result;
+    chartImageBase64 = result.split(',')[1];
+    // Update preview
+    const prev = document.getElementById('chart-preview');
+    const prevWrap = document.getElementById('chart-preview-wrap');
+    const dz = document.getElementById('chart-drop-zone');
+    const fullImg = document.getElementById('chart-full-img');
+    const fullPrev = document.getElementById('chart-full-preview');
+    if (prev) prev.src = result;
+    if (prevWrap) prevWrap.style.display = 'block';
+    if (dz) dz.style.display = 'none';
+    if (fullImg) fullImg.src = result;
+    if (fullPrev) fullPrev.style.display = 'block';
+    // Update status
+    const statusEl = document.getElementById('chart-status');
+    if (statusEl) {
+      statusEl.textContent = '✓ Image ready — click Analyze Chart';
+      statusEl.style.color = 'var(--green)';
+      statusEl.style.display = 'block';
+    }
+    console.log('[Chart] Image loaded, base64 length:', chartImageBase64?.length);
+  };
+  reader.onerror = () => console.error('[Chart] FileReader failed');
+  reader.readAsDataURL(file);
+}
 
-  // Restore saved data
-  const savedUrl = localStorage.getItem('server_url');
-  if (savedUrl) {
-    document.getElementById('server-url').value = savedUrl;
-    document.getElementById('saved-url').textContent = savedUrl;
-    startPolling();
+// Attach drag-drop lazily when Chart tab is opened (not on DOMContentLoaded,
+// because the login screen hides everything and the element may not be visible)
+function initChartDropZone() {
+  const dz = document.getElementById('chart-drop-zone');
+  if (!dz || dz._dzInit) return;
+  dz._dzInit = true;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = 'var(--accent)'; });
+  dz.addEventListener('dragleave', () => { dz.style.borderColor = 'var(--border2)'; });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.style.borderColor = 'var(--border2)';
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleChartFile(file);
+  });
+}
+
+
+async function loadChartFromUrl() {
+  const url = document.getElementById('chart-url').value.trim();
+  const statusEl = document.getElementById('url-load-status');
+  if (!url) {
+    statusEl.textContent = '⚠ Paste a TradingView URL first.';
+    statusEl.style.color = 'var(--red)';
+    statusEl.style.display = 'block';
+    return;
   }
 
-  const savedKey = localStorage.getItem('notion_key');
-  const savedDb  = localStorage.getItem('notion_db');
-  if (savedKey) document.getElementById('notion-key').value = savedKey;
-  if (savedDb)  document.getElementById('notion-db').value  = savedDb;
-  if (savedKey && savedDb) {
-    document.getElementById('saved-notion').textContent = 'Connected';
-    document.getElementById('saved-notion').style.color = 'var(--green)';
-  }
+  statusEl.textContent = '⏳ Fetching image…';
+  statusEl.style.color = 'var(--muted)';
+  statusEl.style.display = 'block';
 
-  const savedPnl = localStorage.getItem('pnl_data');
-  if (savedPnl) {
-    pnlData = JSON.parse(savedPnl);
-    renderPnl();
-    setTimeout(drawEquityCurve, 100);
+  // Method 1: direct fetch (works if CORS headers allow it)
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    if (!blob.type.startsWith('image/')) throw new Error('Not an image');
+    chartImageMime = blob.type;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const result = e.target.result;
+      chartImageBase64 = result.split(',')[1];
+      document.getElementById('chart-preview').src = result;
+      document.getElementById('chart-preview-wrap').style.display = 'block';
+      document.getElementById('chart-drop-zone').style.display = 'none';
+      document.getElementById('chart-full-img').src = result;
+      document.getElementById('chart-full-preview').style.display = 'block';
+      statusEl.textContent = '✓ Image loaded — click Analyze Chart';
+      statusEl.style.color = 'var(--green)';
+    };
+    reader.readAsDataURL(blob);
+    return;
+  } catch(e) { /* fall through to method 2 */ }
+
+  // Method 2: Image element + canvas (works for images with permissive CORS)
+  try {
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        try {
+          const dataUrl = canvas.toDataURL('image/png');
+          chartImageBase64 = dataUrl.split(',')[1];
+          chartImageMime = 'image/png';
+          document.getElementById('chart-preview').src = dataUrl;
+          document.getElementById('chart-preview-wrap').style.display = 'block';
+          document.getElementById('chart-drop-zone').style.display = 'none';
+          document.getElementById('chart-full-img').src = dataUrl;
+          document.getElementById('chart-full-preview').style.display = 'block';
+          statusEl.textContent = '✓ Image loaded via canvas — click Analyze Chart';
+          statusEl.style.color = 'var(--green)';
+          resolve();
+        } catch(canvasErr) { reject(canvasErr); }
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+    return;
+  } catch(e) { /* fall through to instructions */ }
+
+  // Method 3: CORS blocked entirely — show clear instructions
+  statusEl.innerHTML = `<span style="color:var(--orange);">⚠ TradingView blocks direct loading (CORS).</span><br>
+    <span style="color:var(--muted);line-height:1.7;">
+    ① Open the URL in a new tab<br>
+    ② Right-click the image → <strong>Save image as…</strong><br>
+    ③ Use the <strong>file picker below</strong> to upload it
+    </span>`;
+  window.open(url, '_blank');
+}
+
+function clearAnalysis() {
+  document.getElementById('chart-analysis-output').innerHTML = `
+    <div style="text-align:center;padding:3rem;font-family:var(--mono);font-size:.7rem;color:var(--muted);">
+      Load a chart screenshot and click Analyze Chart to get a Saty-framework read
+    </div>`;
+  document.getElementById('chart-analyzed-at').textContent = '';
+  document.getElementById('clear-analysis-btn').style.display = 'none';
+  // Also reset image so user can load a new chart
+  chartImageBase64 = null;
+  chartImageMime = 'image/png';
+  const dz = document.getElementById('chart-drop-zone');
+  const prevWrap = document.getElementById('chart-preview-wrap');
+  const fullPrev = document.getElementById('chart-full-preview');
+  const status = document.getElementById('chart-status');
+  if (dz) dz.style.display = 'block';
+  if (prevWrap) prevWrap.style.display = 'none';
+  if (fullPrev) fullPrev.style.display = 'none';
+  if (status) { status.textContent = ''; status.style.display = 'none'; }
+}
+
+function setChartPrompt(text) {
+  const el = document.getElementById('chart-context');
+  if (el) {
+    el.value = text;
+    el.focus();
+    el.style.borderColor = 'var(--accent)';
+    setTimeout(() => el.style.borderColor = '', 600);
   }
 }
 
-function clearAll() {
-  if (!confirm('Clear all saved data? This cannot be undone.')) return;
-  localStorage.clear();
-  pnlData = [];
-  alerts  = [];
+// ── Proxy detection removed — all calls go through Netlify functions ─────────
+
+async function callAnthropicAPI(payload) {
+  // Always route through Netlify serverless proxy — no CORS, no client-side key exposure
+  const res = await fetch('/.netlify/functions/anthropic-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Proxy error ${res.status}`);
+  }
+  return res.json();
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function analyzeChart() {
+  const tf      = document.getElementById('chart-tf').value;
+  const symbol  = document.getElementById('chart-symbol').value;
+  const context = document.getElementById('chart-context').value.trim();
+  const btn     = document.getElementById('chart-analyze-btn');
+  const status  = document.getElementById('chart-status');
+  const output  = document.getElementById('chart-analysis-output');
+
+  if (!chartImageBase64) {
+    status.textContent = '\u26a0 Load an image first \u2014 use "Load URL" or upload/drop a file.';
+    status.style.color = 'var(--red)';
+    status.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'ANALYZING\u2026';
+  status.textContent = `Analyzing ${symbol} ${tf} chart through Saty framework\u2026`;
+  status.style.color = 'var(--muted)';
+  status.style.display = 'block';
+  output.innerHTML = `<div style="text-align:center;padding:3rem;">
+    <span class="loading-spinner"></span>
+    <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.75rem;">Reading ${symbol} ${tf} through Saty framework\u2026</div>
+  </div>`;
+
+  const isFutures = ['ES','NQ','MES','MNQ'].includes(symbol);
+
+  try {
+    const userContent = [
+      {
+        type: 'image',
+        source: { type: 'base64', media_type: chartImageMime, data: chartImageBase64 }
+      },
+      {
+        type: 'text',
+        text: `${symbol} ${tf} chart analysis. ${isFutures ? 'Futures pricing.' : 'Index/ETF pricing.'}${context ? ' Trader note: ' + context : ''}
+
+Complete ALL 8 sections concisely (2-4 sentences each):
+
+### 1. Market Structure
+### 2. Phase Oscillator
+### 3. Setup Identification
+### 4. Trade Thesis
+### 5. Entry Plan
+### 6. Targets
+### 7. Risk Flags
+### 8. Verdict
+
+Final line must be exactly: VERDICT: GO / NO-GO / WAIT \u2014 [one sentence reason]`
+      }
+    ];
+
+    const data = await callAnthropicAPI({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      system: `You are Rose's personal trading coach analyzing charts through the Saty indicator suite (Pivot Ribbon: 8/13/21/34/48 EMAs, Phase Oscillator, ATR Levels) and her playbook (ORB, Vomy, iVomy, Flag Into Ribbon, Divergence From Extreme, 1-min EOD Divergence, Tweezer Bottom).
+
+CRITICAL: You MUST complete ALL 8 sections and the VERDICT before stopping. Keep each section to 2-4 sentences max — be concise and direct. Never trail off mid-sentence. Rose is an experienced trader; no hand-holding needed.
+
+Format: ### headers, **bold** for prices/setups, bullet points for lists. Final line must be: VERDICT: GO / NO-GO / WAIT — one sentence.`,
+      messages: [{ role: 'user', content: userContent }]
+    });
+    const text = data.content?.[0]?.text || 'No response received.';
+    const stopReason = data.stop_reason;
+
+    let html = formatAnalysis(text, symbol, tf);
+    if (stopReason === 'max_tokens') {
+      html += `<div style="font-family:var(--mono);font-size:.62rem;color:var(--orange);margin-top:1rem;padding:.5rem;border:1px solid rgba(232,184,75,.3);background:rgba(232,184,75,.06);">
+        \u26a0 Response was cut short \u2014 scroll up, all visible sections are complete. Try again if Verdict is missing.
+      </div>`;
+    }
+
+    output.innerHTML = html;
+    document.getElementById('chart-analyzed-at').textContent =
+      `${symbol} ${tf} \u00b7 ` + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) + ' ET';
+    document.getElementById('clear-analysis-btn').style.display = 'block';
+    status.textContent = `\u2713 Analysis complete \u2014 ${symbol} ${tf}`;
+    status.style.color = 'var(--green)';
+
+  } catch(e) {
+    output.innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;padding:1rem;line-height:1.6;">
+      \u26a0 Analysis failed: ${e.message}<br>
+      <span style="color:var(--muted);">Check that the image loaded correctly (preview should show above).</span>
+    </div>`;
+    status.textContent = '\u26a0 ' + e.message;
+    status.style.color = 'var(--red)';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'ANALYZE CHART';
+}
+
+function formatAnalysis(text, symbol, tf) {
+  // Extract verdict
+  let verdictHtml = '';
+  const verdictMatch = text.match(/\*{0,2}VERDICT\*{0,2}[:\s—-]*([^\n]+)/i);
+  if (verdictMatch) {
+    const v = verdictMatch[1].trim();
+    const isGo   = /^GO\b/i.test(v) && !/NO.GO/i.test(v);
+    const isNogo  = /NO.GO/i.test(v) || /^NO\b/i.test(v);
+    const cls = isGo ? 'verdict-go' : isNogo ? 'verdict-nogo' : 'verdict-wait';
+    const label = isGo ? '🟢 GO' : isNogo ? '🔴 NO-GO' : '🟡 WAIT';
+    verdictHtml = `<div class="analysis-verdict ${cls}">${label} — ${v.replace(/^(GO|NO-GO|NO|WAIT)[:\s—-]*/i,'')}</div>`;
+  }
+
+  // Convert markdown headers and formatting
+  let html = text
+    .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+    .replace(/^##\s+(.+)$/gm, '<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^[-•]\s+(.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .split('\n')
+    .map(line => {
+      if (line.startsWith('<h3>') || line.startsWith('<ul>') || line.startsWith('<li>')) return line;
+      if (line.trim() === '') return '';
+      return `<p>${line}</p>`;
+    })
+    .join('\n');
+
+  return verdictHtml + html;
+}
+
+// ══════════════════════════════════════════════════════
+// P&L PERIOD SLICER
+// ══════════════════════════════════════════════════════
+let activePeriod = 'all';
+
+function togglePnlDateRange() {
+  const wrap = document.getElementById('pnl-date-range-wrap');
+  const isVisible = wrap.style.display === 'flex';
+  wrap.style.display = isVisible ? 'none' : 'flex';
+  if (!isVisible) {
+    // Default dates: month start to today
+    const today = new Date().toISOString().slice(0,10);
+    const monthStart = today.slice(0,8) + '01';
+    document.getElementById('pnl-date-from').value = monthStart;
+    document.getElementById('pnl-date-to').value   = today;
+  }
+}
+
+function setPeriod(period) {
+  activePeriod = period;
+
+  // Update active button — only touch P&L period buttons (not journal ones)
+  ['period-all','period-month','period-week','period-day','period-range-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const btnId = period === 'range' ? 'period-range-btn' : 'period-' + period;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.classList.add('active');
+
+  // Show/hide date range inputs
+  const rangeWrap = document.getElementById('pnl-date-range-wrap');
+  if (rangeWrap) rangeWrap.style.display = period === 'range' ? 'flex' : 'none';
+
+  // Label
+  const labels = { all:'All Time', month:'This Month', week:'This Week', day:'Today', range:'Custom Range' };
+  const label = document.getElementById('pnl-period-label');
+  if (label) {
+    if (period === 'range') {
+      const from = document.getElementById('pnl-date-from')?.value;
+      const to   = document.getElementById('pnl-date-to')?.value;
+      label.textContent = (from && to) ? `${from} → ${to}` : 'Custom Range';
+    } else {
+      label.textContent = 'Showing: ' + (labels[period] || period);
+    }
+  }
   renderPnl();
-  renderAlerts();
-  updateStats();
+  setTimeout(drawEquityCurve, 50);
+  setTimeout(loadNotionDashboard, 60); // refresh all charts with new period filter
 }
 
-window.addEventListener('resize', drawEquityCurve);
+// Keep for backward compat (old "Pick Month" button)
+function setPeriodCustomMonth(val) {
+  activePeriod = 'range';
+  const [y, m] = val.split('-');
+  const from = `${y}-${m}-01`;
+  const lastDay = new Date(+y, +m, 0).getDate();
+  const to = `${y}-${m}-${String(lastDay).padStart(2,'0')}`;
+  const fromEl = document.getElementById('pnl-date-from');
+  const toEl   = document.getElementById('pnl-date-to');
+  if (fromEl) fromEl.value = from;
+  if (toEl)   toEl.value   = to;
+  setPeriod('range');
+}
+
+function getFilteredPnlData() {
+  if (activePeriod === 'all') return pnlData;
+  const etNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+
+  return pnlData.filter(t => {
+    const d = new Date(t.date + 'T12:00:00');
+    if (activePeriod === 'day') {
+      return d.toDateString() === etNow.toDateString();
+    }
+    if (activePeriod === 'week') {
+      const weekStart = new Date(etNow);
+      weekStart.setDate(etNow.getDate() - etNow.getDay());
+      weekStart.setHours(0,0,0,0);
+      return d >= weekStart;
+    }
+    if (activePeriod === 'month') {
+      return d.getMonth() === etNow.getMonth() && d.getFullYear() === etNow.getFullYear();
+    }
+    if (activePeriod === 'range') {
+      const from = document.getElementById('pnl-date-from')?.value;
+      const to   = document.getElementById('pnl-date-to')?.value;
+      if (!from && !to) return true;
+      const dStr = t.date;
+      if (from && dStr < from) return false;
+      if (to   && dStr > to)   return false;
+      return true;
+    }
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// JOURNAL PERIOD SLICER
+// ══════════════════════════════════════════════════════
+let activeJournalPeriod = 'all';
+
+function toggleJournalDateRange() {
+  const wrap = document.getElementById('j-date-range-wrap');
+  const isVisible = wrap.style.display === 'flex';
+  wrap.style.display = isVisible ? 'none' : 'flex';
+  if (!isVisible) {
+    const today = new Date().toISOString().slice(0,10);
+    const monthStart = today.slice(0,8) + '01';
+    document.getElementById('j-date-from').value = monthStart;
+    document.getElementById('j-date-to').value   = today;
+    setJournalPeriod('range');
+  }
+}
+
+function setJournalPeriod(period) {
+  activeJournalPeriod = period;
+
+  // Update active button
+  ['j-period-all','j-period-month','j-period-week','j-period-day','j-period-range'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const btnId = period === 'range' ? 'j-period-range' : 'j-period-' + period;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.classList.add('active');
+
+  // Show/hide date range inputs
+  const rangeWrap = document.getElementById('j-date-range-wrap');
+  if (rangeWrap) rangeWrap.style.display = period === 'range' ? 'flex' : 'none';
+
+  // Label
+  const labels = { all:'All Time', month:'This Month', week:'This Week', day:'Today', range:'Custom Range' };
+  const label = document.getElementById('j-period-label');
+  if (label) {
+    if (period === 'range') {
+      const from = document.getElementById('j-date-from')?.value;
+      const to   = document.getElementById('j-date-to')?.value;
+      label.textContent = (from && to) ? `${from} → ${to}` : 'Custom Range';
+    } else {
+      label.textContent = labels[period] || period;
+    }
+  }
+  filterJournal();
+}
+
+function getFilteredJournalData(data) {
+  if (activeJournalPeriod === 'all') return data;
+  const etNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+
+  return data.filter(t => {
+    const dateStr = t.date || '';
+    if (!dateStr) return true;
+    const d = new Date(dateStr + 'T12:00:00');
+
+    if (activeJournalPeriod === 'day') {
+      return d.toDateString() === etNow.toDateString();
+    }
+    if (activeJournalPeriod === 'week') {
+      const weekStart = new Date(etNow);
+      weekStart.setDate(etNow.getDate() - etNow.getDay());
+      weekStart.setHours(0,0,0,0);
+      return d >= weekStart;
+    }
+    if (activeJournalPeriod === 'month') {
+      return d.getMonth() === etNow.getMonth() && d.getFullYear() === etNow.getFullYear();
+    }
+    if (activeJournalPeriod === 'range') {
+      const from = document.getElementById('j-date-from')?.value;
+      const to   = document.getElementById('j-date-to')?.value;
+      if (!from && !to) return true;
+      if (from && dateStr < from) return false;
+      if (to   && dateStr > to)   return false;
+      return true;
+    }
+    return true;
+  });
+}
+
 </script>
 </body>
 </html>
