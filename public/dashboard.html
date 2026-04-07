@@ -965,17 +965,21 @@
 
     <!-- ── JOURNAL TAB ──────────────────────────────────── -->
     <div id="tab-journal" class="tab-panel">
+      <!-- Notion connection banner — shown when no token set -->
+      <div id="notion-connect-banner" style="display:none;background:rgba(124,111,255,0.08);border:1px solid rgba(124,111,255,0.25);border-radius:8px;padding:.85rem 1.1rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div style="font-family:var(--mono);font-size:.68rem;color:var(--text);line-height:1.6;">
+          🔗 <strong style="color:var(--accent);">Connect Notion</strong> to sync your journal automatically — no more manual updates.
+        </div>
+        <button onclick="showTab('settings')" style="font-family:var(--mono);font-size:.65rem;padding:.3rem .85rem;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer;white-space:nowrap;">⚙ Go to Settings</button>
+      </div>
+
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:1rem;">
         <div>
           <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);margin-bottom:.25rem;">// Notion Trading Journal — Webull Journal</div>
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);" id="journal-last-sync">Click Load Journal to display trades</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);" id="journal-last-sync">Loading…</div>
         </div>
         <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);max-width:280px;line-height:1.6;">
-            Data synced directly from Notion.<br>
-            To refresh: ask Claude <em style="color:var(--accent);">"update my dashboard journal"</em>
-          </div>
-          <button class="config-btn" onclick="loadJournalFromNotion()">LOAD JOURNAL</button>
+          <button class="config-btn" onclick="loadJournalFromNotion()">↻ SYNC NOW</button>
         </div>
       </div>
 
@@ -1491,6 +1495,20 @@
           <div id="api-key-msg" style="font-family:var(--mono);font-size:.7rem;margin-top:.75rem;"></div>
         </div>
 
+        <!-- Notion Token Panel -->
+        <div class="panel" style="padding:1.5rem; margin-bottom:1rem;">
+          <div class="panel-title" style="margin-bottom:.5rem;">Notion Integration Token</div>
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+            Required for live journal sync. Get it at
+            <a href="https://www.notion.so/profile/integrations" target="_blank" style="color:var(--accent);">notion.so/profile/integrations</a>
+            → create an integration → copy the token. Make sure the integration has access to your Webull Journal database.
+          </div>
+          <label class="pnl-form-label">Integration Token</label>
+          <input class="pnl-input" type="password" id="notion-token-input" placeholder="secret_...">
+          <button class="pnl-submit" onclick="saveNotionToken()" style="margin-top:.5rem;">SAVE &amp; SYNC</button>
+          <div id="notion-token-msg" style="font-family:var(--mono);font-size:.7rem;margin-top:.75rem;"></div>
+        </div>
+
         <div class="panel" style="padding:1.5rem; margin-bottom:1rem;">
           <div class="panel-title" style="margin-bottom:1.5rem;">Change Dashboard Password</div>
           <label class="pnl-form-label">New Password</label>
@@ -1512,7 +1530,7 @@
             <span class="ms-val ms-cyan" id="saved-url">Not set</span>
           </div>
           <div class="ms-row">
-            <span class="ms-label">Notion Connected</span>
+            <span class="ms-label">Notion Token</span>
             <span class="ms-val" id="saved-notion">Not set</span>
           </div>
           <div class="ms-row">
@@ -2044,6 +2062,7 @@ function init() {
   loadJournalFromNotion();
   loadNotionDashboard();
   updateApiKeyStatus();
+  updateNotionStatus();
 }
 
 function clearAll() {
@@ -2130,38 +2149,162 @@ function initJournalTab() {
   if (journalData.length > 0) renderJournalTab();
 }
 
+function saveNotionToken() {
+  const token = document.getElementById('notion-token-input').value.trim();
+  const msg = document.getElementById('notion-token-msg');
+  if (!token.startsWith('secret_') && !token.startsWith('ntn_')) {
+    msg.textContent = '⚠ Token should start with secret_ or ntn_';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  localStorage.setItem('notion_token', token);
+  document.getElementById('notion-token-input').value = '';
+  msg.textContent = '✓ Token saved — syncing journal…';
+  msg.style.color = 'var(--green)';
+  updateNotionStatus();
+  loadJournalFromNotion();
+  setTimeout(() => { if (msg.textContent.startsWith('✓ Token')) msg.textContent = ''; }, 4000);
+}
+
+function updateNotionStatus() {
+  const token = localStorage.getItem('notion_token');
+  const el = document.getElementById('saved-notion');
+  const banner = document.getElementById('notion-connect-banner');
+  if (el) {
+    if (token) {
+      el.textContent = '✓ Set (' + token.slice(0, 14) + '…)';
+      el.style.color = 'var(--green)';
+    } else {
+      el.textContent = 'Not set — go to Settings';
+      el.style.color = 'var(--muted)';
+    }
+  }
+  if (banner) banner.style.display = token ? 'none' : 'flex';
+}
+
 async function loadJournalFromNotion() {
   const syncEl = document.getElementById('journal-last-sync');
-  syncEl.textContent = 'Loading journal data…';
+  syncEl.textContent = 'Syncing from Notion…';
   syncEl.style.color = 'var(--muted)';
 
-  // Load real Notion data (baked in — fetched by Claude on Apr 6, 2026)
-  journalData = getDemoJournalRows();
+  const token = localStorage.getItem('notion_token');
+  const DB_ID = '30e626c1-f8f8-80f4-83cf-000bde7776e8';
+
+  if (token) {
+    try {
+      // Fetch directly from Notion API — paginate through all results
+      let allResults = [];
+      let hasMore = true;
+      let startCursor = undefined;
+
+      while (hasMore) {
+        const body = {
+          sorts: [{ property: 'Date', direction: 'descending' }],
+          page_size: 100
+        };
+        if (startCursor) body.start_cursor = startCursor;
+
+        const res = await fetch(`https://api.notion.com/v1/databases/${DB_ID}/query`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || `Notion API error ${res.status}`);
+        }
+
+        const data = await res.json();
+        allResults = allResults.concat(data.results);
+        hasMore = data.has_more;
+        startCursor = data.next_cursor;
+      }
+
+      // Map Notion page properties to dashboard trade format
+      journalData = allResults.map(page => {
+        const p = page.properties;
+        const get = (prop, type) => {
+          const v = p[prop];
+          if (!v) return null;
+          if (type === 'number') return v.number ?? null;
+          if (type === 'select') return v.select?.name ?? '';
+          if (type === 'text') return v.rich_text?.map(r => r.plain_text).join('') ?? '';
+          if (type === 'title') return v.title?.map(r => r.plain_text).join('') ?? '';
+          if (type === 'date') return v.date?.start ?? null;
+          if (type === 'checkbox') return v.checkbox ?? false;
+          if (type === 'url') return v.url ?? '';
+          return null;
+        };
+
+        return {
+          date:            get('Date', 'date'),
+          setup:           get('Saty Setup', 'text'),
+          direction:       get('Direction', 'select'),
+          option_type:     get('Option Type', 'select'),
+          entry_price:     get('Entry Price', 'number'),
+          exit_price:      get('Exit Price', 'number'),
+          pnl:             get('P&L ($)', 'number'),
+          grade:           get('Grade', 'select'),
+          emotional_grade: get('Emotional Grade', 'select'),
+          notes:           get('Notes', 'text'),
+          claude_notes:    get('Claude Notes', 'text'),
+          symbol:          get('Underlying', 'text') || 'SPX',
+          strike:          get('Strike', 'number'),
+          qty:             get('Qty / Contracts', 'number'),
+          entry_time:      get('Entry Time', 'text'),
+          exit_time:       get('Exit Time', 'text'),
+          session:         get('Session', 'select'),
+          winner:          get('Winner?', 'checkbox'),
+          reviewed:        get('Reviewed?', 'checkbox'),
+          action:          get('Action', 'select'),
+          bias:            get('Bias', 'select'),
+        };
+      }).filter(t => t.date); // skip entries with no date
+
+      syncEl.textContent = `✓ Live from Notion — ${journalData.length} trades · ${new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})}`;
+      syncEl.style.color = 'var(--green)';
+
+    } catch(e) {
+      console.warn('Notion fetch failed, falling back to baked data:', e.message);
+      syncEl.textContent = `⚠ Notion sync failed (${e.message}) — showing cached data`;
+      syncEl.style.color = 'var(--orange)';
+      journalData = getDemoJournalRows();
+    }
+  } else {
+    // No token — use baked-in data, nudge user to connect
+    journalData = getDemoJournalRows();
+    syncEl.textContent = '📌 Cached data (Apr 6) — add Notion token in Settings for live sync';
+    syncEl.style.color = 'var(--muted)';
+  }
+
   journalFiltered = [...journalData];
   filterJournal();
 
-  // ── Sync P&L tab from the same journal data ────────────────────
+  // ── Sync P&L tab from the same journal data ─────────────────────────
   pnlData = journalData
     .filter(t => t.pnl != null)
     .map(t => ({
-      date:   t.date,
-      setup:  t.setup || '—',
-      dir:    t.option_type === 'CALL' ? 'Call' : t.option_type === 'PUT' ? 'Put' : (t.direction || '—'),
-      amount: t.pnl,
-      notes:  t.notes || t.claude_notes || '',
-      grade:  t.grade || '',
-      strike: t.strike,
-      qty:    t.qty,
+      date:       t.date,
+      setup:      t.setup || '—',
+      dir:        t.option_type === 'CALL' ? 'Call' : t.option_type === 'PUT' ? 'Put' : (t.direction || '—'),
+      amount:     t.pnl,
+      notes:      t.notes || t.claude_notes || '',
+      grade:      t.grade || '',
+      strike:     t.strike,
+      qty:        t.qty,
       entry_time: t.entry_time,
-      symbol: t.symbol || 'SPX'
+      symbol:     t.symbol || 'SPX'
     }))
     .sort((a, b) => new Date(b.date) - new Date(a.date));
   renderPnl();
   setTimeout(drawEquityCurve, 100);
-  // ────────────────────────────────────────────────────
-
-  syncEl.textContent = '✓ Loaded ' + journalData.length + ' trades (synced Apr 6, 2026) — ask Claude to refresh';
-  syncEl.style.color = 'var(--green)';
+  setTimeout(loadNotionDashboard, 150);
+  // ─────────────────────────────────────────────────────────────────────
 }
 
 async function fetchNotionPages(token, dbId) {
@@ -2234,6 +2377,21 @@ function getDemoJournalRows() {
       notes:'No setup, over traded. Was up briefly and did not take profit. Expired worthless. -$185.' },
     { date:'2026-03-11', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.45, exit_price:0, pnl:-90, grade:'', emotional_grade:'F', symbol:'SPX', strike:6770, qty:2, entry_time:'15:57', exit_time:'', session:'PM', winner:false,
       notes:'Emotional Grade: F — No setup. EOD lotto, 2 contracts, expired worthless. -$90.' },
+    // ── Mar 5, 2026 ──
+    { date:'2026-03-05', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:5.30, exit_price:16.10, pnl:1080, grade:'', emotional_grade:'A', symbol:'SPX', strike:6800, qty:1, entry_time:'09:56', exit_time:'10:31', session:'AM', winner:true,
+      notes:'Emotional Grade: A — Amazing trade. Respected target, never got stopped out. 3m/10m Vomy setup. Would have had better entry waiting for gap fill and 3m/48 rejection, but execution was excellent. +204%.' },
+    { date:'2026-03-05', setup:'Flag Into Ribbon', direction:'PUT', option_type:'PUT', entry_price:3.50, exit_price:6.30, pnl:280, grade:'', emotional_grade:'A', symbol:'SPX', strike:6775, qty:1, entry_time:'10:58', exit_time:'11:10', session:'AM', winner:true,
+      notes:'Emotional Grade: A — 3m/21 rejection + 10min ORB rejection confluence. Sold at -1 ATR target, never got stopped out. FVG rejection ICT concept. Textbook execution. +80%.' },
+    { date:'2026-03-05', setup:'iVomy', direction:'CALL', option_type:'CALL', entry_price:0.45, exit_price:1.50, pnl:105, grade:'', emotional_grade:'B', symbol:'SPX', strike:6830, qty:1, entry_time:'15:56', exit_time:'15:59', session:'PM', winner:true,
+      notes:'Emotional Grade: B — Great EOD trade with iVomy forming and breaking out of compression. 1m/10m timeframe. +233% in 3 minutes.' },
+    // ── Mar 4, 2026 ──
+    { date:'2026-03-04', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:0.60, exit_price:0.30, pnl:-30, grade:'', emotional_grade:'D', symbol:'SPX', strike:6640, qty:1, entry_time:'09:43', exit_time:'10:09', session:'AM', winner:false,
+      notes:'Emotional Grade: D — Should not have traded. 3m and 10m were in compression. Entered Vomy setup prematurely. -50%.' },
+    // ── Mar 3, 2026 ──
+    { date:'2026-03-03', setup:'Flag into Ribbon', direction:'PUT', option_type:'PUT', entry_price:5.50, exit_price:0.35, pnl:-515, grade:'', emotional_grade:'C', symbol:'SPX', strike:6675, qty:1, entry_time:'10:14', exit_time:'12:45', session:'AM', winner:false,
+      notes:'Emotional Grade: C — Hit target while in profit at -2 ATR but got greedy and did not take profit. Did not respect stop loss either. -94%. Disappointed in the discipline failure.' },
+    { date:'2026-03-03', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:0.75, exit_price:0.30, pnl:-45, grade:'', emotional_grade:'B', symbol:'SPX', strike:6650, qty:1, entry_time:'11:14', exit_time:'12:23', session:'AM', winner:false,
+      notes:'Emotional Grade: B — Thought Vomy was forming but should have waited for a close below 3m/21. Got stopped out after ribbon flip. 3m/10m timeframe. -60%.' },
     // ── Mar 10, 2026 ──
     { date:'2026-03-10', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.70, exit_price:0.30, pnl:-40, grade:'', emotional_grade:'D', symbol:'SPX', strike:6715, qty:1, entry_time:'11:56', exit_time:'13:24', session:'AM', winner:false,
       notes:'Emotional Grade: D — "Over trade no true setup." Exit at 13:24 = break violation. -57%.' },
