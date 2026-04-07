@@ -2095,10 +2095,13 @@ async function loadJournalFromNotion() {
       symbol:     t.symbol || 'SPX'
     }))
     .sort((a, b) => new Date(b.date) - new Date(a.date));
+// Sync journal period to match
+  activeJournalPeriod = period;
+  filterJournal();
+
   renderPnl();
-  setTimeout(drawEquityCurve, 100);
-  setTimeout(loadNotionDashboard, 150);
-  // ─────────────────────────────────────────────────────────────────────
+  setTimeout(drawEquityCurve, 50);
+  setTimeout(loadNotionDashboard, 60);
 }
 
 async function fetchNotionPages(token, dbId) {
