@@ -68,7 +68,7 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_KEY,
         'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'mcp-client-1.3.0'
+        'anthropic-beta': 'mcp-client-1.2.0'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
