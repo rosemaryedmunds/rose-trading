@@ -68,7 +68,7 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_KEY,
         'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'mcp-client-1.2.0'
+        'anthropic-beta': 'mcp-client-2025-11-20'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
@@ -105,13 +105,16 @@ Sort by date descending. Return ONLY the JSON array.`,
           role: 'user',
           content: `Fetch all pages from Notion database ID ${DB_ID} and return them as a JSON array.`
         }],
-        mcp_servers: [{
-          type: 'url',
-          url: 'https://mcp.notion.com/mcp',
-          name: 'notion',
-          authorization_token: NOTION_TOKEN
-        }]
-      })
+mcp_servers: [{
+  type: 'url',
+  url: 'https://mcp.notion.com/mcp',
+  name: 'notion',
+  authorization_token: NOTION_TOKEN
+}],
+tools: [{
+  type: 'mcp_toolset',
+  mcp_server_name: 'notion'
+}]
     });
 
     if (!anthropicRes.ok) {
