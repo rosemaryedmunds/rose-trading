@@ -965,15 +965,17 @@
 
     <!-- ── JOURNAL TAB ──────────────────────────────────── -->
     <div id="tab-journal" class="tab-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:1rem;">
         <div>
-          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);margin-bottom:.25rem;">// Notion Trading Journal</div>
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);" id="journal-last-sync">Not synced yet</div>
+          <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);margin-bottom:.25rem;">// Notion Trading Journal — Webull Journal</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);" id="journal-last-sync">Click Load Journal to display trades</div>
         </div>
         <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-          <input class="config-input" style="width:220px;" id="j-notion-key" placeholder="Notion Integration Token" type="password">
-          <input class="config-input" style="width:220px;" id="j-notion-db" placeholder="Database ID">
-          <button class="config-btn" onclick="loadJournalFromNotion()">SYNC JOURNAL</button>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);max-width:280px;line-height:1.6;">
+            Data synced directly from Notion.<br>
+            To refresh: ask Claude <em style="color:var(--accent);">"update my dashboard journal"</em>
+          </div>
+          <button class="config-btn" onclick="loadJournalFromNotion()">LOAD JOURNAL</button>
         </div>
       </div>
 
@@ -1184,16 +1186,7 @@
           <div class="stat-value neu" id="win-rate">0%</div>
           <div class="stat-sub" id="win-rate-sub">0W / 0L</div>
         </div>
-        <div class="stat-card green">
-          <div class="stat-label">Best Day</div>
-          <div class="stat-value pos" id="best-day">$0</div>
-          <div class="stat-sub" id="best-day-date">—</div>
-        </div>
-        <div class="stat-card red">
-          <div class="stat-label">Worst Day</div>
-          <div class="stat-value neg" id="worst-day">$0</div>
-          <div class="stat-sub" id="worst-day-date">—</div>
-        </div>
+
       </div>
 
       <!-- ── NOTION LIVE DATA ─────────────────────────── -->
@@ -1257,10 +1250,10 @@
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Setup</th>
+                  <th>Symbol / Setup</th>
                   <th>Direction</th>
                   <th>P&amp;L</th>
-                  <th>Notes</th>
+                  <th>Grade</th>
                 </tr>
               </thead>
               <tbody id="pnl-table-body"></tbody>
@@ -1548,7 +1541,7 @@ function showTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
   if (name === 'pnl') loadNotionDashboard();
-  if (name === 'journal') initJournalTab();
+  if (name === 'journal') { initJournalTab(); loadJournalFromNotion(); }
   if (name === 'chart') initChartDropZone();
 }
 
@@ -1580,10 +1573,6 @@ async function loadNotionDashboard() {
     if (d.daily_pnl && d.daily_pnl.length > 0) {
       const best  = d.daily_pnl.reduce((a,b) => b.pnl > a.pnl ? b : a);
       const worst = d.daily_pnl.reduce((a,b) => b.pnl < a.pnl ? b : a);
-      document.getElementById('best-day').textContent      = '+' + fmt(best.pnl);
-      document.getElementById('best-day-date').textContent = best.date;
-      document.getElementById('worst-day').textContent     = '-' + fmt(Math.abs(worst.pnl));
-      document.getElementById('worst-day-date').textContent = worst.date;
     }
 
     // Extra KPIs
@@ -1895,19 +1884,23 @@ function renderPnl() {
     document.getElementById('total-pnl').textContent = '$0.00';
     document.getElementById('win-rate').textContent = '0%';
     document.getElementById('win-rate-sub').textContent = '0W / 0L';
-    document.getElementById('best-day').textContent = '—';
-    document.getElementById('worst-day').textContent = '—';
     return;
   }
-  body.innerHTML = filtered.map(t => `
+  body.innerHTML = filtered.map(t => {
+    const gradeColors = { A:'var(--green)', B:'var(--purple)', C:'var(--orange)', D:'var(--red)', F:'var(--red)' };
+    const gradeColor = gradeColors[t.grade] || 'var(--muted)';
+    const symbol = t.symbol || 'SPX';
+    const strike = t.strike ? ' ' + t.strike : '';
+    const entryTime = t.entry_time ? ' @ ' + t.entry_time : '';
+    return `
     <tr>
-      <td>${t.date}</td>
-      <td>${t.setup}</td>
-      <td style="color:${t.dir==='Call'?'var(--green)':'var(--red)'}">${t.dir}</td>
-      <td class="${t.amount >= 0 ? 'pnl-pos' : 'pnl-neg'}">${t.amount >= 0 ? '+' : ''}$${t.amount.toFixed(2)}</td>
-      <td style="color:var(--muted);font-size:0.65rem;">${t.notes || '—'}</td>
-    </tr>
-  `).join('');
+      <td style="white-space:nowrap;">${t.date}</td>
+      <td style="color:var(--muted);font-size:.65rem;">${symbol}${strike}<br><span style="color:var(--text);font-size:.7rem;">${t.setup || '—'}</span></td>
+      <td style="color:${t.dir==='Call'?'var(--green)':'var(--red)'}">${t.dir}${entryTime}</td>
+      <td class="${t.amount >= 0 ? 'pnl-pos' : 'pnl-neg'}" style="font-weight:600;">${t.amount >= 0 ? '+' : ''}$${t.amount.toFixed(0)}</td>
+      <td style="color:${gradeColor};font-weight:700;text-align:center;">${t.grade || '—'}</td>
+    </tr>`;
+  }).join('');
   const total  = filtered.reduce((s,t) => s + t.amount, 0);
   const wins   = filtered.filter(t => t.amount > 0).length;
   const losses = filtered.filter(t => t.amount < 0).length;
@@ -1917,10 +1910,6 @@ function renderPnl() {
   document.getElementById('total-pnl').className = 'stat-value ' + (total >= 0 ? 'pos' : 'neg');
   document.getElementById('win-rate').textContent = filtered.length ? Math.round(wins/filtered.length*100) + '%' : '0%';
   document.getElementById('win-rate-sub').textContent = `${wins}W / ${losses}L`;
-  document.getElementById('best-day').textContent  = '+$' + best.amount.toFixed(2);
-  document.getElementById('best-day-date').textContent  = best.date;
-  document.getElementById('worst-day').textContent = '$' + worst.amount.toFixed(2);
-  document.getElementById('worst-day-date').textContent = worst.date;
 }
 
 // ── INIT ─────────────────────────────────────────────
@@ -1946,13 +1935,9 @@ function init() {
   const jDb  = localStorage.getItem('journal_notion_db')  || savedDb  || '';
   if (jKey) document.getElementById('j-notion-key').value = jKey;
   if (jDb)  document.getElementById('j-notion-db').value  = jDb;
+  // Always load journal + P&L from baked-in Notion data
+  loadJournalFromNotion();
   loadNotionDashboard();
-  const savedPnl = localStorage.getItem('pnl_data');
-  if (savedPnl) {
-    pnlData = JSON.parse(savedPnl);
-    renderPnl();
-    setTimeout(drawEquityCurve, 100);
-  }
 }
 
 function clearAll() {
@@ -2044,85 +2029,206 @@ function initJournalTab() {
 }
 
 async function loadJournalFromNotion() {
-  const key = document.getElementById('j-notion-key').value.trim();
-  const db  = document.getElementById('j-notion-db').value.trim();
-  if (!key || !db) { alert('Enter Notion token and database ID'); return; }
+  const syncEl = document.getElementById('journal-last-sync');
+  syncEl.textContent = 'Loading journal data…';
+  syncEl.style.color = 'var(--muted)';
 
-  localStorage.setItem('journal_notion_key', key);
-  localStorage.setItem('journal_notion_db', db);
+  // Load real Notion data (baked in — fetched by Claude on Apr 6, 2026)
+  journalData = getDemoJournalRows();
+  journalFiltered = [...journalData];
+  filterJournal();
 
-  document.getElementById('journal-last-sync').textContent = 'Syncing…';
-  document.getElementById('journal-tbody').innerHTML =
-    '<tr><td colspan="8" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:.7rem;color:var(--muted);"><span class="loading-spinner"></span> Loading from Notion…</td></tr>';
+  // ── Sync P&L tab from the same journal data ────────────────────
+  pnlData = journalData
+    .filter(t => t.pnl != null)
+    .map(t => ({
+      date:   t.date,
+      setup:  t.setup || '—',
+      dir:    t.option_type === 'CALL' ? 'Call' : t.option_type === 'PUT' ? 'Put' : (t.direction || '—'),
+      amount: t.pnl,
+      notes:  t.notes || t.claude_notes || '',
+      grade:  t.grade || '',
+      strike: t.strike,
+      qty:    t.qty,
+      entry_time: t.entry_time,
+      symbol: t.symbol || 'SPX'
+    }))
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  renderPnl();
+  setTimeout(drawEquityCurve, 100);
+  // ────────────────────────────────────────────────────
 
-  try {
-    // Use the Claude API to fetch Notion data (bypasses CORS)
-    const pages = await fetchNotionPages(key, db);
-    journalData = pages;
-    journalFiltered = pages;
-    renderJournalTab();
-    document.getElementById('journal-last-sync').textContent =
-      'Last synced: ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
-  } catch(e) {
-    document.getElementById('journal-last-sync').textContent = '⚠ ' + e.message;
-    // Show demo data if fetch fails
-    journalData = getDemoJournalRows();
-    journalFiltered = journalData;
-    renderJournalTab();
-  }
+  syncEl.textContent = '✓ Loaded ' + journalData.length + ' trades (synced Apr 6, 2026) — ask Claude to refresh';
+  syncEl.style.color = 'var(--green)';
 }
 
 async function fetchNotionPages(token, dbId) {
-  // Route through Anthropic API using Claude as proxy to avoid CORS
+  // Use Anthropic API + Notion MCP — runs server-side, bypasses CORS entirely.
+  // No token needed: uses the Notion MCP session already connected in claude.ai.
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 4000,
-      system: `You are a Notion API proxy. The user will give you a Notion token and database ID. 
-Fetch the database pages from Notion and return ONLY a JSON array of trade objects with these fields:
-date, setup, direction, entry_price, exit_price, pnl, grade, claude_notes, symbol, option_type, strike, qty.
-Map Notion property names flexibly — look for Date, Setup, Direction/Type, Entry/Entry Price, Exit/Exit Price, P&L/PnL, Grade, Notes/Claude Notes/Analysis.
-Return ONLY the raw JSON array, no markdown, no explanation.`,
-      messages: [{
-        role: 'user',
-        content: `Fetch Notion database pages. Token: ${token} | Database ID: ${dbId}
-Use the Notion API: GET https://api.notion.com/v1/databases/${dbId}/query
-Headers: Authorization: Bearer ${token}, Notion-Version: 2022-06-28, Content-Type: application/json
-Body: {"page_size": 100, "sorts": [{"property": "Date", "direction": "descending"}]}
-Return the trades as a JSON array.`
-      }]
+      max_tokens: 8000,
+      system: 'You are a Notion data fetcher. Use the notion-fetch tool to retrieve pages from the Webull Journal trading database. Return ONLY a raw JSON array — no markdown, no explanation, no code fences. Each object must have: date (from Date field), setup (Saty Setup), direction (Option Type: CALL or PUT), entry_price (Entry Price number), exit_price (Exit Price number), pnl (P&L ($) number), grade (Grade select), emotional_grade (Emotional Grade select), claude_notes (Claude Notes text), notes (Notes text), symbol (Underlying text), option_type (Option Type select), strike (Strike number), qty (Qty / Contracts number), entry_time (Entry Time), exit_time (Exit Time), session (Session), winner (Winner? checkbox). Sort by date descending. Return ONLY the JSON array.',
+      messages: [{ role: 'user', content: 'Fetch all pages from the Webull Journal database at https://www.notion.so/30e626c1f8f88027a6dcfd63cf9db4a7 and return them as a JSON array.' }],
+      mcp_servers: [{ type: 'url', url: 'https://mcp.notion.com/mcp', name: 'notion' }]
     })
   });
 
-  if (!response.ok) throw new Error('API error ' + response.status);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'API error ' + response.status);
+  }
+
   const data = await response.json();
-  const text = data.content?.[0]?.text || '[]';
+  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+
+  if (!text.trim()) throw new Error('No data returned — make sure Notion is connected in claude.ai Settings > Integrations');
+
   try {
-    const clean = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch {
-    throw new Error('Could not parse response — showing demo data');
+    const match = text.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('No trade array in response');
+    const rows = JSON.parse(match[0]);
+    return Array.isArray(rows) ? rows.filter(t => t.date) : [];
+  } catch(e) {
+    console.error('Parse error:', e.message, '| Raw:', text.slice(0, 300));
+    throw new Error('Could not parse journal data: ' + e.message);
   }
 }
 
 function getDemoJournalRows() {
+  // Real data from Webull Journal (Notion) — fully synced April 6, 2026
+  // To refresh: ask Claude in chat "update my dashboard journal"
   return [
-    { date:'2026-04-04', setup:'Vomy', direction:'Put', entry_price:5920, exit_price:5878, pnl:480, grade:'A',
-      claude_notes:'✅ Clean Vomy setup — 48 EMA break confirmed on candle close. Held through GG with conviction arrow active. Exited at ATR target. No rule violations. Process was excellent — this is exactly what the playbook calls for.' },
-    { date:'2026-04-03', setup:'ORB', direction:'Call', entry_price:5888, exit_price:5902, pnl:320, grade:'B',
-      claude_notes:'⚠️ Valid ORB setup but entry was slightly ahead of the retest — entered mid-candle rather than waiting for close. Stop was properly placed at OR midpoint. R:R was 1:2.4 which meets minimum. Minor timing issue caps this at B.' },
-    { date:'2026-04-02', setup:'Flag Into Ribbon', direction:'Put', entry_price:5910, exit_price:5892, pnl:-180, grade:'A',
-      claude_notes:'✅ Losing trade, A grade. Flag Into Ribbon was textbook — wicks at the 21 EMA, ribbon stacked bearish, conviction arrow confirmed. Stop was hit at the other side of the ribbon as planned. Loss does not affect grade — process was clean.' },
-    { date:'2026-04-01', setup:'Divergence From Extreme', direction:'Call', entry_price:5870, exit_price:5895, pnl:540, grade:'A',
-      claude_notes:'✅ Phase Oscillator in accumulation zone (-65), Class A divergence — higher low on oscillator while price made lower low. Waited for candle close. Volume confirmed. Target hit at 21 EMA. Perfect execution.' },
-    { date:'2026-03-31', setup:'1min EOD Divergence', direction:'Put', entry_price:5945, exit_price:5940, pnl:-90, grade:'C',
-      claude_notes:'⚠️ Setup was valid (3:15pm, divergence present) but volume confirmation was weak. Should have waited for stronger volume signal. R:R at entry was only 1:1.5 — below the 1:2 minimum. Caps at C due to R:R violation.' },
-    { date:'2026-03-28', setup:'Tweezer Bottom', direction:'Call', entry_price:5862, exit_price:5888, pnl:620, grade:'A',
-      claude_notes:'✅ Perfect Tweezer Bottom — parallel wicks at identical lows, entered on 50% reclaim of down candle. Trailed stop to body lows once +$200 in, then to structure. Held for full target. A+ execution on every rule.' },
+    // ── Apr 6, 2026 ──
+    { date:'2026-04-06', setup:'ORB', direction:'CALL', option_type:'CALL', entry_price:2.15, exit_price:4.50, pnl:235, grade:'B', emotional_grade:'B', symbol:'SPX', strike:6605, qty:1, entry_time:'15:43', exit_time:'15:58', session:'PM', winner:true,
+      notes:'TRADE GRADE: B — Valid ORB setup during authorized PM window (15:43). Held top of OR, targeted Call trigger, stop at ORB loss. Clean 1:4.6 R:R. Excellent execution. For an A: document full checklist + verify risk sizing.' },
+    { date:'2026-04-06', setup:'ORB', direction:'CALL', option_type:'CALL', entry_price:5.60, exit_price:10.80, pnl:520, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6600, qty:1, entry_time:'13:14', exit_time:'15:49', session:'PM', winner:true,
+      notes:'TRADE GRADE: D — Great ORB entry at bottom of OR with stop below PDC. +92%. BUT entry at 13:14 violates 12:30-3pm break. ~1:1.86 R:R (just under 1:2 minimum). Good setup recognition, failed timing discipline.' },
+    { date:'2026-04-06', setup:'ORB', direction:'CALL', option_type:'CALL', entry_price:5.00, exit_price:15.70, pnl:1070, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6595, qty:1, entry_time:'14:07', exit_time:'15:59', session:'PM', winner:true,
+      notes:'TRADE GRADE: D — Great entry at bottom of OR confluencing with PDC ATR level and 3m/200. +214%. BUT entry at 14:07 violates break period. Good technical read, failed timing rule.' },
+    { date:'2026-04-06', setup:'ORB', direction:'CALL', option_type:'CALL', entry_price:7.05, exit_price:0.75, pnl:-1260, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6610, qty:2, entry_time:'12:46', exit_time:'15:41', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — First trade back in a while. Entry at 12:46 (break violation). Entered at resistance, should have waited. Price came back to breakeven and held too long. -89%. 2 contracts = $1,260 loss (>$1,000 risk limit).' },
+    // ── Mar 17, 2026 ──
+    { date:'2026-03-17', setup:'', direction:'SHORT', option_type:'CALL', entry_price:3.80, exit_price:2.30, pnl:300, grade:'', emotional_grade:'', symbol:'SPX', strike:6770, qty:2, entry_time:'10:09', exit_time:'10:13', session:'AM', winner:true,
+      notes:'SHORT CALL — Exited in 4 minutes for +$300. No setup documented. Not reviewed.' },
+    { date:'2026-03-17', setup:'', direction:'SHORT', option_type:'CALL', entry_price:0.35, exit_price:0, pnl:105, grade:'', emotional_grade:'', symbol:'SPX', strike:6770, qty:3, entry_time:'11:37', exit_time:'Expired', session:'AM', winner:true,
+      notes:'SHORT CALL — Sold to open, expired worthless. Full $105 premium kept. No setup. Not reviewed.' },
+    { date:'2026-03-17', setup:'', direction:'CALL', option_type:'CALL', entry_price:1.25, exit_price:0.10, pnl:-115, grade:'', emotional_grade:'', symbol:'SPX', strike:6755, qty:1, entry_time:'11:46', exit_time:'15:04', session:'AM', winner:false,
+      notes:'CALL — Held from 11:46am to 3:04pm. -92%. No setup, no notes. Not reviewed.' },
+    { date:'2026-03-17', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.50, exit_price:0.10, pnl:-340, grade:'', emotional_grade:'', symbol:'SPX', strike:6760, qty:1, entry_time:'10:18', exit_time:'14:36', session:'AM', winner:false,
+      notes:'CALL — -97%. Entry 10:18am, exit 2:36pm during break. No setup. Not reviewed.' },
+    { date:'2026-03-17', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.15, exit_price:0, pnl:null, grade:'', emotional_grade:'', symbol:'SPX', strike:6715, qty:1, entry_time:'15:59', exit_time:'', session:'PM', winner:false,
+      notes:'EOD PUT — Stop was 6700, was nervous. Entered 15:59. No P&L logged. Not reviewed.' },
+    // ── Mar 13, 2026 ──
+    { date:'2026-03-13', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:5.80, exit_price:4.00, pnl:-180, grade:'', emotional_grade:'A', symbol:'SPX', strike:6640, qty:1, entry_time:'10:20', exit_time:'10:34', session:'AM', winner:false,
+      notes:'Emotional Grade: A — Clean Vomy setup after upside GG completed. Planned to add into strength after 10m/21 rejection but accidentally sold — plan was solid, execution error. Loss not a reflection of process quality.' },
+    // ── Mar 11, 2026 ──
+    { date:'2026-03-11', setup:'Vomy', direction:'SHORT', option_type:'PUT', entry_price:2.00, exit_price:0.90, pnl:-110, grade:'', emotional_grade:'', symbol:'SPX', strike:6750, qty:1, entry_time:'15:30', exit_time:'15:36', session:'PM', winner:true,
+      notes:'SHORT PUT — Saty Setup: Vomy noted but self-described "no setup, overtraded in compression." Winner flag but -$110 P&L.' },
+    { date:'2026-03-11', setup:'', direction:'PUT', option_type:'PUT', entry_price:1.85, exit_price:0, pnl:-185, grade:'', emotional_grade:'', symbol:'SPX', strike:6765, qty:1, entry_time:'15:45', exit_time:'', session:'PM', winner:false,
+      notes:'No setup, over traded. Was up briefly and did not take profit. Expired worthless. -$185.' },
+    { date:'2026-03-11', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.45, exit_price:0, pnl:-90, grade:'', emotional_grade:'F', symbol:'SPX', strike:6770, qty:2, entry_time:'15:57', exit_time:'', session:'PM', winner:false,
+      notes:'Emotional Grade: F — No setup. EOD lotto, 2 contracts, expired worthless. -$90.' },
+    // ── Mar 10, 2026 ──
+    { date:'2026-03-10', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.70, exit_price:0.30, pnl:-40, grade:'', emotional_grade:'D', symbol:'SPX', strike:6715, qty:1, entry_time:'11:56', exit_time:'13:24', session:'AM', winner:false,
+      notes:'Emotional Grade: D — "Over trade no true setup." Exit at 13:24 = break violation. -57%.' },
+    { date:'2026-03-10', setup:'', direction:'CALL', option_type:'CALL', entry_price:0.15, exit_price:0, pnl:-15, grade:'', emotional_grade:'F', symbol:'SPX', strike:6785, qty:1, entry_time:'15:58', exit_time:'15:59', session:'PM', winner:false,
+      notes:'Emotional Grade: F — "EOD trade no setup just a lotto." Entered 15:58 with 1 minute to close. Expired worthless.' },
+    // ── Feb 27, 2026 ──
+    { date:'2026-02-27', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.70, exit_price:0, pnl:-70, grade:'', emotional_grade:'F', symbol:'SPX', strike:6845, qty:1, entry_time:'15:22', exit_time:'15:59', session:'PM', winner:false,
+      notes:'Emotional Grade: F — "Went to 0 EOD trade no setup." Entered 15:22, expired worthless. Pure EOD gamble.' },
+    // ── Feb 26, 2026 ──
+    { date:'2026-02-26', setup:'Vomy', direction:'PUT', option_type:'PUT', entry_price:5.50, exit_price:17.40, pnl:2380, grade:'', emotional_grade:'A', symbol:'SPX', strike:6880, qty:2, entry_time:'09:43', exit_time:'10:17', session:'AM', winner:true,
+      notes:'Emotional Grade: A — Entered at 3m Vomy + ORB breakout. Stop at 3m/48, never hit. Took profit at SPX gap fill just below GG completion. +216%. NDOG ICT concept. Textbook execution.' },
+    { date:'2026-02-26', setup:'Flag into ribbon', direction:'PUT', option_type:'PUT', entry_price:4.00, exit_price:2.50, pnl:-150, grade:'', emotional_grade:'C', symbol:'SPX', strike:6800, qty:1, entry_time:'10:31', exit_time:'10:39', session:'AM', winner:true,
+      notes:'Emotional Grade: C — Flag into ribbon setup. FOMO entry. Stop at 3m/21 was hit fast. 8-minute trade. Should have had better entry patience.' },
+    { date:'2026-02-26', setup:'Flag into ribbon', direction:'PUT', option_type:'PUT', entry_price:5.50, exit_price:3.10, pnl:-240, grade:'', emotional_grade:'C', symbol:'SPX', strike:6840, qty:1, entry_time:'10:43', exit_time:'10:58', session:'AM', winner:false,
+      notes:'Emotional Grade: C — Flag into ribbon. Set stop on 3m/21 and it got hit again. Should have waited for better entry.' },
+    { date:'2026-02-26', setup:'Flag into ribbon', direction:'PUT', option_type:'PUT', entry_price:5.30, exit_price:2.15, pnl:-315, grade:'', emotional_grade:'B', symbol:'SPX', strike:6850, qty:1, entry_time:'10:53', exit_time:'11:16', session:'AM', winner:false,
+      notes:'Emotional Grade: B — Flag into ribbon. Got stopped out at 3m/21. Respected stop, good discipline.' },
+    { date:'2026-02-26', setup:'Flag into ribbon', direction:'PUT', option_type:'PUT', entry_price:5.30, exit_price:1.05, pnl:-425, grade:'', emotional_grade:'F', symbol:'SPX', strike:6860, qty:1, entry_time:'11:01', exit_time:'13:45', session:'AM', winner:false,
+      notes:'Emotional Grade: F — Flag into ribbon. Had stop at 3m/21 and target of -1 ATR. HIT TARGET and did not take profit — watched it immediately reverse. "Really mad at myself." Exit at 13:45 also violates break period.' },
+    { date:'2026-02-26', setup:'PO Divergence', direction:'PUT', option_type:'PUT', entry_price:1.30, exit_price:0.70, pnl:-60, grade:'', emotional_grade:'D', symbol:'SPX', strike:6860, qty:1, entry_time:'13:48', exit_time:'14:04', session:'PM', winner:false,
+      notes:'Emotional Grade: D — PO Divergence setup. Stop at 3m/48. Should have taken profit at 3m/200. Entry at 13:48 = break period violation.' },
+    // ── Feb 25, 2026 ──
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:5.80, exit_price:3.90, pnl:-190, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:1, entry_time:'09:42', exit_time:'09:47', session:'AM', winner:false,
+      notes:'SPX 6900 PUT — Exited in 5 min. -$190 (-33%). No setup, no grade.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.40, exit_price:3.00, pnl:-280, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:2, entry_time:'09:53', exit_time:'10:28', session:'AM', winner:false,
+      notes:'Part of 3-contract position — bought 2 @ $4.40, all sold @ $3.00. P&L: -$280.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.30, exit_price:3.00, pnl:-130, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:1, entry_time:'10:02', exit_time:'10:28', session:'AM', winner:false,
+      notes:'Part of 3-contract position — bought 1 @ $4.30, sold @ $3.00. P&L: -$130.' },
+    { date:'2026-02-25', setup:'', direction:'CALL', option_type:'CALL', entry_price:4.00, exit_price:2.40, pnl:-320, grade:'', emotional_grade:'', symbol:'SPX', strike:6940, qty:2, entry_time:'10:28', exit_time:'10:34', session:'AM', winner:false,
+      notes:'Part of 3-contract CALL position — bought 2 @ $4.00, sold all @ $2.40. P&L: -$320.' },
+    { date:'2026-02-25', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.60, exit_price:2.40, pnl:-120, grade:'', emotional_grade:'', symbol:'SPX', strike:6940, qty:1, entry_time:'10:31', exit_time:'10:34', session:'AM', winner:false,
+      notes:'Part of 3-contract CALL position — bought 1 @ $3.60, sold all @ $2.40. P&L: -$120.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.10, exit_price:1.90, pnl:-220, grade:'', emotional_grade:'', symbol:'SPX', strike:6915, qty:1, entry_time:'11:12', exit_time:'11:43', session:'AM', winner:false,
+      notes:'SPX 6915 PUT — -$220 (-54%). No setup, no grade.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.10, exit_price:1.35, pnl:-75, grade:'', emotional_grade:'', symbol:'SPX', strike:6920, qty:1, entry_time:'11:51', exit_time:'12:15', session:'AM', winner:false,
+      notes:'SPX 6920 PUT — -$75 (-36%). No setup, no grade.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.30, exit_price:1.00, pnl:-330, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:1, entry_time:'10:55', exit_time:'11:42', session:'AM', winner:false,
+      notes:'Part of 4-contract position — bought 1 @ $4.30, sold all @ $1.00. P&L: -$330.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:5.40, exit_price:2.60, pnl:-560, grade:'', emotional_grade:'', symbol:'SPX', strike:6890, qty:2, entry_time:'09:32', exit_time:'09:51', session:'AM', winner:false,
+      notes:'SPX 6890 PUT — 2 contracts, -$560 (-52%). No setup, no grade.' },
+    { date:'2026-02-25', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.60, exit_price:1.00, pnl:-1080, grade:'', emotional_grade:'', symbol:'SPX', strike:6900, qty:3, entry_time:'10:35', exit_time:'11:42', session:'AM', winner:false,
+      notes:'3 contracts @ $4.60, sold 4 total @ $1.00. P&L: -$1,080. Risk exceeded $1,000 limit — hard rule violation.' },
+    // ── Feb 20, 2026 ──
+    { date:'2026-02-20', setup:'Divergence From Extreme', direction:'PUT', option_type:'PUT', entry_price:4.20, exit_price:6.00, pnl:180, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6820, qty:1, entry_time:'10:30', exit_time:'12:16', session:'AM', winner:true,
+      notes:'TRADE GRADE: D — Valid Divergence From Extreme setup identified. Profitable +$180. Had predetermined stop. CRITICAL: Exit at 12:16 violates 12:30-3pm break. Grade capped at D despite good setup recognition.' },
+    { date:'2026-02-20', setup:'', direction:'PUT', option_type:'PUT', entry_price:5.20, exit_price:6.00, pnl:80, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6820, qty:1, entry_time:'10:04', exit_time:'12:16', session:'AM', winner:true,
+      notes:'TRADE GRADE: D — Profitable but break exit (12:16) and no documented setup.' },
+    // ── Feb 19, 2026 ──
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.10, exit_price:0.30, pnl:-280, grade:'', emotional_grade:'', symbol:'SPX', strike:6800, qty:1, entry_time:'09:57', exit_time:'14:07', session:'AM', winner:false,
+      notes:'Part of 5-contract position — all 5 sold @ $0.30 at 14:07. Exit during break (14:07).' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.70, exit_price:0.30, pnl:-240, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6800, qty:1, entry_time:'10:51', exit_time:'14:07', session:'AM', winner:false,
+      notes:'TRADE GRADE: D — Break exit (14:07). No playbook setup.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.45, exit_price:0.65, pnl:-180, grade:'', emotional_grade:'', symbol:'SPX', strike:6780, qty:1, entry_time:'09:54', exit_time:'11:18', session:'AM', winner:false,
+      notes:'Part of 3-contract position — all sold @ $0.65 at 11:18. No grade.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.20, exit_price:0.65, pnl:-355, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6780, qty:1, entry_time:'09:45', exit_time:'11:18', session:'AM', winner:false,
+      notes:'TRADE GRADE: D — No setup. 0DTE, 84.5% loss. Missing setup, bias, timeframe, exit plan.' },
+    { date:'2026-02-19', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.90, exit_price:2.35, pnl:-155, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6865, qty:1, entry_time:'14:19', exit_time:'14:29', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break period (14:19). No setup. Reactive trade.' },
+    { date:'2026-02-19', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.90, exit_price:2.35, pnl:-155, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6865, qty:1, entry_time:'14:20', exit_time:'14:29', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break period (14:20). No setup.' },
+    { date:'2026-02-19', setup:'', direction:'CALL', option_type:'CALL', entry_price:3.20, exit_price:2.35, pnl:-85, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6865, qty:1, entry_time:'14:22', exit_time:'14:29', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break period, no setup, no checklist. 3 violations.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:1.75, exit_price:1.45, pnl:-30, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6830, qty:1, entry_time:'14:12', exit_time:'14:19', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Part of 5-contract position. Break period (14:12). No setup.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:1.45, exit_price:0, pnl:-145, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6840, qty:1, entry_time:'15:35', exit_time:'Expired', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — 0DTE at 15:35, no setup, expired worthless.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.70, exit_price:0, pnl:-370, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6840, qty:1, entry_time:'15:09', exit_time:'Expired', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — 0DTE, no setup, expired worthless.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.05, exit_price:0, pnl:-205, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6855, qty:1, entry_time:'15:54', exit_time:'Expired', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — 0DTE at 15:54 with 6 min to close, expired worthless.' },
+    { date:'2026-02-19', setup:'', direction:'PUT', option_type:'PUT', entry_price:0.30, exit_price:0, pnl:90, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6830, qty:3, entry_time:'15:33', exit_time:'Expired', session:'PM', winner:true,
+      notes:'TRADE GRADE: D — Short puts expired worthless, +$90. No setup documented.' },
+    // ── Feb 18, 2026 ──
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:4.30, exit_price:0.20, pnl:-410, grade:'', emotional_grade:'', symbol:'SPX', strike:6780, qty:1, entry_time:'09:36', exit_time:'12:55', session:'AM', winner:false,
+      notes:'Part of 4-contract position — 2 @ $4.30 at 09:36, 2 @ $3.40 at 09:50, all sold @ $0.20 at 12:55. Averaging down + break exit.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.40, exit_price:0.20, pnl:-320, grade:'F', emotional_grade:'F', symbol:'SPX', strike:6780, qty:1, entry_time:'09:50', exit_time:'12:55', session:'AM', winner:false,
+      notes:'TRADE GRADE: F — 3 simultaneous violations: averaged down, break exit, no setup.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.40, exit_price:0.20, pnl:-320, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6780, qty:1, entry_time:'09:50', exit_time:'12:55', session:'AM', winner:false,
+      notes:'TRADE GRADE: D — Averaged down + break exit (12:55). No setup.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.80, exit_price:0.95, pnl:-285, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6850, qty:1, entry_time:'14:58', exit_time:'15:32', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Averaged down (added 2 @ $2.25 after 3 @ $3.80). Valid PM window. No setup.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:2.25, exit_price:0.95, pnl:-130, grade:'', emotional_grade:'', symbol:'SPX', strike:6850, qty:1, entry_time:'15:01', exit_time:'15:32', session:'PM', winner:false,
+      notes:'Add-on leg averaging down — 2 contracts @ $2.25 at 15:01, part of 5-contract position.' },
+    { date:'2026-02-18', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.80, exit_price:0.95, pnl:-285, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6850, qty:1, entry_time:'14:58', exit_time:'15:32', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Added contracts 3 min after initial entry (averaging down). No setup.' },
+    // ── Feb 17, 2026 ──
+    { date:'2026-02-17', setup:'None', direction:'PUT', option_type:'PUT', entry_price:2.35, exit_price:0.65, pnl:-170, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6830, qty:1, entry_time:'13:54', exit_time:'14:37', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break period entry + averaging down (scaled at $3.10, $2.35, $2.10).' },
+    { date:'2026-02-17', setup:'3m/200 rejection', direction:'PUT', option_type:'PUT', entry_price:5.20, exit_price:2.70, pnl:-250, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6800, qty:1, entry_time:'11:45', exit_time:'13:24', session:'AM', winner:false,
+      notes:'TRADE GRADE: D — No valid setup. Exit at 13:24 during break. Averaged down at $5.40, $5.20, $3.90.' },
+    { date:'2026-02-17', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.90, exit_price:2.70, pnl:-120, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6800, qty:1, entry_time:'12:39', exit_time:'13:24', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — Break entry (12:39). Averaging down. No setup.' },
+    { date:'2026-02-17', setup:'', direction:'PUT', option_type:'PUT', entry_price:3.20, exit_price:0, pnl:-320, grade:'D', emotional_grade:'D', symbol:'SPX', strike:6850, qty:1, entry_time:'14:35', exit_time:'Expired', session:'PM', winner:false,
+      notes:'TRADE GRADE: D — "No setup, over traded." Expired worthless.' },
   ];
 }
+
 
 function filterJournal() {
   const setup  = document.getElementById('j-filter-setup').value;
