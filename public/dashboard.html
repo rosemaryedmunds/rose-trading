@@ -1905,6 +1905,8 @@ function renderPnl() {
 
 // ── INIT ─────────────────────────────────────────────
 function init() {
+  activePeriod = 'all';
+  activeJournalPeriod = 'all';
   setInterval(updateClock, 1000);
   updateClock();
   document.getElementById('pnl-date').valueAsDate = new Date();
@@ -1914,9 +1916,8 @@ function init() {
     document.getElementById('saved-url').textContent = savedUrl;
     startPolling();
   }
-  // Always load journal + P&L from baked-in Notion data
+  // Always load journal + P&L from Notion (loadNotionDashboard called inside after data ready)
   loadJournalFromNotion();
-  loadNotionDashboard();
   updateApiKeyStatus();
   updateNotionStatus();
 }
@@ -2688,8 +2689,8 @@ function setPeriod(period) {
   }
   filterJournal(); // re-render journal rows with new period
   renderPnl();
+  loadNotionDashboard(); // update KPI cards + charts immediately
   setTimeout(drawEquityCurve, 50);
-  setTimeout(loadNotionDashboard, 60);
 }
 
 // Keep for backward compat (old "Pick Month" button)
