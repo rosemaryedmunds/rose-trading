@@ -7,3 +7,6 @@
   from = "/api/briefing"
   to = "/.netlify/functions/morning-brief"
   status = 200
+
+[functions."morning-brief"]
+  timeout = 30
