@@ -1,0 +1,461 @@
+---
+// src/pages/morning-brief.astro
+// Morning Briefing page - AI-powered daily market intelligence
+// This page loads its own styles/nav since it's a full-page experience
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Brief | rose.trading</title>
+<meta name="description" content="AI-powered daily morning briefing — pre-market movers, earnings, economic events, geopolitical watch, analyst actions, and Trump's schedule. Built for SPX/ES 0DTE traders.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- IMPORTANT: The Anthropic API key must be set as a Netlify environment variable
+     VITE_ANTHROPIC_API_KEY and injected here, OR you use a Netlify serverless function
+     at /api/briefing to proxy the request. See BRIEFING-SETUP.md for instructions.
+     For now the client calls the API directly (works for private/member-only pages). -->
+
+<style>
+  :root {
+    --bg-primary: #0B0C15;
+    --bg-secondary: #1C1E2D;
+    --bg-card: #141520;
+    --text-primary: #E0E0E0;
+    --text-secondary: #8B8FA8;
+    --text-muted: #555870;
+    --accent-purple: #998BFF;
+    --accent-blue: #5F5CFF;
+    --accent-green: #4ADE80;
+    --accent-red: #F87171;
+    --accent-amber: #FBBF24;
+    --accent-teal: #2DD4BF;
+    --border: rgba(153, 139, 255, 0.12);
+    --border-soft: rgba(255,255,255,0.05);
+    --font-display: 'Syne', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 2.5rem;
+    border-bottom: 0.5px solid var(--border-soft);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(11,12,21,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; color: var(--accent-purple); text-decoration: none; }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a { font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
+
+  .page-header {
+    padding: 3rem 2.5rem 2rem;
+    border-bottom: 0.5px solid var(--border-soft);
+    position: relative; overflow: hidden;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute; top: -60px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(ellipse, rgba(95,92,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--accent-purple); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .header-title { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: #fff; }
+  .header-title span { color: var(--accent-purple); }
+  .header-meta { display: flex; align-items: center; gap: 1.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+  .header-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(74,222,128,0.08); border: 0.5px solid rgba(74,222,128,0.25); border-radius: 20px; padding: 3px 10px; font-family: var(--font-mono); font-size: 10px; color: var(--accent-green); }
+  .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(153,139,255,0.08); border: 0.5px solid rgba(153,139,255,0.25); border-radius: 8px; padding: 5px 12px; font-family: var(--font-mono); font-size: 11px; color: var(--accent-purple); cursor: pointer; transition: all 0.2s; }
+  .refresh-btn:hover { background: rgba(153,139,255,0.15); border-color: rgba(153,139,255,0.5); }
+  .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+  .spin { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .main { padding: 2rem 2.5rem; max-width: 1200px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.75rem; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .grid-4 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { nav { padding: 1rem; } .main { padding: 1.25rem; } .nav-links { gap: 1rem; } .nav-links a { font-size: 12px; } }
+
+  .section { margin-bottom: 2rem; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; }
+  .section-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  .section-label .bar { width: 12px; height: 2px; border-radius: 1px; }
+  .bar-purple { background: var(--accent-purple); } .bar-green { background: var(--accent-green); }
+  .bar-red { background: var(--accent-red); } .bar-amber { background: var(--accent-amber); }
+  .bar-blue { background: var(--accent-blue); } .bar-teal { background: var(--accent-teal); }
+
+  .card { background: var(--bg-card); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(153,139,255,0.3), transparent); }
+  .tone-card { background: var(--bg-card); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; position: relative; overflow: hidden; }
+  .tone-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(153,139,255,0.4), transparent); }
+  .tone-content { font-size: 13.5px; line-height: 1.65; color: var(--text-primary); }
+  .tone-meter { display: flex; align-items: center; gap: 10px; margin-top: 0.85rem; }
+  .meter-track { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .meter-fill { height: 100%; border-radius: 2px; transition: width 1.2s ease; }
+  .meter-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); min-width: 90px; text-align: right; }
+
+  .gap-card { background: var(--bg-card); border: 0.5px solid var(--border-soft); border-radius: 10px; padding: 0.7rem 0.85rem; }
+  .gap-ticker { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+  .gap-move { font-size: 19px; font-weight: 700; letter-spacing: -0.03em; margin: 1px 0; }
+  .gap-name { font-size: 11px; color: var(--text-secondary); line-height: 1.3; }
+  .text-green { color: var(--accent-green); } .text-red { color: var(--accent-red); }
+
+  .item-list { display: flex; flex-direction: column; }
+  .list-row { display: flex; align-items: flex-start; gap: 10px; padding: 0.7rem 0; border-bottom: 0.5px solid var(--border-soft); }
+  .list-row:last-child { border-bottom: none; }
+  .row-icon { width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; font-family: var(--font-mono); }
+  .icon-red { background: rgba(248,113,113,0.12); color: var(--accent-red); }
+  .icon-green { background: rgba(74,222,128,0.10); color: var(--accent-green); }
+  .icon-amber { background: rgba(251,191,36,0.10); color: var(--accent-amber); }
+  .icon-purple { background: rgba(153,139,255,0.10); color: var(--accent-purple); }
+  .icon-teal { background: rgba(45,212,191,0.10); color: var(--accent-teal); }
+  .icon-muted { background: rgba(255,255,255,0.04); color: var(--text-secondary); }
+  .row-body { flex: 1; min-width: 0; }
+  .row-title { font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.4; }
+  .row-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; line-height: 1.5; }
+
+  .badge { display: inline-block; font-family: var(--font-mono); font-size: 9px; padding: 2px 7px; border-radius: 20px; margin-left: 6px; vertical-align: middle; }
+  .badge-up { background: rgba(74,222,128,0.1); color: var(--accent-green); border: 0.5px solid rgba(74,222,128,0.2); }
+  .badge-dn { background: rgba(248,113,113,0.1); color: var(--accent-red); border: 0.5px solid rgba(248,113,113,0.2); }
+  .badge-na { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 0.5px solid var(--border-soft); }
+  .badge-hot { background: rgba(251,191,36,0.1); color: var(--accent-amber); border: 0.5px solid rgba(251,191,36,0.2); }
+  .badge-blue { background: rgba(95,92,255,0.12); color: var(--accent-blue); border: 0.5px solid rgba(95,92,255,0.25); }
+
+  .econ-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+  .econ-item { background: rgba(255,255,255,0.02); border: 0.5px solid var(--border-soft); border-radius: 8px; padding: 0.6rem 0.75rem; }
+  .econ-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+  .econ-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .econ-note { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  .geo-alert { background: rgba(251,191,36,0.05); border: 0.5px solid rgba(251,191,36,0.2); border-left: 2px solid var(--accent-amber); border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.65rem; }
+  .geo-alert-title { font-size: 13px; font-weight: 600; color: var(--accent-amber); }
+  .geo-alert-body { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.6; }
+
+  .trump-row { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 0.55rem 0; border-bottom: 0.5px solid var(--border-soft); align-items: start; }
+  .trump-row:last-child { border-bottom: none; }
+  .trump-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); padding-top: 2px; }
+  .trump-desc { font-size: 12.5px; color: var(--text-primary); line-height: 1.5; }
+  .trump-loc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+  .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; }
+  .loading-ring { width: 44px; height: 44px; border: 2px solid rgba(153,139,255,0.15); border-top-color: var(--accent-purple); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1.25rem; }
+  .loading-text { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+  .loading-step { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); padding: 2px 0; transition: color 0.3s; }
+  .loading-step.active { color: var(--accent-purple); }
+
+  .error-state { background: rgba(248,113,113,0.05); border: 0.5px solid rgba(248,113,113,0.2); border-radius: 10px; padding: 1.5rem; text-align: center; }
+  .error-state p { font-size: 13px; color: var(--accent-red); margin-bottom: 0.75rem; }
+  .error-btn { background: rgba(248,113,113,0.1); border: 0.5px solid rgba(248,113,113,0.3); color: var(--accent-red); border-radius: 8px; padding: 6px 14px; font-family: var(--font-mono); font-size: 11px; cursor: pointer; }
+  .disclaimer { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.6; }
+  .section-divider { height: 0.5px; background: var(--border-soft); margin: 1.75rem 0; }
+  .page-footer { border-top: 0.5px solid var(--border-soft); padding: 1.5rem 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+  .footer-text { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">rose.trading</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <a href="/course">Course</a>
+    <a href="/guides">Guides</a>
+    <a href="/morning-brief" class="active">Morning Brief</a>
+    <a href="/resources">Resources</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="header-eyebrow">// daily intelligence</div>
+  <div class="header-title">Morning <span>Brief</span></div>
+  <div class="header-meta">
+    <span class="header-date" id="currentDate">Loading...</span>
+    <span class="status-pill"><span class="status-dot"></span>AI-powered · refreshes daily</span>
+    <button class="refresh-btn" onclick="runBriefing()" id="refreshBtn">
+      <span id="refreshIcon">↺</span> Refresh Now
+    </button>
+  </div>
+</div>
+
+<div class="main">
+  <div id="briefingContent">
+    <div class="loading-state">
+      <div class="loading-ring"></div>
+      <div class="loading-text">Building your morning brief...</div>
+      <div id="loadingSteps">
+        <div class="loading-step active" id="step1">▶ Scanning market news & geopolitics</div>
+        <div class="loading-step" id="step2">▷ Pulling earnings & economic calendar</div>
+        <div class="loading-step" id="step3">▷ Fetching Trump's schedule</div>
+        <div class="loading-step" id="step4">▷ Compiling analyst ratings</div>
+        <div class="loading-step" id="step5">▷ Generating briefing...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-footer">
+  <span class="footer-text">rose.trading · SPX/ES 0DTE Focus · Houston CT</span>
+  <span class="footer-text" id="footerSources">Sources: Anthropic Claude · web search · Roll Call Factbase</span>
+</div>
+
+<script is:inline>
+const today = new Date();
+const dateStr = today.toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric',year:'numeric'});
+document.getElementById('currentDate').textContent = dateStr;
+
+const TRUMP_URL = 'https://rollcall.com/factbase/trump/topic/calendar/';
+
+async function runBriefing() {
+  const btn = document.getElementById('refreshBtn');
+  const icon = document.getElementById('refreshIcon');
+  btn.classList.add('loading');
+  icon.innerHTML = '<span class="spin">↻</span>';
+
+  document.getElementById('briefingContent').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-ring"></div>
+      <div class="loading-text">Building your morning brief...</div>
+      <div id="loadingSteps">
+        <div class="loading-step active" id="step1">▶ Scanning market news & geopolitics</div>
+        <div class="loading-step" id="step2">▷ Pulling earnings & economic calendar</div>
+        <div class="loading-step" id="step3">▷ Fetching Trump's schedule</div>
+        <div class="loading-step" id="step4">▷ Compiling analyst ratings</div>
+        <div class="loading-step" id="step5">▷ Generating briefing...</div>
+      </div>
+    </div>`;
+
+  const steps = ['step1','step2','step3','step4','step5'];
+  let si = 0;
+  const stepTimer = setInterval(() => {
+    if (si > 0 && document.getElementById(steps[si-1])) document.getElementById(steps[si-1]).classList.remove('active');
+    if (si < steps.length && document.getElementById(steps[si])) document.getElementById(steps[si]).classList.add('active');
+    si++;
+  }, 2200);
+
+  try {
+    const res = await fetch('/.netlify/functions/morning-brief');
+
+    clearInterval(stepTimer);
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const brief = await res.json();
+
+    renderBriefing(brief);
+  } catch(err) {
+    clearInterval(stepTimer);
+    document.getElementById('briefingContent').innerHTML = `
+      <div class="error-state">
+        <p>⚠ Briefing failed: ${esc(err.message)}</p>
+        <button class="error-btn" onclick="runBriefing()">↺ Retry</button>
+        <p style="margin-top:0.75rem;font-size:11px;color:var(--text-muted)">Tip: Ensure VITE_ANTHROPIC_API_KEY is set in Netlify env vars, or use the serverless proxy function.</p>
+      </div>`;
+  }
+
+  btn.classList.remove('loading');
+  icon.textContent = '↺';
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function biasColor(b) {
+  return b==='bullish'?'var(--accent-green)':b==='bearish'?'var(--accent-red)':b==='mixed'?'var(--accent-amber)':'var(--text-secondary)';
+}
+
+function actionBadge(t) {
+  if (t==='upgrade') return '<span class="badge badge-up">Upgrade</span>';
+  if (t==='downgrade') return '<span class="badge badge-dn">Downgrade</span>';
+  if (t==='initiation') return '<span class="badge badge-blue">Initiation</span>';
+  if (t==='pt_raise') return '<span class="badge badge-up">PT↑</span>';
+  if (t==='pt_cut') return '<span class="badge badge-dn">PT↓</span>';
+  return '';
+}
+
+function actionIcon(t) {
+  if (t==='upgrade'||t==='pt_raise') return {cls:'icon-green',s:'↑'};
+  if (t==='downgrade'||t==='pt_cut') return {cls:'icon-red',s:'↓'};
+  return {cls:'icon-muted',s:'~'};
+}
+
+function geoColor(l) {
+  return l==='high'?'var(--accent-red)':l==='medium'?'var(--accent-amber)':'var(--text-muted)';
+}
+
+function renderBriefing(b) {
+  const t = b.market_tone||{};
+  const fc = biasColor(t.bias);
+  const fp = Math.min(100,Math.max(0,t.bias_score||50));
+
+  const guH = (b.gap_ups||[]).slice(0,4).map(g=>`
+    <div class="gap-card">
+      <div class="gap-ticker">${esc(g.ticker)}</div>
+      <div class="gap-move text-green">${esc(g.move)}</div>
+      <div class="gap-name">${esc(g.name)}<br><span style="color:var(--text-muted);font-size:10px">${esc(g.catalyst)}</span></div>
+    </div>`).join('');
+
+  const gdH = (b.gap_downs||[]).slice(0,4).map(g=>`
+    <div class="gap-card">
+      <div class="gap-ticker">${esc(g.ticker)}</div>
+      <div class="gap-move text-red">${esc(g.move)}</div>
+      <div class="gap-name">${esc(g.name)}<br><span style="color:var(--text-muted);font-size:10px">${esc(g.catalyst)}</span></div>
+    </div>`).join('');
+
+  const etH = (b.earnings_today||[]).map(e=>`
+    <div class="list-row">
+      <div class="row-icon icon-amber" style="font-size:9px">${esc(e.ticker)}</div>
+      <div class="row-body">
+        <div class="row-title">${esc(e.name)} <span class="badge ${e.timing==='pre-market'?'badge-hot':'badge-na'}">${esc(e.timing)}</span></div>
+        <div class="row-sub">${esc(e.note)}</div>
+      </div>
+    </div>`).join('') || '<p style="font-size:12px;color:var(--text-muted);padding:0.5rem 0">No major earnings today</p>';
+
+  const econH = (b.economic_events||[]).map(e=>`
+    <div class="econ-item">
+      <div class="econ-time">${esc(e.time)} ${e.importance==='high'?'🔥':e.importance==='medium'?'◆':''}</div>
+      <div class="econ-name">${esc(e.name)}</div>
+      <div class="econ-note">${esc(e.note)}</div>
+    </div>`).join('');
+
+  const aaH = (b.analyst_actions||[]).slice(0,5).map(a=>{
+    const ic=actionIcon(a.type);
+    return `<div class="list-row">
+      <div class="row-icon ${ic.cls}">${ic.s}</div>
+      <div class="row-body">
+        <div class="row-title">${esc(a.firm)} on ${esc(a.ticker)} ${actionBadge(a.type)}</div>
+        <div class="row-sub">${esc(a.action)} — ${esc(a.note)}</div>
+      </div></div>`;
+  }).join('');
+
+  const geoH = (b.geopolitical||[]).map(g=>`
+    <div class="geo-alert" style="border-left-color:${geoColor(g.level)}">
+      <div class="geo-alert-title" style="color:${geoColor(g.level)}">${esc(g.title)}</div>
+      <div class="geo-alert-body">${esc(g.body)}</div>
+      ${g.market_impact?`<div style="margin-top:4px;font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">Market: ${esc(g.market_impact)}</div>`:''}
+    </div>`).join('');
+
+  const newsH = (b.company_news||[]).map(n=>`
+    <div class="list-row">
+      <div class="row-icon icon-teal" style="font-size:9px">${esc((n.ticker||'').slice(0,4))}</div>
+      <div class="row-body">
+        <div class="row-title">${esc(n.title)}</div>
+        <div class="row-sub">${esc(n.body)}</div>
+      </div>
+    </div>`).join('');
+
+  const tsH = (b.trump_schedule||[]).length>0
+    ? (b.trump_schedule||[]).map(s=>`
+      <div class="trump-row">
+        <div class="trump-time">${esc(s.time)}</div>
+        <div>
+          <div class="trump-desc">${esc(s.description)}</div>
+          ${s.location?`<div class="trump-loc">${esc(s.location)}${s.access?` · ${esc(s.access)}`:''}</div>`:''}
+        </div>
+      </div>`).join('')
+    : `<p style="font-size:12px;color:var(--text-muted);padding:0.5rem 0">Today's schedule not yet published. <a href="${TRUMP_URL}" target="_blank" style="color:var(--accent-purple)">View on Roll Call ↗</a></p>`;
+
+  const srcs = (b.sources||[]).join(' · ');
+  if (srcs) document.getElementById('footerSources').textContent = 'Sources: ' + srcs;
+
+  document.getElementById('briefingContent').innerHTML = `
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label"><span class="bar bar-purple"></span>Market tone</div>
+        <a href="https://www.barchart.com/stocks/pre-market-trading" target="_blank" style="font-family:var(--font-mono);font-size:10px;color:var(--accent-purple);text-decoration:none">Live scanner ↗</a>
+      </div>
+      <div class="tone-card">
+        <div class="tone-content">${esc(t.summary)}</div>
+        ${t.key_risk?`<div style="font-size:12px;color:var(--accent-amber);margin-top:8px;font-family:var(--font-mono)">⚠ ${esc(t.key_risk)}</div>`:''}
+        <div class="tone-meter">
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">Bear</span>
+          <div class="meter-track"><div class="meter-fill" style="width:${fp}%;background:${fc}"></div></div>
+          <span class="meter-label" style="color:${fc}">${(t.bias||'').charAt(0).toUpperCase()+(t.bias||'').slice(1)} ${fp}%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label" style="margin-bottom:0.65rem"><span class="bar bar-green"></span>Pre-market gap ups <span class="badge badge-up" style="margin-left:8px">↑</span></div>
+      <div class="grid-4">${guH||'<p style="font-size:12px;color:var(--text-muted)">Available after 8 AM ET</p>'}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label" style="margin-bottom:0.65rem"><span class="bar bar-red"></span>Pre-market gap downs <span class="badge badge-dn" style="margin-left:8px">↓</span></div>
+      <div class="grid-4">${gdH||'<p style="font-size:12px;color:var(--text-muted)">Available after 8 AM ET</p>'}</div>
+      <p class="disclaimer" style="margin-top:6px">⚠ Indicative only — confirm live at <a href="https://www.barchart.com/stocks/pre-market-trading" target="_blank" style="color:var(--accent-purple)">Barchart</a> or <a href="https://www.tradingview.com/markets/stocks-usa/market-movers-pre-market-gappers/" target="_blank" style="color:var(--accent-purple)">TradingView</a></p>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="grid-2">
+      <div class="section">
+        <div class="section-label" style="margin-bottom:0.75rem"><span class="bar bar-amber"></span>Earnings today</div>
+        <div class="card">
+          <div class="item-list">${etH}</div>
+          ${b.earnings_week?`<div style="margin-top:0.75rem;padding-top:0.65rem;border-top:0.5px solid var(--border-soft);font-size:11.5px;color:var(--text-secondary)"><span style="color:var(--text-muted);font-family:var(--font-mono);font-size:10px">This week:</span> ${esc(b.earnings_week)}</div>`:''}
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-label" style="margin-bottom:0.75rem"><span class="bar bar-blue"></span>Economic calendar</div>
+        <div class="card"><div class="econ-grid">${econH||'<p style="font-size:12px;color:var(--text-muted)">No major events today</p>'}</div></div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="section">
+      <div class="section-label" style="margin-bottom:0.75rem"><span class="bar bar-purple"></span>Analyst actions</div>
+      <div class="card"><div class="item-list">${aaH||'<p style="font-size:12px;color:var(--text-muted)">No major ratings changes today</p>'}</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label" style="margin-bottom:0.75rem"><span class="bar bar-red"></span>Geopolitical watch</div>
+      ${geoH||'<p style="font-size:12px;color:var(--text-muted)">No major alerts</p>'}
+    </div>
+
+    <div class="section">
+      <div class="section-label" style="margin-bottom:0.75rem"><span class="bar bar-teal"></span>Company & sector news</div>
+      <div class="card"><div class="item-list">${newsH||'<p style="font-size:12px;color:var(--text-muted)">Loading latest news...</p>'}</div></div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-label"><span class="bar bar-blue"></span>Trump schedule today</div>
+        <a href="${TRUMP_URL}" target="_blank" style="font-family:var(--font-mono);font-size:10px;color:var(--accent-purple);text-decoration:none">Roll Call Factbase ↗</a>
+      </div>
+      <div class="card">
+        ${tsH}
+        ${b.trump_watch?`<div style="margin-top:0.75rem;padding-top:0.65rem;border-top:0.5px solid var(--border-soft);font-size:12px;color:var(--accent-amber);font-family:var(--font-mono)">📡 ${esc(b.trump_watch)}</div>`:''}
+      </div>
+    </div>
+
+    <p style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--border-soft)">
+      Generated ${b.generated_at?new Date(b.generated_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'just now'} · AI-generated briefing for informational purposes only · Not financial advice
+    </p>`;
+}
+
+runBriefing();
+</script>
+</body>
+</html>
