@@ -1,6 +1,6 @@
 // netlify/functions/morning-brief.js
-// Fast approach: fetch raw data from public sources first,
-// then send it all to Claude in ONE call (no web search tool = ~3-5 seconds)
+// Fetches earnings from Yahoo Finance calendar, company events from Yahoo Finance events,
+// and Trump's schedule from Roll Call Factbase — then passes all to Claude in one fast call.
 //
 // Required Netlify env var: ANTHROPIC_API_KEY
 
@@ -16,8 +16,12 @@ const HEADERS = {
 async function safeFetch(url) {
   try {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; rose.trading/1.0)' },
-      signal: AbortSignal.timeout(5000),
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      },
+      signal: AbortSignal.timeout(6000),
     });
     return res.ok ? await res.text() : '';
   } catch {
@@ -43,71 +47,93 @@ exports.handler = async (event) => {
   const dateStr = today.toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   });
+
+  // Build date strings for Yahoo Finance URLs (YYYY-MM-DD)
   const isoDate = today.toISOString().slice(0, 10);
 
-  // ── Step 1: Fetch raw data in parallel (max 5s each) ────────────────────
-  const [trumpHtml, yahooHtml, earningsHtml] = await Promise.all([
+  // ── Fetch all sources in parallel ────────────────────────────────────────
+  const [
+    trumpHtml,
+    earningsHtml,
+    eventsHtml,
+    marketNewsHtml,
+  ] = await Promise.all([
+    // Trump's daily schedule
     safeFetch(TRUMP_URL),
+    // Yahoo Finance earnings calendar — today's date
+    safeFetch(`https://finance.yahoo.com/calendar/earnings?day=${isoDate}`),
+    // Yahoo Finance company events calendar — today's date (investor days, conferences, etc.)
+    safeFetch(`https://finance.yahoo.com/calendar/?day=${isoDate}`),
+    // Yahoo Finance stock market news for broader market context
     safeFetch('https://finance.yahoo.com/topic/stock-market-news/'),
-    safeFetch(`https://finance.yahoo.com/calendar/earnings/?day=${isoDate}`),
   ]);
 
-  const trumpText  = stripHtml(trumpHtml).slice(0, 3000);
-  const marketText = stripHtml(yahooHtml).slice(0, 2000);
-  const earningsText = stripHtml(earningsHtml).slice(0, 2000);
+  // Strip HTML and truncate to keep tokens manageable
+  const trumpText    = stripHtml(trumpHtml).slice(0, 3000);
+  const earningsText = stripHtml(earningsHtml).slice(0, 3000);
+  const eventsText   = stripHtml(eventsHtml).slice(0, 2000);
+  const marketText   = stripHtml(marketNewsHtml).slice(0, 2000);
 
-  // ── Step 2: Single fast Claude call with pre-fetched data ────────────────
+  // ── Single Claude call ────────────────────────────────────────────────────
   const userMessage = `Today is ${dateStr}.
 
-Here is raw data from three sources for you to analyze:
+I'm giving you four raw data sources. Extract and synthesize the most relevant information for an SPX/ES 0DTE options trader's morning briefing.
 
---- TRUMP SCHEDULE (Roll Call Factbase) ---
-${trumpText || 'Unavailable — use your knowledge.'}
+--- TRUMP SCHEDULE (Roll Call Factbase — today's entries) ---
+${trumpText || 'Unavailable — use your knowledge for today.'}
+
+--- EARNINGS CALENDAR (Yahoo Finance — today: ${isoDate}) ---
+${earningsText || 'Unavailable — use your knowledge for today.'}
+Note: BMO = Before Market Open (pre-market), AMC = After Market Close, TAS = Time As Scheduled.
+Focus on large-cap names with market cap >$1B that are most likely to move SPX/ES.
+
+--- COMPANY EVENTS CALENDAR (Yahoo Finance — investor days, conferences, splits, IPOs) ---
+${eventsText || 'Unavailable — use your knowledge for today.'}
 
 --- MARKET NEWS (Yahoo Finance) ---
-${marketText || 'Unavailable — use your knowledge.'}
+${marketText || 'Unavailable — use your knowledge for today.'}
 
---- EARNINGS CALENDAR ---
-${earningsText || 'Unavailable — use your knowledge.'}
+Using all the above plus your own knowledge of current conditions as of ${dateStr}, generate the complete morning briefing JSON.
 
-Using the data above plus your knowledge of current market conditions as of ${dateStr}, generate a complete morning market briefing JSON object.
-
-Return ONLY valid JSON — no markdown, no backticks, no explanation before or after:
+Return ONLY valid JSON — no markdown, no backticks, no explanation:
 {
   "generated_at": "${today.toISOString()}",
   "market_tone": {
     "summary": "2-3 sentences on overall market bias and key themes today",
     "bias": "bullish|bearish|neutral|mixed",
     "bias_score": 0-100,
-    "key_risk": "single biggest risk to watch today"
+    "key_risk": "single biggest risk to watch today in one sentence"
   },
   "gap_ups": [
-    {"ticker": "XX", "move": "+X.X%", "name": "Company Name", "catalyst": "reason"}
+    {"ticker": "XX", "move": "+X.X%", "name": "Company Name", "catalyst": "reason for gap"}
   ],
   "gap_downs": [
-    {"ticker": "XX", "move": "-X.X%", "name": "Company Name", "catalyst": "reason"}
+    {"ticker": "XX", "move": "-X.X%", "name": "Company Name", "catalyst": "reason for gap"}
   ],
   "earnings_today": [
-    {"ticker": "XX", "name": "Company", "timing": "pre-market|after-close", "note": "what to watch"}
+    {"ticker": "XX", "name": "Company", "timing": "pre-market|after-close", "note": "what to watch for SPX impact"}
   ],
-  "earnings_week": "One sentence listing major reporters this week",
+  "earnings_week": "One sentence listing the most important reporters this week beyond today",
+  "company_events_today": [
+    {"ticker": "XX", "name": "Company", "event_type": "Investor Day|Conference|Split|IPO|Other", "note": "why it matters"}
+  ],
   "economic_events": [
-    {"time": "8:30 AM ET", "name": "Event", "importance": "high|medium|low", "note": "context"}
+    {"time": "8:30 AM ET", "name": "Event Name", "importance": "high|medium|low", "note": "what to watch"}
   ],
   "analyst_actions": [
-    {"type": "upgrade|downgrade|initiation|pt_raise|pt_cut", "ticker": "XX", "firm": "Firm", "action": "description", "note": "why it matters"}
+    {"type": "upgrade|downgrade|initiation|pt_raise|pt_cut", "ticker": "XX", "firm": "Firm Name", "action": "short description", "note": "market impact"}
   ],
   "geopolitical": [
-    {"title": "Headline", "body": "2-3 sentence summary", "market_impact": "impact on markets", "level": "high|medium|low"}
+    {"title": "Headline", "body": "2-3 sentence summary", "market_impact": "direct impact on SPX/oil/rates", "level": "high|medium|low"}
   ],
   "company_news": [
-    {"ticker": "XX", "title": "Headline", "body": "2-3 sentence summary"}
+    {"ticker": "XX", "title": "Headline", "body": "2-3 sentence summary of why it matters for traders"}
   ],
   "trump_schedule": [
     {"time": "9:00 AM", "description": "Event description", "location": "Location", "access": "Open|Closed|Pool"}
   ],
-  "trump_watch": "1-2 sentences on what traders should watch from Trump today",
-  "sources": ["Roll Call Factbase", "Yahoo Finance", "Claude knowledge base"]
+  "trump_watch": "1-2 sentences on what traders should specifically watch from Trump today — any scheduled press events, policy meetings, or social media patterns that could move markets",
+  "sources": ["Yahoo Finance Earnings Calendar", "Yahoo Finance Events Calendar", "Roll Call Factbase", "Claude knowledge base"]
 }`;
 
   try {
@@ -121,7 +147,14 @@ Return ONLY valid JSON — no markdown, no backticks, no explanation before or a
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
-        system: `You are a professional market analyst for rose.trading — a trading education platform for SPX/ES 0DTE options traders in Houston, TX. Generate accurate, concise morning briefings. Use the provided source data when available; fall back to your training knowledge when not. Always return valid JSON only — nothing else.`,
+        system: `You are a professional market analyst for rose.trading — a trading education platform for SPX/ES 0DTE options traders in Houston, TX. 
+
+Your job is to generate a concise, accurate morning market briefing from the raw data provided. Follow these rules:
+- For earnings_today: only include companies with market cap >$500M or that are known SPX component stocks. Prefer BMO (pre-market) names as they directly affect the open.
+- For company_events_today: focus on events that could move individual stocks or sectors — investor days with guidance, major conferences, stock splits effective today.
+- For gaps: only include if you have specific knowledge of a genuine pre-market move with a real catalyst. Do not fabricate gap percentages.
+- For trump_schedule: parse the Roll Call text carefully — extract time, event description, location, and press access level.
+- Always return valid JSON only. No markdown fences, no preamble, no postamble.`,
         messages: [{ role: 'user', content: userMessage }],
       }),
     });
