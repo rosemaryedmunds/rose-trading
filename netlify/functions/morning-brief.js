@@ -1,8 +1,11 @@
 // netlify/functions/morning-brief.js
 // Fetches earnings from Yahoo Finance calendar, company events from Yahoo Finance events,
-// and Trump's schedule from Roll Call Factbase — then passes all to Claude in one fast call.
+// Trump's schedule from Roll Call Factbase, and live market news from Finnhub —
+// then passes all to Claude in one fast call.
 //
-// Required Netlify env var: ANTHROPIC_API_KEY
+// Required Netlify env vars:
+//   ANTHROPIC_API_KEY   — your Anthropic key
+//   FINNHUB_API_KEY     — your Finnhub key (free tier at finnhub.io)
 
 const TRUMP_URL = 'https://rollcall.com/factbase/trump/topic/calendar/';
 
@@ -29,6 +32,33 @@ async function safeFetch(url) {
   }
 }
 
+// Finnhub returns JSON directly — separate helper to keep things clean
+async function fetchFinnhubNews(apiKey) {
+  try {
+    // category=general covers macro, equities, and broad market news
+    const res = await fetch(
+      `https://finnhub.io/api/v1/news?category=general&minId=0&token=${apiKey}`,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (!res.ok) return [];
+    const articles = await res.json();
+
+    // Keep the 20 most recent, return only the fields Claude needs
+    return articles.slice(0, 20).map(a => ({
+      headline: a.headline || '',
+      summary: (a.summary || '').slice(0, 200),
+      source: a.source || '',
+      datetime: a.datetime
+        ? new Date(a.datetime * 1000).toLocaleTimeString('en-US', {
+            hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+          })
+        : '',
+    }));
+  } catch {
+    return [];
+  }
+}
+
 function stripHtml(html) {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -36,6 +66,17 @@ function stripHtml(html) {
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s{2,}/g, ' ')
     .trim();
+}
+
+// Format Finnhub articles into a compact text block for the Claude prompt
+function formatFinnhubForPrompt(articles) {
+  if (!articles.length) return 'Unavailable — use your knowledge for today.';
+  return articles
+    .map((a, i) =>
+      `[${i + 1}] ${a.datetime ? a.datetime + ' — ' : ''}${a.headline}` +
+      (a.summary ? `\n    ${a.summary}` : '')
+    )
+    .join('\n');
 }
 
 exports.handler = async (event) => {
@@ -48,8 +89,8 @@ exports.handler = async (event) => {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   });
 
-  // Build date strings for Yahoo Finance URLs (YYYY-MM-DD)
   const isoDate = today.toISOString().slice(0, 10);
+  const finnhubKey = process.env.FINNHUB_API_KEY || '';
 
   // ── Fetch all sources in parallel ────────────────────────────────────────
   const [
@@ -57,27 +98,36 @@ exports.handler = async (event) => {
     earningsHtml,
     eventsHtml,
     marketNewsHtml,
+    finnhubArticles,
   ] = await Promise.all([
-    // Trump's daily schedule
     safeFetch(TRUMP_URL),
-    // Yahoo Finance earnings calendar — today's date
     safeFetch(`https://finance.yahoo.com/calendar/earnings?day=${isoDate}`),
-    // Yahoo Finance company events calendar — today's date (investor days, conferences, etc.)
     safeFetch(`https://finance.yahoo.com/calendar/?day=${isoDate}`),
-    // Yahoo Finance stock market news for broader market context
     safeFetch('https://finance.yahoo.com/topic/stock-market-news/'),
+    finnhubKey
+      ? fetchFinnhubNews(finnhubKey)
+      : Promise.resolve([]),
   ]);
 
-  // Strip HTML and truncate to keep tokens manageable
   const trumpText    = stripHtml(trumpHtml).slice(0, 3000);
   const earningsText = stripHtml(earningsHtml).slice(0, 3000);
   const eventsText   = stripHtml(eventsHtml).slice(0, 2000);
   const marketText   = stripHtml(marketNewsHtml).slice(0, 2000);
+  const finnhubText  = formatFinnhubForPrompt(finnhubArticles);
+
+  // Only add Finnhub to sources if it actually returned data
+  const sources = [
+    '"Yahoo Finance Earnings Calendar"',
+    '"Yahoo Finance Events Calendar"',
+    '"Roll Call Factbase"',
+    finnhubArticles.length ? '"Finnhub Live News"' : null,
+    '"Claude knowledge base"',
+  ].filter(Boolean).join(', ');
 
   // ── Single Claude call ────────────────────────────────────────────────────
   const userMessage = `Today is ${dateStr}.
 
-I'm giving you four raw data sources. Extract and synthesize the most relevant information for an SPX/ES 0DTE options trader's morning briefing.
+I'm giving you five raw data sources. Extract and synthesize the most relevant information for an SPX/ES 0DTE options trader's morning briefing.
 
 --- TRUMP SCHEDULE (Roll Call Factbase — today's entries) ---
 ${trumpText || 'Unavailable — use your knowledge for today.'}
@@ -92,6 +142,11 @@ ${eventsText || 'Unavailable — use your knowledge for today.'}
 
 --- MARKET NEWS (Yahoo Finance) ---
 ${marketText || 'Unavailable — use your knowledge for today.'}
+
+--- LIVE MARKET NEWS (Finnhub — real-time headlines fetched this morning) ---
+${finnhubText}
+These are live headlines. Use them to populate company_news and to inform market_tone, geopolitical,
+and gap moves. Prefer these over your training data when they conflict.
 
 Using all the above plus your own knowledge of current conditions as of ${dateStr}, generate the complete morning briefing JSON.
 
@@ -132,8 +187,8 @@ Return ONLY valid JSON — no markdown, no backticks, no explanation:
   "trump_schedule": [
     {"time": "9:00 AM", "description": "Event description", "location": "Location", "access": "Open|Closed|Pool"}
   ],
-  "trump_watch": "1-2 sentences on what traders should specifically watch from Trump today — any scheduled press events, policy meetings, or social media patterns that could move markets",
-  "sources": ["Yahoo Finance Earnings Calendar", "Yahoo Finance Events Calendar", "Roll Call Factbase", "Claude knowledge base"]
+  "trump_watch": "1-2 sentences on what traders should specifically watch from Trump today",
+  "sources": [${sources}]
 }`;
 
   try {
@@ -147,12 +202,13 @@ Return ONLY valid JSON — no markdown, no backticks, no explanation:
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
-        system: `You are a professional market analyst for rose.trading — a trading education platform for SPX/ES 0DTE options traders in Houston, TX. 
+        system: `You are a professional market analyst for rose.trading — a trading education platform for SPX/ES 0DTE options traders in Houston, TX.
 
 Your job is to generate a concise, accurate morning market briefing from the raw data provided. Follow these rules:
 - For earnings_today: only include companies with market cap >$500M or that are known SPX component stocks. Prefer BMO (pre-market) names as they directly affect the open.
 - For company_events_today: focus on events that could move individual stocks or sectors — investor days with guidance, major conferences, stock splits effective today.
 - For gaps: only include if you have specific knowledge of a genuine pre-market move with a real catalyst. Do not fabricate gap percentages.
+- For company_news: prioritize items from the Finnhub live headlines — these are real and current. Use the ticker symbol if identifiable from the headline, otherwise use "MACRO".
 - For trump_schedule: parse the Roll Call text carefully — extract time, event description, location, and press access level.
 - Always return valid JSON only. No markdown fences, no preamble, no postamble.`,
         messages: [{ role: 'user', content: userMessage }],
