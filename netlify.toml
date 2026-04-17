@@ -2,23 +2,20 @@
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
- 
-[functions]
-  timeout = 30
- 
+
 [functions."notion-proxy"]
   timeout = 30
- 
+
 [functions."anthropic-proxy"]
   timeout = 30
- 
+
 [functions."morning-brief"]
   timeout = 30
- 
+
 [functions."discord-morning-brief"]
   timeout = 30
   schedule = "0 13 * * 1-5"
- 
+
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
