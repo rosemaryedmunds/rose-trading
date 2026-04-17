@@ -1,8 +1,8 @@
 // netlify/functions/morning-brief.js
 // Data sources:
-//   - Finnhub: live news (general + merger), analyst recommendations, earnings calendar, IPO calendar
+//   - Finnhub: live news (general + merger), earnings calendar, IPO calendar
 //   - Roll Call Factbase: Trump's daily schedule
-//   - Yahoo Finance: fallback market news (best-effort scrape)
+//   - Yahoo Finance: fallback market news
 //
 // Required Netlify env vars:
 //   ANTHROPIC_API_KEY
@@ -17,11 +17,19 @@ const HEADERS = {
   'Content-Type': 'application/json',
 };
 
-// ── Generic JSON fetch from Finnhub ──────────────────────────────────────────
+// Wraps any promise with a timeout — returns null instead of throwing
+function withTimeout(promise, ms = 5000) {
+  return Promise.race([
+    promise,
+    new Promise(resolve => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
+// JSON fetch from Finnhub — never throws, returns null on failure
 async function finnhubGet(path, apiKey) {
   try {
     const url = `https://finnhub.io/api/v1${path}&token=${apiKey}`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(7000) });
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -29,15 +37,15 @@ async function finnhubGet(path, apiKey) {
   }
 }
 
-// ── HTML scrape (best-effort) ─────────────────────────────────────────────────
+// HTML scrape — never throws, returns '' on failure
 async function safeFetch(url) {
   try {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(5000),
     });
     return res.ok ? await res.text() : '';
   } catch {
@@ -54,7 +62,6 @@ function stripHtml(html) {
     .trim();
 }
 
-// ── Format news articles for the Claude prompt ───────────────────────────────
 function formatArticles(articles = []) {
   if (!articles.length) return 'None retrieved.';
   return articles
@@ -65,11 +72,8 @@ function formatArticles(articles = []) {
     .join('\n');
 }
 
-// ── Format Finnhub earnings calendar ─────────────────────────────────────────
 function formatEarnings(data) {
-  if (!data || !Array.isArray(data.earningsCalendar) || !data.earningsCalendar.length) {
-    return 'None retrieved from Finnhub.';
-  }
+  if (!data?.earningsCalendar?.length) return 'None retrieved from Finnhub.';
   return data.earningsCalendar
     .map(e =>
       `${e.symbol} — ${e.company || ''} | Hour: ${e.hour || '?'} | ` +
@@ -78,34 +82,14 @@ function formatEarnings(data) {
     .join('\n');
 }
 
-// ── Format Finnhub IPO calendar (proxy for company events) ───────────────────
 function formatIPOs(data) {
-  if (!data || !Array.isArray(data.ipoCalendar) || !data.ipoCalendar.length) {
-    return 'None retrieved from Finnhub.';
-  }
+  if (!data?.ipoCalendar?.length) return 'None today.';
   return data.ipoCalendar
     .map(e =>
       `${e.symbol || '?'} — ${e.name || ''} | Date: ${e.date} | ` +
-      `Price: ${e.price || '?'} | Shares: ${e.numberOfShares || '?'} | Exchange: ${e.exchange || '?'}`
+      `Price: ${e.price || '?'} | Exchange: ${e.exchange || '?'}`
     )
     .join('\n');
-}
-
-// ── Format Finnhub analyst recommendations ───────────────────────────────────
-// /stock/recommendation returns aggregate sentiment counts — not individual actions.
-// We use /news?category=general and scan for analyst language instead (see prompt).
-// But we also pull a few high-profile tickers' latest recommendation trends.
-function formatRecommendations(results) {
-  // results is array of { symbol, data: [{period, strongBuy, buy, hold, sell, strongSell}] }
-  const lines = [];
-  for (const { symbol, data } of results) {
-    if (!data || !data.length) continue;
-    const latest = data[0]; // most recent period
-    lines.push(
-      `${symbol}: period ${latest.period} | StrongBuy ${latest.strongBuy} Buy ${latest.strongBuy} Hold ${latest.hold} Sell ${latest.sell} StrongSell ${latest.strongSell}`
-    );
-  }
-  return lines.length ? lines.join('\n') : 'None retrieved.';
 }
 
 exports.handler = async (event) => {
@@ -119,14 +103,10 @@ exports.handler = async (event) => {
   });
   const isoDate = today.toISOString().slice(0, 10);
   const KEY = process.env.FINNHUB_API_KEY || '';
-
-  // Date range for Finnhub calendar endpoints (today only)
   const dateParam = `from=${isoDate}&to=${isoDate}`;
 
-  // SPX-heavy tickers to pull recommendation trends for
-  const recTickers = ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'META', 'GOOGL', 'TSLA', 'JPM', 'SPY'];
-
-  // ── All fetches in parallel ───────────────────────────────────────────────
+  // ── 6 fetches in parallel, each capped at 5s ─────────────────────────────
+  // Total budget: ~6s for fetches + ~4s for Claude call = well under 10s limit
   const [
     trumpHtml,
     yahooNewsHtml,
@@ -134,35 +114,21 @@ exports.handler = async (event) => {
     newsMerger,
     earningsData,
     ipoData,
-    ...recResults
   ] = await Promise.all([
-    // Trump schedule
-    safeFetch(TRUMP_URL),
-    // Yahoo fallback news
-    safeFetch('https://finance.yahoo.com/topic/stock-market-news/'),
-    // Finnhub general market news
-    KEY ? finnhubGet('/news?category=general&minId=0', KEY) : Promise.resolve([]),
-    // Finnhub merger/company news
-    KEY ? finnhubGet('/news?category=merger&minId=0', KEY) : Promise.resolve([]),
-    // Finnhub earnings calendar — today
-    KEY ? finnhubGet(`/calendar/earnings?${dateParam}`, KEY) : Promise.resolve(null),
-    // Finnhub IPO calendar — today
-    KEY ? finnhubGet(`/calendar/ipo?${dateParam}`, KEY) : Promise.resolve(null),
-    // Recommendation trends for key SPX tickers
-    ...recTickers.map(sym =>
-      KEY
-        ? finnhubGet(`/stock/recommendation?symbol=${sym}`, KEY).then(d => ({ symbol: sym, data: d }))
-        : Promise.resolve({ symbol: sym, data: null })
-    ),
+    withTimeout(safeFetch(TRUMP_URL)),
+    withTimeout(safeFetch('https://finance.yahoo.com/topic/stock-market-news/')),
+    withTimeout(KEY ? finnhubGet('/news?category=general&minId=0', KEY) : Promise.resolve([])),
+    withTimeout(KEY ? finnhubGet('/news?category=merger&minId=0', KEY) : Promise.resolve([])),
+    withTimeout(KEY ? finnhubGet(`/calendar/earnings?${dateParam}`, KEY) : Promise.resolve(null)),
+    withTimeout(KEY ? finnhubGet(`/calendar/ipo?${dateParam}`, KEY) : Promise.resolve(null)),
   ]);
 
-  // ── Process news articles ─────────────────────────────────────────────────
+  // Process news articles
   const processArticles = (raw, limit) =>
     Array.isArray(raw)
       ? raw.slice(0, limit).map(a => ({
           headline: a.headline || '',
           summary: (a.summary || '').slice(0, 180),
-          source: a.source || '',
           datetime: a.datetime
             ? new Date(a.datetime * 1000).toLocaleTimeString('en-US', {
                 hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
@@ -173,8 +139,8 @@ exports.handler = async (event) => {
 
   const generalArticles = processArticles(newsGeneral, 20);
   const mergerArticles  = processArticles(newsMerger, 15);
-  const trumpText       = stripHtml(trumpHtml).slice(0, 2500);
-  const yahooText       = stripHtml(yahooNewsHtml).slice(0, 1500);
+  const trumpText       = stripHtml(trumpHtml || '').slice(0, 2500);
+  const yahooText       = stripHtml(yahooNewsHtml || '').slice(0, 1500);
 
   const hasFinnhub = generalArticles.length > 0 || mergerArticles.length > 0;
 
@@ -190,7 +156,7 @@ exports.handler = async (event) => {
   // ── Claude prompt ─────────────────────────────────────────────────────────
   const userMessage = `Today is ${dateStr} (${isoDate}).
 
-Build a complete SPX/ES 0DTE morning briefing from the sources below.
+Build a complete SPX/ES 0DTE morning briefing from these sources.
 
 === TRUMP SCHEDULE (Roll Call Factbase) ===
 ${trumpText || 'Unavailable.'}
@@ -198,79 +164,42 @@ ${trumpText || 'Unavailable.'}
 === YAHOO MARKET NEWS (fallback) ===
 ${yahooText || 'Unavailable.'}
 
-=== FINNHUB LIVE GENERAL NEWS (real-time — highest priority) ===
+=== FINNHUB LIVE GENERAL NEWS (real-time) ===
 ${formatArticles(generalArticles)}
 
-=== FINNHUB LIVE MERGER/COMPANY NEWS (real-time — use for company_news) ===
+=== FINNHUB LIVE MERGER/COMPANY NEWS (real-time) ===
 ${formatArticles(mergerArticles)}
 
-=== FINNHUB EARNINGS CALENDAR (today: ${isoDate}) ===
+=== FINNHUB EARNINGS CALENDAR (${isoDate}) ===
 ${formatEarnings(earningsData)}
-Hour codes: BMO = before market open, AMC = after market close, DMT = during market trading.
-Only include in earnings_today if market cap >$500M or known SPX component.
+BMO = before market open, AMC = after market close, DMT = during market trading.
 
-=== FINNHUB IPO CALENDAR (today: ${isoDate}) ===
+=== FINNHUB IPO CALENDAR (${isoDate}) ===
 ${formatIPOs(ipoData)}
-Use this for company_events_today (event_type: "IPO").
 
-=== SPX KEY TICKER RECOMMENDATION TRENDS (Finnhub aggregate — last period) ===
-${formatRecommendations(recResults)}
-These are aggregate analyst counts, not individual actions. Use them to infer if a ticker has
-a strong buy/sell skew worth noting in analyst_actions (e.g. "NVDA: 28 Buy vs 2 Sell — strong consensus").
+=== FILL INSTRUCTIONS ===
+gap_ups/gap_downs: Scan Finnhub general news for stocks described as surging, spiking, gapping, plunging, falling pre-market. Also use your own knowledge of today's pre-market movers. Estimate % from context if not stated. Aim for 2-4 each.
+analyst_actions: Scan all Finnhub feeds for "raises PT", "cuts PT", "upgrades to", "downgrades to", "initiates". Also use your own knowledge of today's analyst calls. Aim for 3-5.
+earnings_today: Use Finnhub earnings calendar above. Fill company names/SPX notes from your knowledge.
+company_events_today: Use IPO calendar + your knowledge of today's investor days, conferences, splits.
+economic_events: Always populate — list today's scheduled US economic data releases with times.
+company_news: 4-6 items from Finnhub merger feed first, then general feed.
+market_tone: Synthesize all of the above into a 2-3 sentence bias read.
+geopolitical: Any geopolitical/macro risk items from the news feeds.
+trump_schedule: Parse Roll Call text above carefully for today's entries.
 
-=== SECTION-BY-SECTION INSTRUCTIONS ===
-gap_ups / gap_downs:
-  - Scan the Finnhub general news for ANY stock explicitly described as gapping, surging, spiking,
-    jumping, plunging, falling, or moving pre-market.
-  - Also use your own real-time knowledge of today's pre-market movers.
-  - If no specific move % is in the news, estimate based on context (e.g. "beat earnings" = ~3-5%).
-  - Aim for 2-4 entries each. Return [] only if truly nothing is moving today.
-
-analyst_actions:
-  - Scan ALL Finnhub news feeds for phrases like: "raises price target", "cuts PT", "downgrades to",
-    "upgrades to Buy/Overweight", "initiates with Buy/Sell", "reiterates Outperform".
-  - Also use the recommendation trends above — if a ticker has a lopsided count, note it.
-  - Use your knowledge of today's analyst actions if Finnhub feeds are light.
-  - Aim for 3-5 entries. Return [] only if genuinely nothing today.
-
-earnings_today:
-  - Use the Finnhub earnings calendar above as primary source.
-  - Fill in company names and SPX-impact notes from your knowledge.
-  - Return [] only if the calendar genuinely shows no earnings today.
-
-company_events_today:
-  - Use IPO calendar above for IPOs.
-  - Use your knowledge for investor days, conferences, spin-offs, and splits today.
-  - Aim for 2-4 entries if any exist.
-
-economic_events:
-  - ALWAYS populate this from your knowledge of today's US economic data schedule.
-  - Today is ${dateStr} — what economic releases are scheduled?
-
-company_news:
-  - Use Finnhub merger/company feed first, then general feed.
-  - 4-6 items. Identify ticker from context where possible, else "MACRO".
-
-market_tone:
-  - Synthesize everything above into a 2-3 sentence bias read.
-
-Return ONLY valid JSON — no markdown, no backticks, no preamble:
+Return ONLY valid JSON — no markdown, no backticks:
 
 {
   "generated_at": "${today.toISOString()}",
-  "market_tone": {
-    "summary": "2-3 sentences on overall market bias and key themes",
-    "bias": "bullish|bearish|neutral|mixed",
-    "bias_score": 0-100,
-    "key_risk": "single biggest risk today"
-  },
+  "market_tone": {"summary":"...","bias":"bullish|bearish|neutral|mixed","bias_score":0-100,"key_risk":"..."},
   "gap_ups": [{"ticker":"XX","move":"+X.X%","name":"Company","catalyst":"reason"}],
   "gap_downs": [{"ticker":"XX","move":"-X.X%","name":"Company","catalyst":"reason"}],
   "earnings_today": [{"ticker":"XX","name":"Company","timing":"pre-market|after-close","note":"SPX impact"}],
   "earnings_week": "Key reporters this week beyond today",
   "company_events_today": [{"ticker":"XX","name":"Company","event_type":"IPO|Investor Day|Conference|Split|Other","note":"why it matters"}],
   "economic_events": [{"time":"8:30 AM ET","name":"Event","importance":"high|medium|low","note":"what to watch"}],
-  "analyst_actions": [{"type":"upgrade|downgrade|initiation|pt_raise|pt_cut","ticker":"XX","firm":"Firm","action":"description","note":"market impact"}],
+  "analyst_actions": [{"type":"upgrade|downgrade|initiation|pt_raise|pt_cut","ticker":"XX","firm":"Firm","action":"description","note":"impact"}],
   "geopolitical": [{"title":"Headline","body":"2-3 sentences","market_impact":"SPX/oil/rates impact","level":"high|medium|low"}],
   "company_news": [{"ticker":"XX","title":"Headline","body":"2-3 sentences for traders"}],
   "trump_schedule": [{"time":"9:00 AM","description":"Event","location":"Location","access":"Open|Closed|Pool"}],
@@ -289,15 +218,14 @@ Return ONLY valid JSON — no markdown, no backticks, no preamble:
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4000,
-        system: `You are a professional market analyst for rose.trading, a trading education site for SPX/ES 0DTE options traders in Houston, TX.
+        system: `You are a professional market analyst for rose.trading, an SPX/ES 0DTE options trading education platform in Houston, TX.
 
-Critical rules:
-1. NEVER return an empty array if there is any data in the sources above, or if you have real-time knowledge of relevant events. Empty arrays are a last resort only.
-2. For gap_ups/gap_downs: look hard in the news feeds for pre-market movers. Use your own knowledge of today's pre-market action if feeds are light. Estimate move % from context if not stated.
-3. For analyst_actions: scan every news feed for rating/PT language. Also use your own knowledge of today's analyst actions.
-4. For economic_events: always populate — use your knowledge of today's US economic calendar.
-5. For earnings_today: use the Finnhub calendar data provided. It is real and accurate.
-6. Return valid JSON only. No markdown fences, no preamble, no postamble.`,
+Rules:
+1. Never return an empty array if Finnhub data or your own knowledge has relevant content.
+2. economic_events: always populate — you know today's US economic calendar.
+3. gap_ups/gap_downs: use news feeds + your own knowledge of today's pre-market action.
+4. analyst_actions: scan all feeds for rating/PT language + use your own knowledge.
+5. Return valid JSON only. No markdown. No preamble.`,
         messages: [{ role: 'user', content: userMessage }],
       }),
     });
