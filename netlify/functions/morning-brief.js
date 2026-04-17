@@ -1,9 +1,4 @@
 // netlify/functions/morning-brief.js
-// Data sources:
-//   - Finnhub: live news (general + merger), earnings calendar, IPO calendar
-//   - Roll Call Factbase: Trump's daily schedule
-//   - Yahoo Finance: fallback market news
-//
 // Required Netlify env vars:
 //   ANTHROPIC_API_KEY
 //   FINNHUB_API_KEY   (free tier — finnhub.io)
@@ -17,19 +12,17 @@ const HEADERS = {
   'Content-Type': 'application/json',
 };
 
-// Wraps any promise with a timeout — returns null instead of throwing
-function withTimeout(promise, ms = 5000) {
+function withTimeout(promise, ms = 4000) {
   return Promise.race([
     promise,
     new Promise(resolve => setTimeout(() => resolve(null), ms)),
   ]);
 }
 
-// JSON fetch from Finnhub — never throws, returns null on failure
 async function finnhubGet(path, apiKey) {
   try {
     const url = `https://finnhub.io/api/v1${path}&token=${apiKey}`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -37,15 +30,11 @@ async function finnhubGet(path, apiKey) {
   }
 }
 
-// HTML scrape — never throws, returns '' on failure
 async function safeFetch(url) {
   try {
     const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-      signal: AbortSignal.timeout(5000),
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html' },
+      signal: AbortSignal.timeout(4000),
     });
     return res.ok ? await res.text() : '';
   } catch {
@@ -54,7 +43,7 @@ async function safeFetch(url) {
 }
 
 function stripHtml(html) {
-  return html
+  return (html || '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<[^>]+>/g, ' ')
@@ -73,22 +62,9 @@ function formatArticles(articles = []) {
 }
 
 function formatEarnings(data) {
-  if (!data?.earningsCalendar?.length) return 'None retrieved from Finnhub.';
+  if (!data?.earningsCalendar?.length) return 'None retrieved.';
   return data.earningsCalendar
-    .map(e =>
-      `${e.symbol} — ${e.company || ''} | Hour: ${e.hour || '?'} | ` +
-      `EPS est: ${e.epsEstimate ?? '?'} | Rev est: ${e.revenueEstimate ?? '?'}`
-    )
-    .join('\n');
-}
-
-function formatIPOs(data) {
-  if (!data?.ipoCalendar?.length) return 'None today.';
-  return data.ipoCalendar
-    .map(e =>
-      `${e.symbol || '?'} — ${e.name || ''} | Date: ${e.date} | ` +
-      `Price: ${e.price || '?'} | Exchange: ${e.exchange || '?'}`
-    )
+    .map(e => `${e.symbol} — ${e.company || ''} | Hour: ${e.hour || '?'} | EPS est: ${e.epsEstimate ?? '?'}`)
     .join('\n');
 }
 
@@ -103,101 +79,73 @@ exports.handler = async (event) => {
   });
   const isoDate = today.toISOString().slice(0, 10);
   const KEY = process.env.FINNHUB_API_KEY || '';
-  const dateParam = `from=${isoDate}&to=${isoDate}`;
 
-  // ── 6 fetches in parallel, each capped at 5s ─────────────────────────────
-  // Total budget: ~6s for fetches + ~4s for Claude call = well under 10s limit
-  const [
-    trumpHtml,
-    yahooNewsHtml,
-    newsGeneral,
-    newsMerger,
-    earningsData,
-    ipoData,
-  ] = await Promise.all([
+  // ── 4 fetches only — well under Netlify's 10s limit ──────────────────────
+  const [trumpHtml, newsGeneral, earningsData, yahooHtml] = await Promise.all([
     withTimeout(safeFetch(TRUMP_URL)),
-    withTimeout(safeFetch('https://finance.yahoo.com/topic/stock-market-news/')),
     withTimeout(KEY ? finnhubGet('/news?category=general&minId=0', KEY) : Promise.resolve([])),
-    withTimeout(KEY ? finnhubGet('/news?category=merger&minId=0', KEY) : Promise.resolve([])),
-    withTimeout(KEY ? finnhubGet(`/calendar/earnings?${dateParam}`, KEY) : Promise.resolve(null)),
-    withTimeout(KEY ? finnhubGet(`/calendar/ipo?${dateParam}`, KEY) : Promise.resolve(null)),
+    withTimeout(KEY ? finnhubGet(`/calendar/earnings?from=${isoDate}&to=${isoDate}`, KEY) : Promise.resolve(null)),
+    withTimeout(safeFetch('https://finance.yahoo.com/topic/stock-market-news/')),
   ]);
 
-  // Process news articles
-  const processArticles = (raw, limit) =>
-    Array.isArray(raw)
-      ? raw.slice(0, limit).map(a => ({
-          headline: a.headline || '',
-          summary: (a.summary || '').slice(0, 180),
-          datetime: a.datetime
-            ? new Date(a.datetime * 1000).toLocaleTimeString('en-US', {
-                hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
-              })
-            : '',
-        }))
-      : [];
+  const articles = Array.isArray(newsGeneral)
+    ? newsGeneral.slice(0, 20).map(a => ({
+        headline: a.headline || '',
+        summary: (a.summary || '').slice(0, 180),
+        datetime: a.datetime
+          ? new Date(a.datetime * 1000).toLocaleTimeString('en-US', {
+              hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+            })
+          : '',
+      }))
+    : [];
 
-  const generalArticles = processArticles(newsGeneral, 20);
-  const mergerArticles  = processArticles(newsMerger, 15);
-  const trumpText       = stripHtml(trumpHtml || '').slice(0, 2500);
-  const yahooText       = stripHtml(yahooNewsHtml || '').slice(0, 1500);
-
-  const hasFinnhub = generalArticles.length > 0 || mergerArticles.length > 0;
+  const trumpText = stripHtml(trumpHtml || '').slice(0, 2500);
+  const yahooText = stripHtml(yahooHtml || '').slice(0, 1500);
 
   const sources = [
-    '"Yahoo Finance"',
     '"Roll Call Factbase"',
-    hasFinnhub ? '"Finnhub Live News"' : null,
+    articles.length ? '"Finnhub Live News"' : null,
     earningsData?.earningsCalendar?.length ? '"Finnhub Earnings Calendar"' : null,
-    ipoData?.ipoCalendar?.length ? '"Finnhub IPO Calendar"' : null,
     '"Claude knowledge base"',
   ].filter(Boolean).join(', ');
 
-  // ── Claude prompt ─────────────────────────────────────────────────────────
   const userMessage = `Today is ${dateStr} (${isoDate}).
-
-Build a complete SPX/ES 0DTE morning briefing from these sources.
 
 === TRUMP SCHEDULE (Roll Call Factbase) ===
 ${trumpText || 'Unavailable.'}
 
-=== YAHOO MARKET NEWS (fallback) ===
-${yahooText || 'Unavailable.'}
-
-=== FINNHUB LIVE GENERAL NEWS (real-time) ===
-${formatArticles(generalArticles)}
-
-=== FINNHUB LIVE MERGER/COMPANY NEWS (real-time) ===
-${formatArticles(mergerArticles)}
+=== FINNHUB LIVE NEWS (real-time) ===
+${formatArticles(articles)}
 
 === FINNHUB EARNINGS CALENDAR (${isoDate}) ===
 ${formatEarnings(earningsData)}
-BMO = before market open, AMC = after market close, DMT = during market trading.
+BMO = before market open, AMC = after market close.
 
-=== FINNHUB IPO CALENDAR (${isoDate}) ===
-${formatIPOs(ipoData)}
+=== YAHOO MARKET NEWS (fallback) ===
+${yahooText || 'Unavailable.'}
 
-=== FILL INSTRUCTIONS ===
-gap_ups/gap_downs: Scan Finnhub general news for stocks described as surging, spiking, gapping, plunging, falling pre-market. Also use your own knowledge of today's pre-market movers. Estimate % from context if not stated. Aim for 2-4 each.
-analyst_actions: Scan all Finnhub feeds for "raises PT", "cuts PT", "upgrades to", "downgrades to", "initiates". Also use your own knowledge of today's analyst calls. Aim for 3-5.
-earnings_today: Use Finnhub earnings calendar above. Fill company names/SPX notes from your knowledge.
-company_events_today: Use IPO calendar + your knowledge of today's investor days, conferences, splits.
-economic_events: Always populate — list today's scheduled US economic data releases with times.
-company_news: 4-6 items from Finnhub merger feed first, then general feed.
-market_tone: Synthesize all of the above into a 2-3 sentence bias read.
-geopolitical: Any geopolitical/macro risk items from the news feeds.
-trump_schedule: Parse Roll Call text above carefully for today's entries.
+Using all sources above plus your own real-time knowledge, return this JSON briefing.
 
-Return ONLY valid JSON — no markdown, no backticks:
+Rules:
+- gap_ups/gap_downs: find pre-market movers in the news feeds OR use your knowledge. Estimate % from context. Aim for 2-4 each.
+- analyst_actions: scan news for "raises PT / cuts PT / upgrades / downgrades / initiates" AND use your own knowledge of today's calls. Aim for 3-5.
+- earnings_today: use Finnhub calendar. BMO = pre-market, AMC = after-close.
+- economic_events: ALWAYS populate — you know today's US economic release schedule.
+- company_events_today: use your knowledge of investor days, conferences, splits today.
+- company_news: 4-6 items from the Finnhub feed above.
+- trump_schedule: parse Roll Call text for today's entries.
+
+Return ONLY valid JSON, no markdown, no backticks:
 
 {
   "generated_at": "${today.toISOString()}",
-  "market_tone": {"summary":"...","bias":"bullish|bearish|neutral|mixed","bias_score":0-100,"key_risk":"..."},
+  "market_tone": {"summary":"2-3 sentences","bias":"bullish|bearish|neutral|mixed","bias_score":0-100,"key_risk":"..."},
   "gap_ups": [{"ticker":"XX","move":"+X.X%","name":"Company","catalyst":"reason"}],
   "gap_downs": [{"ticker":"XX","move":"-X.X%","name":"Company","catalyst":"reason"}],
   "earnings_today": [{"ticker":"XX","name":"Company","timing":"pre-market|after-close","note":"SPX impact"}],
   "earnings_week": "Key reporters this week beyond today",
-  "company_events_today": [{"ticker":"XX","name":"Company","event_type":"IPO|Investor Day|Conference|Split|Other","note":"why it matters"}],
+  "company_events_today": [{"ticker":"XX","name":"Company","event_type":"Investor Day|Conference|Split|IPO|Other","note":"why it matters"}],
   "economic_events": [{"time":"8:30 AM ET","name":"Event","importance":"high|medium|low","note":"what to watch"}],
   "analyst_actions": [{"type":"upgrade|downgrade|initiation|pt_raise|pt_cut","ticker":"XX","firm":"Firm","action":"description","note":"impact"}],
   "geopolitical": [{"title":"Headline","body":"2-3 sentences","market_impact":"SPX/oil/rates impact","level":"high|medium|low"}],
@@ -218,14 +166,7 @@ Return ONLY valid JSON — no markdown, no backticks:
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4000,
-        system: `You are a professional market analyst for rose.trading, an SPX/ES 0DTE options trading education platform in Houston, TX.
-
-Rules:
-1. Never return an empty array if Finnhub data or your own knowledge has relevant content.
-2. economic_events: always populate — you know today's US economic calendar.
-3. gap_ups/gap_downs: use news feeds + your own knowledge of today's pre-market action.
-4. analyst_actions: scan all feeds for rating/PT language + use your own knowledge.
-5. Return valid JSON only. No markdown. No preamble.`,
+        system: `You are a professional market analyst for rose.trading, an SPX/ES 0DTE options trading education platform in Houston, TX. Return valid JSON only — no markdown, no preamble. Never return empty arrays if you have relevant knowledge. Always populate economic_events, gap moves, and analyst_actions using your own knowledge if the feeds are light.`,
         messages: [{ role: 'user', content: userMessage }],
       }),
     });
