@@ -5,10 +5,6 @@ week: 2
 ---
 
 
-> **📹 Video Lesson — Coming Soon**  
-> *Replace this block with your YouTube embed when ready:*  
-> `<!-- <iframe width="100%" height="400" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe> -->`
-
 ---
 
 # Lesson 2: Options Fundamentals
@@ -154,4 +150,4 @@ They are three different things. Keep them straight:
 - **Option Price (Premium):** The cost of the option contract itself
 
 **Rule: Do not buy options expiring too soon.**
-Give yourself at LEAST 4 days before expiration. Preferably 7+ days. Time is your friend — don't throw it away by buying near-expiration contracts.
+Give yourself at LEAST 4 days before expiration. Preferably 7+ days. Time is your friend — don't throw it away by buying near-expiration contracts. A good rule is to double the time based on the time frame you're entering. For example, if the weekly time frame is the main time frame that has your A+ setup, buy the contract at least 2 weeks out to let the set up play out. 

@@ -5,9 +5,6 @@ week: 4
 ---
 
 
-> **📹 Video Lesson — Coming Soon**  
-> *Replace this block with your YouTube embed when ready:*  
-> `<!-- <iframe width="100%" height="400" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe> -->`
 
 ---
 
@@ -47,9 +44,11 @@ This subtle shift moves you from blame to learning. Every loss is a tuition paym
 
 This point is so important it needs its own section.
 
-I started with $200. I built it into $60,000. Then I lost $40,000 of it through inexperience and emotional trading. I was depressed. My confidence was destroyed.
+When I first started, I felt like I was gambling since I wasn't following a plan or rules. I lost a lot of money during that time. I felt sad, depressed, dissapointed. 
 
 But I kept going. I reviewed my mistakes, tightened my rules, and eventually recovered everything I lost.
+
+The market doesn't define you, don't let past mistakes follow you to your next trade. 
 
 > **The market is not your judge. It is a tool you can use to express yourself.**
 
@@ -169,7 +168,7 @@ When the market sells off tech, your energy trade might hold. When banks struggl
 
 ---
 
-## Dry Powder — Cash is a Position
+## Cash is a Position
 
 Always keep a significant portion of your account in CASH. I recommend at least **50%** when starting out.
 

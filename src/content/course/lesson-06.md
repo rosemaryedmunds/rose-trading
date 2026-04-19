@@ -3,12 +3,6 @@ title: "Lesson 6: Common Mistakes"
 phase: "Phase 5: Avoiding Disasters"
 week: 6
 ---
-
-
-> **📹 Video Lesson — Coming Soon**  
-> *Replace this block with your YouTube embed when ready:*  
-> `<!-- <iframe width="100%" height="400" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe> -->`
-
 ---
 
 # Lesson 6: Common Mistakes
@@ -197,6 +191,8 @@ If you don't track your trades, you cannot improve. Period.
 - **TraderSync.com** — Free tier available, automated
 - **Excel/Google Sheets** — Manual but customizable
 - **Physical notebook** — Old school but effective
+- **AI integration** — I used AI to integrate my notion journal and Webull account
+
 
 Review your journal weekly. Identify patterns in your winners AND losers. Your journal is the fastest feedback loop you have.
 

@@ -5,9 +5,6 @@ week: 5
 ---
 
 
-> **📹 Video Lesson — Coming Soon**  
-> *Replace this block with your YouTube embed when ready:*  
-> `<!-- <iframe width="100%" height="400" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe> -->`
 
 ---
 
@@ -129,7 +126,7 @@ When multiple timeframes show the same directional bar type (all 2U or all 2D), 
 
 ## Saty Mahajan's Pivot Ribbon & Phase Oscillator
 
-**Saty's indicators are a professional trader's toolkit that gives you immediate visual clarity on trend, momentum, and extreme levels.** Available as free scripts on TradingView.
+**Saty's indicators are a professional trader's toolkit that gives you immediate visual clarity on trend, momentum, and extreme levels.** Available as free scripts on TradingView. Go to his website www.satyland.com to download his indicators and learn how to use them.
 
 ### The Pivot Ribbon
 
@@ -162,28 +159,6 @@ ATR measures how much a stock typically moves in a day. Saty's ATR script plots 
 
 Use ATR levels as profit targets and stop-loss references. If a stock is approaching its upper ATR, the move is likely exhausting — take profits.
 
----
-
-## Indicators I Use
-
-Keep it simple. More indicators = more confusion.
-
-### Core Four
-- **Volume** — Confirms moves. A breakout with low volume often fails.
-- **Moving Averages (9 EMA, 20 EMA)** — Short-term trend reference
-- **VWAP (Volume Weighted Average Price)** — Institutional reference. Price above VWAP = bullish, below = bearish.
-- **RVOL (Relative Volume)** — Compares today's volume to the average. Spikes indicate meaningful activity.
-
-### The EMA9/VWAP Crossover — Powerful Setup
-
-One of my favorite setups. When price is above both the 9 EMA and VWAP, with all three aligning upward, it's a strong bullish signal.
-
-1. Price holds above VWAP
-2. 9 EMA crosses above VWAP from below
-3. Volume picks up
-4. Price pulls back briefly then continues higher
-
-This is especially powerful on the 5-minute or 15-minute chart during the morning.
 
 ---
 
@@ -195,6 +170,8 @@ Simple but effective. The first 30 minutes of the trading day set a "range" — 
 - **If the stock breaks BELOW the 30-minute low** → buy puts
 
 Why it works: The opening 30 minutes contain the most volume and order flow. Breaking out of that range typically signals genuine directional conviction for the rest of the day.
+
+I also like setting it to the first 10 minutes of the trading day when trading SPX 0DTE.
 
 ### ORB + Sector ETFs
 Apply ORB to Select Sector SPDR ETFs (XLK for tech, XLF for financials, XLE for energy, etc.) to identify which sectors are leading. Then trade stocks within those sectors, or the ETFs directly.

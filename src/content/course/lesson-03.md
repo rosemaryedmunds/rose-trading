@@ -5,10 +5,6 @@ week: 3
 ---
 
 
-> **📹 Video Lesson — Coming Soon**  
-> *Replace this block with your YouTube embed when ready:*  
-> `<!-- <iframe width="100%" height="400" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe> -->`
-
 ---
 
 # Lesson 3: What They Won't Teach You
@@ -150,6 +146,8 @@ Because of **IV Crush**. Before earnings, Implied Volatility is extremely high (
 
 Earnings swings are essentially gambling. Don't do it. Take your profits before the report and watch from the sidelines.
 
+You can go to marketchameleon.com and look for the Implied Move on earnings for a ticker. The stock has to move more than the implied move, for your options to work, especially if you're trading weeklies.
+
 ---
 
 ## Quadruple Witching — Beware
@@ -171,5 +169,3 @@ Institutions rebalance massive positions during Quad Witching. This creates:
 2. Consider going mostly to cash the week of
 3. If you must trade, use only 5-10% of your portfolio
 4. Monitor positions closely
-
-Ignoring Quad Witching has cost me tens of thousands of dollars. Don't make the same mistake. Mark these dates on your calendar every year.
