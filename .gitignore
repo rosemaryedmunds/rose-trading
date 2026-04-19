@@ -24,3 +24,6 @@ pnpm-debug.log*
 *.swp
 *.swo
 *~
+
+#Ghost Folder
+.claude/
