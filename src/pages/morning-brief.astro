@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Morning Brief">
+<Layout title="Morning Brief | Rose Trading">
   <main class="mb-container">
     <header class="mb-header">
       <div class="mb-header-left">
@@ -22,7 +22,7 @@ import Layout from '../layouts/Layout.astro';
     <div id="error-state" class="mb-status error hidden"></div>
 
     <div id="brief-content" class="mb-grid hidden">
-      <section id="tone-card" class="mb-card span-2">
+      <section class="mb-card span-2">
         <div class="card-header"><span class="dot blue"></span> Market Tone</div>
         <div class="card-body">
           <p id="tone-text" class="large-text"></p>
@@ -60,6 +60,89 @@ import Layout from '../layouts/Layout.astro';
   </main>
 
   <style>
-    .mb-container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; color: #e8e6ff; font-family: system-ui, sans-serif; }
+    /* Rose Trading Color Palette */
+    :root {
+      --bg-card: #1a1a2e;
+      --accent: #6b5ecd;
+      --text: #e8e6ff;
+    }
+    .mb-container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; color: var(--text); font-family: system-ui, sans-serif; }
     .mb-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; }
-    .mb-date-display { font-family: monospace; color: #6b5ecd; margin-top: 0.5rem; }
+    .mb-date-display { font-family: monospace; color: var(--accent); margin-top: 0.5rem; }
+    .mb-badge { font-size: 0.7rem; background: rgba(107,94,205,0.1); border: 1px solid var(--accent); padding: 0.2rem 0.5rem; border-radius: 4px; margin-right: 0.5rem; }
+    .mb-btn { background: var(--accent); border: none; color: white; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
+    .mb-btn:hover { transform: scale(1.05); }
+    .mb-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .span-2 { grid-column: span 2; }
+    .mb-card { background: var(--bg-card); border: 1px solid #3d3d5c; border-radius: 12px; overflow: hidden; }
+    .card-header { background: rgba(255,255,255,0.03); padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #3d3d5c; display: flex; align-items: center; gap: 0.5rem; }
+    .card-body { padding: 1.25rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .blue { background: #3b82f6; } .violet { background: #8b5cf6; } .teal { background: #14b8a6; } .amber { background: #f59e0b; } .red { background: #ef4444; }
+    .large-text { font-size: 1.1rem; line-height: 1.6; color: #b8b4d8; }
+    .brief-list { list-style: none; padding: 0; margin: 0; }
+    .brief-list li { font-size: 0.85rem; padding: 0.6rem 0; border-bottom: 1px solid #2d2d4d; }
+    .mb-status { text-align: center; padding: 4rem; color: #b8b8d1; }
+    .hidden { display: none; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 600px) { .mb-grid { grid-template-columns: 1fr; } .span-2 { grid-column: span 1; } }
+  </style>
+
+  <script>
+    async function fetchBrief() {
+      const content = document.getElementById('brief-content');
+      const loading = document.getElementById('loading-state');
+      const errorEl = document.getElementById('error-state');
+      
+      loading.classList.remove('hidden');
+      content.classList.add('hidden');
+      errorEl.classList.add('hidden');
+
+      try {
+        const response = await fetch('/.netlify/functions/morning-brief');
+        const data = await response.json();
+
+        if (data.error) throw new Error(data.error);
+
+        // Inject Tone
+        document.getElementById('tone-text').textContent = data.market_tone;
+
+        // Inject Trump
+        document.getElementById('trump-list').innerHTML = data.trump_schedule.map(s => 
+          `<li><strong>${s.time}:</strong> ${s.event}</li>`
+        ).join('') || '<li>No scheduled public events.</li>';
+
+        // Inject Gaps
+        document.getElementById('gaps-container').innerHTML = `
+          <p style="color:#4ade80; margin-bottom: 0.5rem;">🟢 ${data.gaps.ups.join(', ') || 'None'}</p>
+          <p style="color:#f87171">🔴 ${data.gaps.downs.join(', ') || 'None'}</p>
+        `;
+
+        // Inject Econ
+        document.getElementById('econ-list').innerHTML = data.econ_calendar.map(e => 
+          `<li><span style="color:#8b8cb1">${e.time}</span> — ${e.event} [${e.impact}]</li>`
+        ).join('') || '<li>No major data today.</li>';
+
+        // Inject News & Analysts
+        const allNews = [...(data.analyst_actions || []), ...(data.breaking_news || [])];
+        document.getElementById('news-list').innerHTML = allNews.length > 0 
+          ? allNews.map(n => `<li>${n}</li>`).join('') 
+          : '<li>No major upgrades or breaking news.</li>';
+
+        loading.classList.add('hidden');
+        content.classList.remove('hidden');
+      } catch (err) {
+        loading.classList.add('hidden');
+        errorEl.textContent = `Update Error: ${err.message}`;
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('mb-date').textContent = new Date().toDateString();
+    document.getElementById('refresh-btn').addEventListener('click', fetchBrief);
+    
+    // Initial fetch on load
+    fetchBrief();
+  </script>
+</Layout>
