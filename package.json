@@ -9,6 +9,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "astro": "^4.16.18",
     "chart.js": "^4.5.1"
   }
