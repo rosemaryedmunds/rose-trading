@@ -5,10 +5,6 @@ week: 1
 ---
 
 
-> **📹 Video Lesson — Coming Soon**  
-> *Replace this block with your YouTube embed when ready:*  
-> `<!-- <iframe width="100%" height="400" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe> -->`
-
 ---
 
 # Lesson 1: Before We Begin
@@ -84,7 +80,7 @@ As a small fish, you have three choices:
 2. **Swim against them** (bet on a reversal — riskier but potentially more rewarding)
 3. **Wait and watch** (until the direction is clear)
 
-> **The most important lesson in this book:** The market is always moving. New opportunities arise every single day. Your job is not to catch every move — it is to catch the moves that align with a direction you can read clearly.
+> **The most important lesson:** The market is always moving. New opportunities arise every single day. Your job is not to catch every move — it is to catch the moves that align with a direction you can read clearly.
 
 ---
 
