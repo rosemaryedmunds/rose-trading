@@ -31,67 +31,47 @@ if (!entry) {
 
 const { Content } = await entry.render();
 
-// Hardcoded quiz data for each week (temporary solution to ensure quizzes work)
+// Quiz data for each lesson - matches the new beginner course
 const quizData = {
   1: {
-    question: 'In the "Spring" analogy, what does an Inside Bar represent?',
-    options: ['1. Kinetic Energy (The explosion)', '2. Potential Energy (The compression)', '3. A market crash'],
+    question: 'In the "Sea of the Market" analogy, what are YOU as a new trader?',
+    options: ['1. A big fish (Institutional Trader)', '2. A small fish (Retail Trader)', '3. The shark'],
     correct: 2
   },
   2: {
-    question: 'If the Monthly Candle is Green and the Ribbon is Green, but you see a Bearish setup on the 5-minute chart, what do you do?',
-    options: ['1. Take the short trade quickly.', '2. Ignore the short trade; it is fighting the trend.', '3. Flip a coin.'],
+    question: 'You buy a Call option at $0.50. The stock rises and your option increases to $1.50. What is your profit on a single contract?',
+    options: ['1. $50', '2. $100', '3. $150'],
     correct: 2
   },
   3: {
-    question: 'A stock has been falling for 3 days. Suddenly, a Green candle breaks the High of the previous Red candle. What signal is this?',
-    options: ['1. A Continuation (2-1-2)', '2. A Reversal (2-2)', '3. An Inside Bar (1)'],
-    correct: 2
+    question: 'What happens to option premiums the moment an earnings report is released?',
+    options: ['1. They go up due to excitement', '2. They stay the same until the next day', '3. They drop due to IV Crush, even if the stock moves correctly'],
+    correct: 3
   },
   4: {
-    question: 'If you SELL an option, who is "Theta" working for?',
-    options: ['1. The Buyer (The Gambler)', '2. You (The Casino)', '3. The Broker'],
+    question: 'You have a $10,000 account. Using the 5% Rule, what is the maximum you should risk on a single trade?',
+    options: ['1. $100', '2. $500', '3. $1,000'],
     correct: 2
   },
   5: {
-    question: 'If you sell an option with a 20 Delta, what is your theoretical probability of winning (keeping the full premium)?',
-    options: ['1. 20%', '2. 50%', '3. 80%'],
+    question: 'In #TheStrat, a candle that has a higher LOW and a lower HIGH than the previous candle is called a:',
+    options: ['1. Outside Bar (Type 3)', '2. Directional Bar (Type 2)', '3. Inside Bar (Type 1)'],
     correct: 3
   },
   6: {
-    question: 'To sell a "Cash Secured Put," what does your broker require you to have?',
-    options: ['1. 100 shares of the stock.', '2. Enough cash to buy 100 shares at the strike price.', '3. A margin loan.'],
+    question: 'You see a stock rocketing up, but you did not plan a trade for it. You feel FOMO. What is the correct action?',
+    options: ['1. Chase the trade immediately, or you will miss out', '2. Wait. There is always another bus coming. Trade your setup, not FOMO', '3. Buy just a small amount to participate'],
     correct: 2
   },
   7: {
-    question: 'The chart looks perfect, but the IV Rank is 5 (very low premiums). Do you take the trade?',
-    options: ['1. Yes, the chart is king.', '2. No, the premium is too cheap; the risk/reward isn\'t there.'],
+    question: 'What is the absolute MINIMUM viable setup for a beginner to start trading (at zero cost)?',
+    options: ['1. Premium flow tools and multiple paid services', '2. Webull paper trading account + free TradingView + Saty\'s free indicators', '3. Only a physical journal and a free brokerage'],
     correct: 2
   },
   8: {
-    question: 'Why do we buy the "Protection" leg in a Credit Spread?',
-    options: ['1. To make more profit.', '2. To cap our maximum loss (Defined Risk).', '3. Because the broker forces us to.'],
+    question: 'What is the recommended path forward after completing this course?',
+    options: ['1. Fund a large account and start trading immediately', '2. Paper trade for 30 days first, then start small with real money', '3. Find a premium trading room to copy trades from'],
     correct: 2
-  },
-  9: {
-    question: 'You sold a spread for $1.00 credit. It is now trading at $0.50. What do you do?',
-    options: ['1. Hold it until it goes to $0.00.', '2. Buy to Close (BTC) immediately to lock in the win.', '3. Roll the trade.'],
-    correct: 2
-  },
-  10: {
-    question: 'You have a $20,000 account. What is the absolute maximum capital you should allocate to a single trade setup (5% rule)?',
-    options: ['1. $5,000', '2. $1,000', '3. $10,000'],
-    correct: 2
-  },
-  11: {
-    question: 'You just took a max loss on a trade. You feel angry and want to open a new trade immediately to recover the loss. What is this called?',
-    options: ['1. Hedging', '2. Revenge Trading', '3. Alpha Generation'],
-    correct: 2
-  },
-  12: {
-    question: 'This is the final assessment - you completed the course!',
-    options: ['1. I understand the fundamentals', '2. I\'m ready to practice', '3. Both of the above'],
-    correct: 3
   }
 };
 
@@ -104,7 +84,7 @@ const quiz = quizData[weekNumber] || null;
   
   {quiz && (
     <div class="quiz-section">
-      <h3 class="quiz-title">📝 Week {entry.data.week} Assessment</h3>
+      <h3 class="quiz-title">📝 Lesson {entry.data.week} Assessment</h3>
       <p class="quiz-question"><strong>Question:</strong> {quiz.question}</p>
       
       <div class="quiz-options">
