@@ -1,15 +1,15 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default async (req, context) => {
-  // 1. Handle CORS and Methods
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
+  const apiKey = Netlify.env.get('GEMINI_API_KEY') || process.env.GEMINI_API_KEY;
+  
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    
+    // UPDATE: Use gemini-2.5-flash which is the current stable version
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash", 
+      tools: [{ googleSearchRetrieval: {} }] 
     });
   }
 
