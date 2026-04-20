@@ -3,12 +3,6 @@ title: "Lesson 8: Conclusion & Your Path Forward"
 phase: "Phase 6: Your Toolkit"
 week: 8
 ---
-
-
-> **📹 Video Lesson — Coming Soon**  
-> *Replace this block with your YouTube embed when ready:*  
-> `<!-- <iframe width="100%" height="400" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe> -->`
-
 ---
 
 # Lesson 8: Conclusion & Your Path Forward
@@ -55,7 +49,7 @@ Over these 8 lessons, you've built a complete foundation:
 - **Saty's Pivot Ribbon** — trend direction
 - **Saty's Phase Oscillator** — momentum and extremes
 - **Saty's ATR Levels** — volatility and targets
-- **Essential indicators** — Volume, 9 EMA, VWAP
+- **Essential indicators** 
 - **EMA9/VWAP Crossover strategy**
 - **ORB Strategy** with sector ETFs
 - **Chart patterns** — bull flags, triangles, head and shoulders
@@ -116,7 +110,7 @@ Knowing about IV Crush is different from resisting the urge to swing through ear
 
 ---
 
-## The Sniper Trader's Contract
+## The Option Trader's Contract
 
 Read this before every trading session:
 
@@ -143,7 +137,7 @@ I want to end where I began.
 
 You have a life outside of trading. You have people who love you regardless of your P&L. You have dreams and goals bigger than any single trade. When a trade goes wrong — and some will — remember that the loss is a temporary event in a lifetime of opportunity.
 
-When I lost $40,000 in my early days, I thought I was done. I had depression. I had anxiety. But my WHY was bigger than my loss. I wanted generational wealth. I wanted to take care of my family. I wanted financial freedom.
+When I lost money in my early days, I thought I was done. I had depression. I had anxiety. But my WHY was bigger than my loss. I wanted generational wealth. I wanted to take care of my family. I wanted financial freedom.
 
 That WHY pulled me through the darkness. The dream was always brighter than the obstacles.
 
@@ -159,9 +153,9 @@ You now have the knowledge. You now have the framework. You now have the tools.
 
 The rest is up to you.
 
-Welcome to the 10%. Welcome to the journey. The spaceship is built. Time to fly.
+Welcome to the 10%. Welcome to the journey. 
 
-> *"Use these tools to create your own world, astronaut."*
+Please contact me if you need additional help! The first step is the step to greatness.
 
 ---
 

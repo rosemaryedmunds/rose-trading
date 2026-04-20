@@ -4,11 +4,6 @@ phase: "Phase 6: Your Toolkit"
 week: 7
 ---
 
-
-> **📹 Video Lesson — Coming Soon**  
-> *Replace this block with your YouTube embed when ready:*  
-> `<!-- <iframe width="100%" height="400" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe> -->`
-
 ---
 
 # Lesson 7: The Tools I Use
@@ -47,7 +42,7 @@ Start with **Webull's paper trading** to practice without real money. When you'r
 1. Sign up for a free account at tradingview.com
 2. Start with the basic (free) plan
 3. Upgrade only if you find you need more
-4. Load Saty's free indicators from the public library
+4. Load Saty's free indicators from satyland.com
 
 ---
 
@@ -55,25 +50,25 @@ Start with **Webull's paper trading** to practice without real money. When you'r
 
 Once you're in TradingView, add these indicators to your default layout:
 
-### The Essential Four
-- **Volume** — Bottom of chart, always on
-- **9 EMA (Exponential Moving Average)** — Short-term trend line
-- **VWAP (Volume Weighted Average Price)** — Institutional reference
+### The Essential Fo
 - **Saty's Pivot Ribbon** — Trend direction at a glance
-
-### Additional
-- **Phase Oscillator** (Saty's) — Momentum and extremes
-- **ATR Levels** (Saty's) — Volatility-based targets
+- **Saty's Phase Oscillator** (Saty's) — Momentum and extremes
+- **Saty's ATR Levels** (Saty's) — Volatility-based targets
 - **RVOL (Relative Volume)** — Today's volume vs average
+For ADR Zones:
+https://www.tradingview.com/script/iRFijVEu-ATRvsDTR-ADR-Zone-SSS50/ 
 
-### Finding Saty's Scripts
-1. In TradingView, click the "Indicators" button
-2. Search "Saty"
-3. Select his free public scripts
-4. Apply to your charts
+Timeframe continuity:
+https://www.tradingview.com/script/9QtwuoHf-Timeframe-Continuity/ 
 
-Less is more. Don't load 15 indicators. The Core Four plus Saty's tools are more than enough.
+Candle Type #TheStrat
+https://www.tradingview.com/script/0WOo54ab-Candle-Type-The-Strat/ 
 
+SMA indicator I use it for the 50 sma:
+https://www.tradingview.com/script/Yf5SvY8G-30-50-100-and-200-Day-Simple-Moving-Averages/ 
+
+
+Less is more. Don't load 15 indicators. 
 ---
 
 ## News Sources
@@ -199,7 +194,7 @@ For complete clarity, here's exactly what I use:
 | Broker (Main) | ThinkorSwim / Webull |
 | Broker (Beginner) | Robinhood |
 | Charting | TradingView.com |
-| Indicators | 9 EMA, VWAP, Saty's Pivot Ribbon, Saty's Phase Oscillator, Saty's ATR |
+| Indicators | Saty's Pivot Ribbon, Saty's Phase Oscillator, Saty's ATR |
 | News | CNBC, Yahoo Finance, Twitter |
 | Breaking News | Benzinga Squawk |
 | Earnings Calendar | earningswhispers.com |
