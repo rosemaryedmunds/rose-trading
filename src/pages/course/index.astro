@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import { Icon } from 'astro-icon/components'; // Added icon import
 
 const courseEntries = await getCollection('course');
 
@@ -29,7 +30,6 @@ const phaseOrder = [
 ---
 
 <Layout title="Beginner Options Trading">
-  <!-- Hero Section -->
   <section class="hero">
     <div class="container">
       <h1>Beginner Options Trading</h1>
@@ -41,18 +41,21 @@ const phaseOrder = [
     </div>
   </section>
 
-  <!-- Course Overview Cards -->
   <section class="section" style="background: var(--bg-secondary);">
     <div class="container">
       <div class="grid grid-2" style="max-width: 900px; margin: 0 auto;">
         <div class="card" style="text-align: center;">
-          <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎯</div>
+          <div class="course-header-icon">
+            <Icon name="lucide:target" />
+          </div>
           <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">8 Lessons</h3>
           <p style="margin: 0;">Structured curriculum from 0 knowledge to beginner</p>
         </div>
         
         <div class="card" style="text-align: center;">
-          <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+          <div class="course-header-icon">
+            <Icon name="lucide:layers" />
+          </div>
           <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">4 Phases</h3>
           <p style="margin: 0;">Charting, Business Model, Execution, and Risk Management</p>
         </div>
@@ -60,7 +63,6 @@ const phaseOrder = [
     </div>
   </section>
 
-  <!-- Course Phases -->
   {phaseOrder.map((phaseName) => {
     const phaseWeeks = phases[phaseName] || [];
     if (phaseWeeks.length === 0) return null;
@@ -82,7 +84,6 @@ const phaseOrder = [
     );
   })}
 
-  <!-- Call to Action -->
   <section class="section" style="background: var(--bg-secondary);">
     <div class="container">
       <div class="card" style="max-width: 800px; margin: 0 auto; text-align: center;">
@@ -99,6 +100,20 @@ const phaseOrder = [
 </Layout>
 
 <style>
+  /* Added specific styling for the course page icons */
+  .course-header-icon {
+    margin-bottom: 1rem;
+    color: var(--accent-primary);
+    filter: drop-shadow(0 0 10px rgba(108, 99, 255, 0.5));
+  }
+
+  [data-icon] {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto;
+  }
+
+  /* Existing Styles */
   .hero {
     padding: 6rem 0 4rem;
     text-align: center;
@@ -181,24 +196,10 @@ const phaseOrder = [
   }
 
   @media (max-width: 768px) {
-    .hero {
-      padding: 3rem 0 2rem;
-    }
-    
-    .hero h1 {
-      font-size: 2rem;
-    }
-    
-    .subtitle {
-      font-size: 1.25rem;
-    }
-
-    .intro {
-      font-size: 1rem;
-    }
-
-    .phase-title {
-      font-size: 1.5rem;
-    }
+    .hero { padding: 3rem 0 2rem; }
+    .hero h1 { font-size: 2rem; }
+    .subtitle { font-size: 1.25rem; }
+    .intro { font-size: 1rem; }
+    .phase-title { font-size: 1.5rem; }
   }
 </style>
