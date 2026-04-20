@@ -54,7 +54,6 @@ Once you're in TradingView, add these indicators to your default layout:
 - **Saty's Pivot Ribbon** — Trend direction at a glance
 - **Saty's Phase Oscillator** (Saty's) — Momentum and extremes
 - **Saty's ATR Levels** (Saty's) — Volatility-based targets
-- **RVOL (Relative Volume)** — Today's volume vs average
 For ADR Zones:
 https://www.tradingview.com/script/iRFijVEu-ATRvsDTR-ADR-Zone-SSS50/ 
 
