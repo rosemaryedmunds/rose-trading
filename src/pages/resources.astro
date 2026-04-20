@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Icon } from 'astro-icon/components'; // This was the missing line
+import { Icon } from 'astro-icon/components';
 ---
 
 <Layout title="Resources">
@@ -19,7 +19,7 @@ import { Icon } from 'astro-icon/components'; // This was the missing line
       <div class="resource-dropdown">
         <button class="dropdown-header">
           <span class="dropdown-title">
-            <span class="dropdown-icon"><Icon name="lucide:book-open" /></span>
+            <Icon name="lucide:book-open" class="dropdown-icon-svg" />
             Learning Resources
           </span>
           <span class="dropdown-arrow">▼</span>
@@ -33,6 +33,19 @@ import { Icon } from 'astro-icon/components'; // This was the missing line
                 <li><a href="https://www.youtube.com/playlist?list=PLU9f1fTtAn5rCgq2tCbpaJkEru3bzxF7x" target="_blank">Chart Pattern Course</a></li>
                 <li><a href="https://www.youtube.com/playlist?list=PLU9f1fTtAn5r0om7hq7nhRs45kzSBZMcl" target="_blank">Technical Trading Course</a></li>
                 <li><a href="https://www.youtube.com/playlist?list=PLU9f1fTtAn5qSOuwkc5PT0STeLF0mW8Ur" target="_blank">Supply & Demand Trading</a></li>
+                <li><a href="https://www.youtube.com/playlist?list=PLU9f1fTtAn5oZxHxZVa50-myUJfohUGt9" target="_blank">Price Action Course</a></li>
+                <li><a href="https://www.youtube.com/playlist?list=PLU9f1fTtAn5ofyRQKWqMhOBp2DWUSQU3n" target="_blank">Candlestick Patterns</a></li>
+                <li><a href="https://www.youtube.com/playlist?list=PLU9f1fTtAn5o9qnTwApheFvnkyFG5Tice" target="_blank">Smart Money Concepts</a></li>
+                <li><a href="https://www.youtube.com/watch?v=uSjDYn8xaNs&list=PLFAKby4qxtHVXUxudppWUtGrsqHZZiRV_&pp=iAQB" target="_blank">Fibonacci</a></li>
+              </ul>
+            </div>
+
+            <div class="resource-section">
+              <h3>Beginner Options Trading</h3>
+              <ul class="resource-list">
+                <li><a href="https://www.youtube.com/playlist?list=PLU9f1fTtAn5pPXal0TSKS4ohfRk9xwXzY" target="_blank">Beginner Options Trading</a></li>
+                <li><a href="https://www.youtube.com/watch?v=jN4QODy000Y" target="_blank">Options Greeks</a></li>
+                <li><a href="https://www.youtube.com/watch?v=0GSB5YZx9ZE" target="_blank">Options Explained</a></li>
               </ul>
             </div>
           </div>
@@ -42,7 +55,37 @@ import { Icon } from 'astro-icon/components'; // This was the missing line
       <div class="resource-dropdown">
         <button class="dropdown-header">
           <span class="dropdown-title">
-            <span class="dropdown-icon"><Icon name="lucide:library" /></span>
+            <Icon name="lucide:compass" class="dropdown-icon-svg" />
+            Study Plans
+          </span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="dropdown-content">
+          <div class="resource-grid">
+            <div class="resource-section">
+              <h3>#theStrat</h3>
+              <ul class="resource-list">
+                <li><a href="https://www.youtube.com/@SaraStratSniper/playlists" target="_blank">Sara Strat Sniper Playlists</a></li>
+                <li><a href="https://www.youtube.com/playlist?list=PL8FT63xUyCPPSq2qJdgVDBbxJU6CRW2_X" target="_blank">Adex Beginner's Guide</a></li>
+                <li><a href="https://www.youtube.com/playlist?list=PL8FT63xUyCPNzQhBpmgLqdr95bNcipFo9" target="_blank">Adex Public Lessons</a></li>
+              </ul>
+            </div>
+            <div class="resource-section">
+              <h3>ICT</h3>
+              <ul class="resource-list">
+                <li><a href="https://www.youtube.com/playlist?list=PLVgHx4Z63pabb9rl1nyG58TG8PG8yzuao" target="_blank">2016 Mentorship</a></li>
+                <li><a href="https://www.youtube.com/playlist?list=PLVgHx4Z63paYiFGQ56PjTF1PGePL3r69s" target="_blank">2022 Mentorship</a></li>
+                <li><a href="https://www.youtube.com/playlist?list=PLVgHx4Z63pabpjlduWBaEsn8VMtALhjGV" target="_blank">2023 Mentorship</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="resource-dropdown">
+        <button class="dropdown-header">
+          <span class="dropdown-title">
+            <Icon name="lucide:library" class="dropdown-icon-svg" />
             Must Read Books
           </span>
           <span class="dropdown-arrow">▼</span>
@@ -50,8 +93,40 @@ import { Icon } from 'astro-icon/components'; // This was the missing line
         <div class="dropdown-content">
           <div class="books-grid">
             <div class="book-item">Trading in the Zone by Mark Douglas</div>
+            <div class="book-item">The Zen Trader by Peter Castle</div>
             <div class="book-item">The Best Loser Wins by Tom Hougaard</div>
+            <div class="book-item">Atomic Habits by James Clear</div>
             <div class="book-item">The Mental Game of Trading by Jared Tendler</div>
+            <div class="book-item">Discipline is Destiny by Ryan Holiday</div>
+            <div class="book-item">Volume Price Analysis by Anna Coulling</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="resource-dropdown">
+        <button class="dropdown-header">
+          <span class="dropdown-title">
+            <Icon name="lucide:link-2" class="dropdown-icon-svg" />
+            Helpful Links
+          </span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="dropdown-content">
+          <div class="resource-grid">
+            <div class="resource-section">
+              <h3>TradingView Watchlists</h3>
+              <ul class="resource-list">
+                <li><a href="https://www.tradingview.com/watchlists/116311478/" target="_blank">Master Sector List</a></li>
+                <li><a href="https://www.tradingview.com/watchlists/116968101/" target="_blank">Sector Industry (ETF List)</a></li>
+                <li><a href="https://www.tradingview.com/watchlists/207513575/" target="_blank">Small Account Friendly List</a></li>
+              </ul>
+            </div>
+            <div class="resource-section">
+              <h3>Think or Swim Scripts</h3>
+              <ul class="resource-list">
+                <li><a href="https://docs.google.com/spreadsheets/d/1dWibOarZXk2dHOD6C9wAsJsmV-xz6cDQ6iNR1UuZlMg/htmlview" target="_blank">#TheStrat Scripts</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -61,25 +136,7 @@ import { Icon } from 'astro-icon/components'; // This was the missing line
 </Layout>
 
 <style>
-  [data-icon] {
-    width: 1.5rem;
-    height: 1.5rem;
-    color: var(--accent-primary);
-    display: inline-block;
-    vertical-align: middle;
-  }
-  
-  .dropdown-title {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .hero {
-    padding: 6rem 0 4rem;
-    text-align: center;
-  }
-  
+  .hero { padding: 6rem 0 4rem; text-align: center; }
   .hero h1 {
     font-size: 3.5rem;
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
@@ -87,49 +144,38 @@ import { Icon } from 'astro-icon/components'; // This was the missing line
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  .intro { max-width: 800px; margin: 0 auto; color: var(--text-secondary); line-height: 1.8; }
+  
+  .resource-dropdown { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 1.5rem; overflow: hidden; }
+  .dropdown-header { width: 100%; padding: 1.5rem 2rem; background: none; border: none; display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: var(--text-primary); font-size: 1.25rem; font-weight: 600; }
+  
+  .dropdown-title { display: flex; align-items: center; gap: 1rem; }
+  .dropdown-icon-svg { width: 1.5rem; height: 1.5rem; color: var(--accent-primary); }
+  .dropdown-arrow { color: var(--accent-primary); transition: transform 0.3s ease; }
+  
+  .dropdown-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 2rem; }
+  .resource-dropdown.active .dropdown-content { max-height: 2000px; padding: 0 2rem 2rem 2rem; }
 
-  .resource-dropdown {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-  }
+  .resource-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+  .resource-section h3 { color: var(--accent-primary); margin-bottom: 1rem; font-size: 1.125rem; }
+  .resource-list { list-style: none; padding: 0; }
+  .resource-list li { margin-bottom: 0.75rem; position: relative; padding-left: 1.5rem; }
+  .resource-list li::before { content: "→"; position: absolute; left: 0; color: var(--accent-primary); }
+  .resource-list a { color: var(--text-secondary); text-decoration: none; transition: color 0.3s ease; }
+  .resource-list a:hover { color: var(--accent-primary); }
 
-  .dropdown-header {
-    width: 100%;
-    padding: 1.5rem 2rem;
-    background: none;
-    border: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    color: var(--text-primary);
-    font-size: 1.25rem;
-    font-weight: 600;
-  }
-
-  .dropdown-content {
-    max-height: 0;
-    overflow: hidden;
-    padding: 0 2rem;
-    transition: max-height 0.3s ease;
-  }
-
-  .resource-dropdown.active .dropdown-content {
-    max-height: 2000px;
-    padding: 0 2rem 2rem 2rem;
-  }
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+  .book-item { background: var(--bg-secondary); padding: 1rem; border-radius: 8px; color: var(--text-secondary); border: 1px solid var(--border-color); }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.dropdown-header').forEach(header => {
       header.addEventListener('click', function() {
-        this.parentElement.classList.toggle('active');
+        const dropdown = this.parentElement;
+        dropdown.classList.toggle('active');
         const arrow = this.querySelector('.dropdown-arrow');
-        arrow.style.transform = this.parentElement.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+        arrow.style.transform = dropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
       });
     });
   });
