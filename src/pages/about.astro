@@ -14,39 +14,38 @@ import { Icon } from 'astro-icon/components';
         </div>
         
         <div class="about-text">
-          <h2 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Hi, I'm Rose! <Icon name="lucide:sparkles" style="display:inline; width:1.5rem;" /></h2>
-          
+          <h2 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Hi, I'm Rose!</h2>
           <p>
-            Rose is an IT Trading Analyst for a Fortune 500 company that lives in Houston, Texas.
+            Rose is an IT Trading Analyst for a Fortune 500 company that lives in Houston, Texas. [cite: 3]
+            She's a wife, dog mom and cancer survivor that likes to play soccer, travel and read on her free time. [cite: 4]
           </p>
-          
           <p>
-            Rose started trading in 2020. She mainly focused on options with a main focus on SPX right now.
+            Rose started trading in 2020. She mainly focused on options with a main focus on SPX right now. [cite: 5]
           </p>
-          
           <p>
-            Rose likes to use #TheStrat and Market Structure to swing trade and intraday trade.
+            Rose likes to use #TheStrat and Market Structure to swing trade and intraday trade. [cite: 6]
+            Rose loves to pay it forward by teaching others what has brought her success in trading. [cite: 7]
           </p>
         </div>
       </div>
 
       <div class="grid grid-3" style="margin-top: 4rem;">
         <div class="card" style="text-align: center;">
-          <div class="icon-wrapper"><Icon name="lucide:zap" /></div>
+          <Icon name="lucide:trending-up" />
           <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">My Approach</h3>
-          <p style="margin: 0;">#TheStrat and Market Structure for swing and intraday trading</p>
+          <p style="margin: 0;">#TheStrat and Market Structure for swing and intraday trading [cite: 8]</p>
         </div>
         
         <div class="card" style="text-align: center;">
-          <div class="icon-wrapper"><Icon name="lucide:target" /></div>
+          <Icon name="lucide:target" />
           <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">Main Focus</h3>
-          <p style="margin: 0;">SPX Options Trading</p>
+          <p style="margin: 0;">SPX Options Trading [cite: 9]</p>
         </div>
         
         <div class="card" style="text-align: center;">
-          <div class="icon-wrapper"><Icon name="lucide:graduation-cap" /></div>
+          <Icon name="lucide:graduation-cap" />
           <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">My Mission</h3>
-          <p style="margin: 0;">Teaching technical analysis, risk management, and trading psychology</p>
+          <p style="margin: 0;">Teaching technical analysis, risk management, and trading psychology [cite: 10]</p>
         </div>
       </div>
     </div>
@@ -54,12 +53,22 @@ import { Icon } from 'astro-icon/components';
 </Layout>
 
 <style>
-  /* ... existing styles ... */
   [data-icon] {
     width: 2.5rem;
     height: 2.5rem;
     color: var(--accent-primary);
     filter: drop-shadow(0 0 8px rgba(108, 99, 255, 0.4));
-    margin: 0 auto 1rem;
+    margin-bottom: 1rem;
+  }
+  .about-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .about-image img {
+    width: 100%;
+    border-radius: 16px;
+    border: 3px solid var(--accent-primary);
   }
 </style>

@@ -1,53 +1,66 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import StepCard from '../components/StepCard.astro';
-import { Icon } from 'astro-icon/components'; [cite: 28]
+import { Icon } from 'astro-icon/components';
 ---
 
-<section class="section" id="journaling">
-  <div class="container">
-    <h2>Journaling</h2> [cite: 58]
-    <div class="grid grid-3">
-      <div class="card journal-card">
-        <Icon name="lucide:pencil-line" /> [cite: 59]
-        <h4>Daily Reflection</h4>
-      </div>
+<Layout title="Trading Guides">
+  <section class="hero">
+    <div class="container">
+      <h1>Trading Guides</h1>
+      <p class="intro">Essential guides to help you prepare for the market. [cite: 29]</p>
+    </div>
+  </section>
 
-      <div class="card journal-card">
-        <Icon name="lucide:crosshair" /> [cite: 60]
-        <h4>Track Your Trades</h4>
-      </div>
-
-      <div class="card journal-card">
-        <Icon name="lucide:scale" /> [cite: 60]
-        <h4>Compare to Ideal</h4>
-      </div>
-
-      <div class="card journal-card">
-        <Icon name="lucide:check-circle" /> [cite: 61]
-        <h4>Wins & Mistakes</h4>
-      </div>
-
-      <div class="card journal-card">
-        <Icon name="lucide:refresh-cw" /> [cite: 63]
-        <h4>Future Planning</h4>
-      </div>
-
-      <div class="card journal-card">
-        <Icon name="lucide:bar-chart-3" /> [cite: 64]
-        <h4>Visual Documentation</h4>
+  <section class="section" id="study-plan">
+    <div class="container">
+      <h2>Study Plan</h2>
+      <div class="study-grid">
+        <div class="card">
+          <Icon name="lucide:bar-chart-2" />
+          <h3 style="color: var(--accent-primary); text-align: center;">#theStrat</h3>
+          <p>A mechanical approach based on price action scenarios. [cite: 45]</p>
+        </div>
+        <div class="card">
+          <Icon name="lucide:line-chart" />
+          <h3 style="color: var(--accent-primary); text-align: center;">ICT</h3>
+          <p>Focusing on institutional order flow and market structure. [cite: 51]</p>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <section class="section" id="journaling">
+    <div class="container">
+      <h2>Journaling</h2>
+      <div class="grid grid-3">
+        <div class="card journal-card">
+          <Icon name="lucide:pencil" />
+          <h4>Daily Reflection</h4>
+          <p>Explain what you did well and what you did poorly. [cite: 59]</p>
+        </div>
+        <div class="card journal-card">
+          <Icon name="lucide:crosshair" />
+          <h4>Track Your Trades</h4>
+          <p>Document every trade you take and your reasoning. [cite: 60]</p>
+        </div>
+        <div class="card journal-card">
+          <Icon name="lucide:refresh-cw" />
+          <h4>Future Planning</h4>
+          <p>Set specific, actionable improvements for tomorrow. [cite: 63]</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
 
 <style>
   [data-icon] {
-    width: 3rem;
-    height: 3rem;
+    width: 2.5rem;
+    height: 2.5rem;
     color: var(--accent-primary);
     filter: drop-shadow(0 0 8px rgba(108, 99, 255, 0.4));
-    margin-bottom: 1rem;
+    margin: 0 auto 1rem;
+    display: block;
   }
-  /* ... rest of styles ... */
 </style>
