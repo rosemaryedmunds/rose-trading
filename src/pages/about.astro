@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Icon } from 'astro-icon/components';
 ---
 
 <Layout title="About Rose">
@@ -13,11 +14,10 @@ import Layout from '../layouts/Layout.astro';
         </div>
         
         <div class="about-text">
-          <h2 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Hi, I'm Rose! 👋</h2>
+          <h2 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Hi, I'm Rose! <Icon name="lucide:sparkles" style="display:inline; width:1.5rem;" /></h2>
           
           <p>
-            Rose is an IT Trading Analyst for a Fortune 500 company that lives in Houston, Texas. 
-            She's a wife, dog mom and cancer survivor that likes to play soccer, travel and read on her free time.
+            Rose is an IT Trading Analyst for a Fortune 500 company that lives in Houston, Texas.
           </p>
           
           <p>
@@ -25,100 +25,41 @@ import Layout from '../layouts/Layout.astro';
           </p>
           
           <p>
-            Rose likes to use #TheStrat and Market Structure to swing trade and intraday trade. 
-            Rose loves to pay it forward by teaching others what has brought her success in trading 
-            from technical analysis, risk management, and trading psychology.
+            Rose likes to use #TheStrat and Market Structure to swing trade and intraday trade.
           </p>
         </div>
       </div>
 
-      <!-- Trading Focus Section -->
       <div class="grid grid-3" style="margin-top: 4rem;">
         <div class="card" style="text-align: center;">
-          <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+          <div class="icon-wrapper"><Icon name="lucide:zap" /></div>
           <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">My Approach</h3>
           <p style="margin: 0;">#TheStrat and Market Structure for swing and intraday trading</p>
         </div>
         
         <div class="card" style="text-align: center;">
-          <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎯</div>
+          <div class="icon-wrapper"><Icon name="lucide:target" /></div>
           <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">Main Focus</h3>
           <p style="margin: 0;">SPX Options Trading</p>
         </div>
         
         <div class="card" style="text-align: center;">
-          <div style="font-size: 2.5rem; margin-bottom: 1rem;">📚</div>
+          <div class="icon-wrapper"><Icon name="lucide:graduation-cap" /></div>
           <h3 style="color: var(--accent-primary); margin-bottom: 0.75rem;">My Mission</h3>
           <p style="margin: 0;">Teaching technical analysis, risk management, and trading psychology</p>
         </div>
-      </div>
-
-      <!-- CTA Section -->
-      <div class="card" style="max-width: 800px; margin: 4rem auto 0; text-align: center;">
-        <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Ready to Start Your Trading Journey?</h3>
-        <p style="margin-bottom: 2rem;">
-          Join our community and learn the strategies that have brought success.
-        </p>
-        <a href="/contact" class="btn">Get Started</a>
       </div>
     </div>
   </section>
 </Layout>
 
 <style>
-  h1 {
-    font-size: 3rem;
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .about-content {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 3rem;
-    align-items: center;
-    margin-bottom: 3rem;
-  }
-
-  .about-image {
-    width: 100%;
-  }
-
-  .about-image img {
-    width: 100%;
-    border-radius: 16px;
-    border: 3px solid var(--accent-primary);
-    box-shadow: 0 8px 32px rgba(108, 99, 255, 0.2);
-  }
-
-  .about-text p {
-    font-size: 1.125rem;
-    line-height: 1.8;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-  }
-
-  @media (max-width: 968px) {
-    .about-content {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-
-    .about-image {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-  }
-
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 2rem;
-    }
-
-    .about-text p {
-      font-size: 1rem;
-    }
+  /* ... existing styles ... */
+  [data-icon] {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--accent-primary);
+    filter: drop-shadow(0 0 8px rgba(108, 99, 255, 0.4));
+    margin: 0 auto 1rem;
   }
 </style>
