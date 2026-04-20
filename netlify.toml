@@ -12,7 +12,7 @@
 [functions."morning-brief"]
   # Gemini search grounding can take 15-20 seconds
   # Note: Standard limit is 10s. If you see a 'Task Timed Out', you may need Pro.
-  timeout = 26
+  timeout = 29
 
 [functions."discord-morning-brief"]
   timeout = 26

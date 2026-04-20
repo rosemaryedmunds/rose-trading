@@ -141,86 +141,58 @@ declare module 'astro:content' {
 
 	type ContentEntryMap = {
 		"course": {
-"week-01.md": {
-	id: "week-01.md";
-  slug: "week-01";
+"lesson-01.md": {
+	id: "lesson-01.md";
+  slug: "lesson-01";
   body: string;
   collection: "course";
   data: InferEntrySchema<"course">
 } & { render(): Render[".md"] };
-"week-02.md": {
-	id: "week-02.md";
-  slug: "week-02";
+"lesson-02.md": {
+	id: "lesson-02.md";
+  slug: "lesson-02";
   body: string;
   collection: "course";
   data: InferEntrySchema<"course">
 } & { render(): Render[".md"] };
-"week-03.md": {
-	id: "week-03.md";
-  slug: "week-03";
+"lesson-03.md": {
+	id: "lesson-03.md";
+  slug: "lesson-03";
   body: string;
   collection: "course";
   data: InferEntrySchema<"course">
 } & { render(): Render[".md"] };
-"week-04.md": {
-	id: "week-04.md";
-  slug: "week-04";
+"lesson-04.md": {
+	id: "lesson-04.md";
+  slug: "lesson-04";
   body: string;
   collection: "course";
   data: InferEntrySchema<"course">
 } & { render(): Render[".md"] };
-"week-05.md": {
-	id: "week-05.md";
-  slug: "week-05";
+"lesson-05.md": {
+	id: "lesson-05.md";
+  slug: "lesson-05";
   body: string;
   collection: "course";
   data: InferEntrySchema<"course">
 } & { render(): Render[".md"] };
-"week-06.md": {
-	id: "week-06.md";
-  slug: "week-06";
+"lesson-06.md": {
+	id: "lesson-06.md";
+  slug: "lesson-06";
   body: string;
   collection: "course";
   data: InferEntrySchema<"course">
 } & { render(): Render[".md"] };
-"week-07.md": {
-	id: "week-07.md";
-  slug: "week-07";
+"lesson-07.md": {
+	id: "lesson-07.md";
+  slug: "lesson-07";
   body: string;
   collection: "course";
   data: InferEntrySchema<"course">
 } & { render(): Render[".md"] };
-"week-08.md": {
-	id: "week-08.md";
-  slug: "week-08";
-  body: string;
-  collection: "course";
-  data: InferEntrySchema<"course">
-} & { render(): Render[".md"] };
-"week-09.md": {
-	id: "week-09.md";
-  slug: "week-09";
-  body: string;
-  collection: "course";
-  data: InferEntrySchema<"course">
-} & { render(): Render[".md"] };
-"week-10.md": {
-	id: "week-10.md";
-  slug: "week-10";
-  body: string;
-  collection: "course";
-  data: InferEntrySchema<"course">
-} & { render(): Render[".md"] };
-"week-11.md": {
-	id: "week-11.md";
-  slug: "week-11";
-  body: string;
-  collection: "course";
-  data: InferEntrySchema<"course">
-} & { render(): Render[".md"] };
-"week-12.md": {
-	id: "week-12.md";
-  slug: "week-12";
+"lesson-08.md": {
+	id: "lesson-08.md";
+  slug: "lesson-08";
   body: string;
   collection: "course";
   data: InferEntrySchema<"course">

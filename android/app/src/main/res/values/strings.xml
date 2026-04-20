@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Rose Trading</string>
+    <string name="title_activity_main">Rose Trading</string>
+    <string name="package_name">com.rose.trading</string>
+    <string name="custom_url_scheme">com.rose.trading</string>
+</resources>

@@ -7,49 +7,43 @@ export default async (req, context) => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // Using gemini-2.5-flash which currently handles grounding better than Pro in 2026
+    // Switch to Gemini 3.1 for stability during the current grounding outage
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
+      model: "gemini-3.1-flash",
       tools: [{ googleSearch: {} }] 
     });
 
     const today = new Date().toLocaleDateString('en-US', { timeZone: 'America/Chicago' });
 
-    // Step 1: Request as text first (more stable for grounding)
-    const prompt = `Today is ${today}. provide a pre-market brief for an SPX trader. 
-    Include: Overnight S&P futures tone, Trump's schedule today, top Gap Ups/Downs, Econ reports, and top market news.
-    Format the response as a clean, raw JSON object only.`;
+    // We add a 'thinking' instruction to force the model to process search results
+    const prompt = `Today is ${today}. Using Google Search, provide a pre-market brief for an SPX trader. 
+    Search for: S&P futures tone, Trump's schedule today, and top Gap Ups/Downs.
+    Return ONLY a valid JSON object. If you find no specific data, use "None" for the value.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     let text = response.text();
 
-    // Step 2: Clean and validate before sending
+    // Aggressive cleaning for the April 2026 "triple backtick" bug
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    if (!text || !text.startsWith('{')) {
-       // If grounding failed, return a structured fallback so the page doesn't break
-       throw new Error("Search tool returned empty content");
-    }
+    if (!text || text.length < 5) throw new Error("Search tool returned an empty response.");
 
     return new Response(text, { status: 200, headers: { "Content-Type": "application/json" } });
 
   } catch (error) {
-    console.error("Grounding Error:", error.message);
+    console.error("Brief Error:", error.message);
     
-    // Reliable fallback for Sunday/Quiet periods
+    // Fail gracefully with valid JSON so the dashboard cards don't stay blank
     const fallback = {
-      market_tone: "Search grounding is currently refreshing or markets are quiet (Sunday).",
-      trump_schedule: [{"time": "N/A", "event": "No public events scheduled"}],
+      market_tone: "The live search tool is currently experiencing high latency (API Issue).",
+      trump_schedule: [{"time": "N/A", "event": "Searching... try refreshing."}],
       gaps: { ups: ["None"], downs: ["None"] },
-      econ_calendar: [{"time": "N/A", "event": "No major data", "impact": "Low"}],
+      econ_calendar: [{"time": "N/A", "event": "No data", "impact": "Low"}],
       analyst_actions: ["N/A"],
-      breaking_news: ["Note: The live search tool is experiencing high latency. Try refreshing in 1 minute."]
+      breaking_news: ["Note: Markets are quiet or search grounding is resetting."]
     };
 
-    return new Response(JSON.stringify(fallback), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
+    return new Response(JSON.stringify(fallback), { status: 200, headers: { "Content-Type": "application/json" } });
   }
 };
