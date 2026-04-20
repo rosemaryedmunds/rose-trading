@@ -1,19 +1,21 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
+import { Icon } from 'astro-icon/components';
 ---
 
 <Layout title="Beginners Guide to Trading">
   <Hero />
 
-  <!-- Main Navigation Cards -->
   <section class="section">
     <div class="container">
       <h2>Explore Your Trading Journey</h2>
       <div class="main-grid">
         
         <a href="/about" class="main-card">
-          <div class="card-icon">👋</div>
+          <div class="card-icon">
+            <Icon name="lucide:user-round" />
+          </div>
           <h3>About Rose</h3>
           <p>Learn about my trading journey, approach to the markets, and how I can help you succeed.</p>
           <span class="card-link">Learn More →</span>
@@ -21,35 +23,45 @@ import Hero from '../components/Hero.astro';
 
         <a href="/course" class="main-card featured">
           <div class="card-badge">Featured</div>
-          <div class="card-icon">🎯</div>
+          <div class="card-icon">
+            <Icon name="lucide:target" />
+          </div>
           <h3>Sniper Trading Course</h3>
-          <p>Master options trading in 12 weeks. Learn charting, business model, execution, and risk management.</p>
+          <p>Learn options in 8 lessons. Learn charting, business model, execution, and risk management.</p>
           <span class="card-link">Start Learning →</span>
         </a>
 
         <a href="/guides" class="main-card">
-          <div class="card-icon">📋</div>
+          <div class="card-icon">
+            <Icon name="lucide:book-open-check" />
+          </div>
           <h3>Trading Guides</h3>
           <p>Essential guides on preparing for the market, developing a study plan, and maintaining a trading journal.</p>
           <span class="card-link">View Guides →</span>
         </a>
 
         <a href="/resources" class="main-card">
-          <div class="card-icon">📚</div>
+          <div class="card-icon">
+            <Icon name="lucide:library" />
+          </div>
           <h3>Learning Resources</h3>
           <p>Free YouTube courses, study plans, must-read books, and helpful tools to accelerate your learning.</p>
           <span class="card-link">Browse Resources →</span>
         </a>
 
         <a href="/contact" class="main-card">
-          <div class="card-icon">💬</div>
+          <div class="card-icon">
+            <Icon name="lucide:messages-square" />
+          </div>
           <h3>Join the Community</h3>
           <p>Connect with other traders, get support, and stay updated on live trading sessions.</p>
           <span class="card-link">Get Connected →</span>
         </a>
 
         <div class="main-card info-card">
-          <div class="card-icon">📊</div>
+          <div class="card-icon">
+            <Icon name="lucide:bar-chart-3" />
+          </div>
           <h3>What You'll Learn</h3>
           <ul style="text-align: left; padding-left: 1.5rem; color: var(--text-secondary); line-height: 2;">
             <li>SPX Options Trading</li>
@@ -64,7 +76,6 @@ import Hero from '../components/Hero.astro';
     </div>
   </section>
 
-  <!-- Quick Stats -->
   <section class="section" style="background: var(--bg-secondary);">
     <div class="container">
       <div class="stats-grid">
@@ -88,7 +99,6 @@ import Hero from '../components/Hero.astro';
     </div>
   </section>
 
-  <!-- CTA Section -->
   <section class="section">
     <div class="container">
       <div class="card cta-card">
@@ -107,6 +117,8 @@ import Hero from '../components/Hero.astro';
 </Layout>
 
 <style>
+  /* Keep all your existing styles, but update .card-icon and add [data-icon] */
+  
   h2 {
     text-align: center;
     margin-bottom: 3rem;
@@ -170,9 +182,18 @@ import Hero from '../components/Hero.astro';
     letter-spacing: 0.05em;
   }
 
+  /* UPDATED CARD ICON STYLES */
   .card-icon {
-    font-size: 3rem;
     margin-bottom: 1.5rem;
+    color: var(--accent-primary);
+    /* This creates the purple glow effect from the screenshot */
+    filter: drop-shadow(0 0 8px rgba(108, 99, 255, 0.4));
+  }
+
+  /* This targets the SVG inside the Icon component */
+  [data-icon] {
+    width: 3.5rem;
+    height: 3.5rem;
   }
 
   .main-card h3 {
@@ -238,21 +259,4 @@ import Hero from '../components/Hero.astro';
     padding: 3rem;
   }
 
-  @media (max-width: 768px) {
-    h2 {
-      font-size: 1.75rem;
-    }
-
-    .main-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .main-card {
-      padding: 2rem;
-    }
-
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-</style>
+  @media (max-width: 7
