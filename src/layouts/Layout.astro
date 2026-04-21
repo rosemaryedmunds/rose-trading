@@ -16,6 +16,21 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content={description}>
   <title>{title} | Rose Trading</title>
+  <link rel="manifest" href="/manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/rose-logo.png">
+<script is:inline>
+    // This function only runs if the app is opened as a Mobile App
+    document.addEventListener('deviceready', () => {
+      window.plugins.OneSignal.initialize("48b95503-4b11-4a91-9806-059e84277551");
+      
+      // OPTIONAL: Request permission immediately on startup
+      window.plugins.OneSignal.Notifications.requestPermission(true).then((success) => {
+        console.log("Notification permission status:", success);
+      });
+    }, false);
+  </script>
 </head>
 <body>
   <header>
