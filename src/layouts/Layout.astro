@@ -20,17 +20,15 @@ const { title, description = "Your guide to options trading" } = Astro.props;
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="/rose-logo.png">
-<script is:inline>
-    // This function only runs if the app is opened as a Mobile App
-    document.addEventListener('deviceready', () => {
-      window.plugins.OneSignal.initialize("48b95503-4b11-4a91-9806-059e84277551");
-      
-      // OPTIONAL: Request permission immediately on startup
-      window.plugins.OneSignal.Notifications.requestPermission(true).then((success) => {
-        console.log("Notification permission status:", success);
-      });
-    }, false);
-  </script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "48b95503-4b11-4a91-9806-059e84277551",
+    });
+  });
+</script>
 </head>
 <body>
   <header>
