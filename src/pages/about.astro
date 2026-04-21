@@ -4,6 +4,17 @@ import { Icon } from 'astro-icon/components';
 ---
 
 <Layout title="About Rose">
+<section style="padding: 2rem; text-align: center; background: #111; border-radius: 12px;">
+  <h3>Get Trade Alerts</h3>
+  <p>Never miss an SPX entry. Tap below to enable mobile notifications.</p>
+  
+  <button 
+    onclick="OneSignal.Slidedown.promptPush()"
+    style="background: #e63946; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: bold; cursor: pointer;"
+  >
+    🔔 Enable Alerts
+  </button>
+</section>
   <section class="section">
     <div class="container">
       <h1 style="text-align: center; margin-bottom: 3rem;">About Me</h1>
