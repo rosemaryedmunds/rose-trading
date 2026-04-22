@@ -12,6 +12,19 @@ import { Icon } from 'astro-icon/components';
       <h2>Explore Your Trading Journey</h2>
       <div class="main-grid">
         
+        <!-- SPX Alerts Card -->
+        <a href="/alerts" class="main-card alerts-card featured">
+          <div class="card-badge alerts-card-badge">
+            <span class="badge-dot"></span> Live Alerts
+          </div>
+          <div class="card-icon">
+            <Icon name="lucide:bell-ring" />
+          </div>
+          <h3>Get Access to SPX Alerts</h3>
+          <p>Real-time push notifications straight to your phone the moment Rose enters or exits an SPX trade — plus daily pre and post market reviews.</p>
+          <span class="card-link alerts-link">Subscribe for $39.99/mo →</span>
+        </a>
+
         <a href="/about" class="main-card">
           <div class="card-icon">
             <Icon name="lucide:user-round" />
@@ -99,71 +112,6 @@ import { Icon } from 'astro-icon/components';
     </div>
   </section>
 
-  <!-- SPX Alerts CTA Section -->
-  <section class="section alerts-section">
-    <div class="container">
-      <div class="alerts-cta-card">
-        <div class="alerts-cta-left">
-          <div class="alerts-badge">
-            <span class="alerts-dot"></span>
-            LIVE TRADE ALERTS
-          </div>
-          <h2 class="alerts-title">Get Access to SPX Alerts</h2>
-          <p class="alerts-desc">Get real-time push notifications straight to your phone the moment Rose enters or exits an SPX trade — plus pre and post market reviews every day.</p>
-          <ul class="alerts-features">
-            <li><span class="check">✓</span> Instant push alerts on iPhone & Android</li>
-            <li><span class="check">✓</span> Pre-market bias every morning</li>
-            <li><span class="check">✓</span> Post-market review every evening</li>
-            <li><span class="check">✓</span> SPX 0DTE options focus</li>
-          </ul>
-          <div class="alerts-cta-row">
-            <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" target="_blank" class="alerts-btn">
-              🔓 Subscribe for $39.99/mo
-            </a>
-            <a href="/alerts" class="alerts-preview-link">See a preview →</a>
-          </div>
-          <p class="alerts-fine">Instant access · Cancel anytime from Whop</p>
-        </div>
-        <div class="alerts-cta-right">
-          <div class="alerts-mock">
-            <div class="mock-bar">
-              <span class="mock-dot r"></span>
-              <span class="mock-dot y"></span>
-              <span class="mock-dot g"></span>
-              <span class="mock-title">Live Feed</span>
-            </div>
-            <div class="mock-item alert-item">
-              <span class="mock-tag red">🚨 ALERT</span>
-              <span class="mock-time">9:47 AM CT</span>
-              <div class="mock-msg">LONG 🟢 ENTRY | ORB @ 5412</div>
-            </div>
-            <div class="mock-item review-item">
-              <span class="mock-tag purple">☀️ PRE-MARKET</span>
-              <span class="mock-time">8:15 AM CT</span>
-              <div class="mock-msg">Bias is long above 5395, watching for ORB at open...</div>
-            </div>
-            <div class="mock-item alert-item">
-              <span class="mock-tag red">🚨 ALERT</span>
-              <span class="mock-time">2:31 PM CT</span>
-              <div class="mock-msg">LONG 🟢 EXIT ✅ | Target hit</div>
-            </div>
-            <div class="mock-item review-item">
-              <span class="mock-tag purple">🌙 POST-MARKET</span>
-              <span class="mock-time">4:05 PM CT</span>
-              <div class="mock-msg">Great follow-through today. Both trades hit target...</div>
-            </div>
-            <div class="mock-blur-row">
-              <div class="mock-item alert-item blurred-item">
-                <span class="mock-tag red">🚨 ALERT</span>
-                <div class="mock-msg">••••• •••• ••••••••</div>
-              </div>
-              <div class="lock-overlay">🔒 Members Only</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section class="section">
     <div class="container">
@@ -326,172 +274,40 @@ import { Icon } from 'astro-icon/components';
   }
 
   @media (max-width: 7
-  /* ── SPX Alerts Section ───────────────────────────────────────────────── */
-  .alerts-section { background: var(--bg-primary); }
-
-  .alerts-cta-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    align-items: center;
-    border: 2px solid var(--accent-primary);
-    border-radius: 20px;
-    padding: 3rem;
-    max-width: 1100px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, rgba(108,99,255,0.05), rgba(139,132,255,0.02));
+  /* ── Alerts Card ──────────────────────────────────────────────────────── */
+  .alerts-card {
+    border-color: var(--accent-primary);
+    background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(139,132,255,0.03));
   }
 
-  .alerts-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(61,220,132,0.08);
-    border: 1px solid rgba(61,220,132,0.25);
+  .alerts-card-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(61,220,132,0.15);
+    border: 1px solid rgba(61,220,132,0.3);
     color: #3DDC84;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    padding: 0.3rem 0.85rem;
-    border-radius: 100px;
-    margin-bottom: 1.25rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
     font-weight: 700;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 
-  .alerts-dot {
-    width: 7px; height: 7px;
+  .badge-dot {
+    width: 6px; height: 6px;
     background: #3DDC84;
     border-radius: 50%;
-    animation: apulse 2s infinite;
+    animation: bdpulse 2s infinite;
   }
-  @keyframes apulse {
-    0%, 100% { opacity:1; box-shadow: 0 0 0 0 rgba(61,220,132,0.4); }
-    50%       { opacity:0.7; box-shadow: 0 0 0 5px rgba(61,220,132,0); }
-  }
-
-  .alerts-title {
-    font-size: 2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1rem;
-    text-align: left;
+  @keyframes bdpulse {
+    0%, 100% { opacity:1; box-shadow: 0 0 0 0 rgba(61,220,132,0.5); }
+    50%       { opacity:0.7; box-shadow: 0 0 0 4px rgba(61,220,132,0); }
   }
 
-  .alerts-desc {
-    color: var(--text-secondary);
-    line-height: 1.75;
-    margin-bottom: 1.5rem;
-    font-size: 1rem;
-  }
-
-  .alerts-features {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-  .alerts-features li {
-    color: var(--text-secondary);
-    font-size: 0.92rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-  .check { color: #3DDC84; font-weight: 700; font-size: 1rem; }
-
-  .alerts-cta-row {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.75rem;
-  }
-
-  .alerts-btn {
-    background: var(--accent-primary);
-    color: #fff;
-    text-decoration: none;
-    padding: 0.85rem 1.75rem;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    transition: opacity 0.15s, transform 0.1s;
-    white-space: nowrap;
-  }
-  .alerts-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-
-  .alerts-preview-link {
-    color: var(--accent-primary);
-    text-decoration: none;
-    font-size: 0.88rem;
-    font-weight: 600;
-  }
-  .alerts-preview-link:hover { text-decoration: underline; }
-
-  .alerts-fine {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    opacity: 0.6;
-    margin: 0;
-  }
-
-  .alerts-mock {
-    background: #0B0C15;
-    border: 1px solid rgba(153,139,255,0.2);
-    border-radius: 14px;
-    overflow: hidden;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .mock-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0.65rem 1rem;
-    background: #1C1E2D;
-    border-bottom: 1px solid rgba(153,139,255,0.1);
-  }
-  .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .mock-dot.r { background: #FF5F57; }
-  .mock-dot.y { background: #FFBD2E; }
-  .mock-dot.g { background: #28C840; }
-  .mock-title { font-size: 0.7rem; color: #998BFF; letter-spacing: 0.12em; margin-left: 0.4rem; }
-
-  .mock-item {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid rgba(153,139,255,0.07);
-  }
-  .alert-item  { border-left: 3px solid #FF5C5C; }
-  .review-item { border-left: 3px solid #998BFF; }
-
-  .mock-tag { font-size: 0.58rem; letter-spacing: 0.15em; font-weight: 700; margin-right: 0.5rem; }
-  .mock-tag.red    { color: #FF5C5C; }
-  .mock-tag.purple { color: #998BFF; }
-
-  .mock-time { font-size: 0.6rem; color: #444; }
-  .mock-msg  { font-size: 0.78rem; color: #E0E0E0; margin-top: 0.3rem; line-height: 1.4; }
-
-  .mock-blur-row { position: relative; }
-  .blurred-item  { filter: blur(3px); opacity: 0.4; }
-  .lock-overlay  {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.78rem;
-    color: #998BFF;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    background: rgba(11,12,21,0.6);
-  }
-
-  @media (max-width: 900px) {
-    .alerts-cta-card { grid-template-columns: 1fr; }
-    .alerts-cta-right { display: none; }
-  }
+  .alerts-link { color: #3DDC84 !important; }
+  .alerts-card:hover .alerts-link { color: #3DDC84 !important; }
 </style>
