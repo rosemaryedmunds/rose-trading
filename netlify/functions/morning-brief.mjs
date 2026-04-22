@@ -1,49 +1,50 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 export default async (req, context) => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return new Response(JSON.stringify({ error: "API Key missing" }), { status: 500 });
+  const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+  
+  // Use the Flash model for speed, with Google Search grounding enabled
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    tools: [{ googleSearch: {} }] // Enables real-time web access
+  });
+
+  const prompt = `
+    Search the web for financial and political news for today, April 22, 2026. 
+    Prioritize data from:
+    - benzinga.com (for analyst ratings and stock gaps)
+    - rollcall.com (for the Trump schedule/calendar)
+    - tikr.com (for earnings and economic data)
+
+    Return the data in a raw JSON format ONLY with this exact schema:
+    {
+      "market_tone": "1-2 sentence summary",
+      "trump_schedule": [{"time": "string", "event": "string"}],
+      "gaps": {"ups": ["TICKER (+%)"], "downs": ["TICKER (-%)"]},
+      "econ_calendar": [{"time": "string", "event": "string", "impact": "High/Med/Low"}],
+      "analyst_actions": ["TICKER: Action (Target)"],
+      "breaking_news": ["string"]
+    }
+    If data is missing, use "None" or empty lists. No conversational text.
+  `;
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
     
-    // Switch to Gemini 3.1 for stability during the current grounding outage
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-3.1-flash",
-      tools: [{ googleSearch: {} }] 
+    // Clean up any Markdown formatting if the AI includes it
+    const jsonString = responseText.replace(/```json|```/g, "").trim();
+    const data = JSON.parse(jsonString);
+
+    return new Response(JSON.stringify(data), {
+      headers: { "Content-Type": "application/json" }
     });
 
-    const today = new Date().toLocaleDateString('en-US', { timeZone: 'America/Chicago' });
-
-    // We add a 'thinking' instruction to force the model to process search results
-    const prompt = `Today is ${today}. Using Google Search, provide a pre-market brief for an SPX trader. 
-    Search for: S&P futures tone, Trump's schedule today, and top Gap Ups/Downs.
-    Return ONLY a valid JSON object. If you find no specific data, use "None" for the value.`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let text = response.text();
-
-    // Aggressive cleaning for the April 2026 "triple backtick" bug
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-
-    if (!text || text.length < 5) throw new Error("Search tool returned an empty response.");
-
-    return new Response(text, { status: 200, headers: { "Content-Type": "application/json" } });
-
   } catch (error) {
-    console.error("Brief Error:", error.message);
-    
-    // Fail gracefully with valid JSON so the dashboard cards don't stay blank
-    const fallback = {
-      market_tone: "The live search tool is currently experiencing high latency (API Issue).",
-      trump_schedule: [{"time": "N/A", "event": "Searching... try refreshing."}],
-      gaps: { ups: ["None"], downs: ["None"] },
-      econ_calendar: [{"time": "N/A", "event": "No data", "impact": "Low"}],
-      analyst_actions: ["N/A"],
-      breaking_news: ["Note: Markets are quiet or search grounding is resetting."]
-    };
-
-    return new Response(JSON.stringify(fallback), { status: 200, headers: { "Content-Type": "application/json" } });
+    console.error("Briefing Error:", error);
+    return new Response(JSON.stringify({ 
+      error: "Search Latency Issue", 
+      details: error.message 
+    }), { status: 500 });
   }
 };
