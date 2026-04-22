@@ -3,124 +3,216 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="About Me | Rose Trading">
+
+  <!-- iOS PWA Install / Alert Banner -->
+  <div id="alert-banner" class="alert-banner" style="display:none;">
+    <button id="enable-alerts-btn" class="enable-btn" onclick="handleAlertsClick()">
+      <span id="bell-icon-wrapper" class="btn-icon"></span>
+      <span id="alert-btn-label">Enable Trade Alerts</span>
+    </button>
+    <p id="pwa-hint" class="pwa-hint" style="display:none;">
+      📱 To get alerts on iPhone: tap <strong>Share</strong> → <strong>Add to Home Screen</strong>, then open the app and enable alerts.
+    </p>
+  </div>
+
   <section class="about-hero">
-   <div class="alert-cta">
-  <button id="onesignal-button" class="enable-btn">
-    <span class="bell-icon">🔔</span> Enable Trade Alerts
-  </button>
-</div>
+    <h1 class="page-title">About Me</h1>
 
-<script is:inline>
-  function onEnableAlertsClick() {
-    const triggerPrompt = () => {
-      if (window.OneSignal && window.OneSignal.Slidedown) {
-        window.OneSignal.Slidedown.promptPush();
-      } else {
-        // If not ready, wait 500ms and try one more time
-        setTimeout(() => {
-          if (window.OneSignal?.Slidedown) {
-            window.OneSignal.Slidedown.promptPush();
-          } else {
-            alert("Connection to alert server is slow. Please refresh the page.");
-          }
-        }, 500);
-      }
-    };
-
-    triggerPrompt();
-  }
-</script>
-
-      <h1 class="page-title">About Me</h1>
-      
-      <div class="about-grid">
-        <div class="profile-frame">
-          <img src="/rose-photo.jpg" alt="Rosemary Edmunds" class="profile-img" />
-        </div>
-        
-        <div class="about-text">
-          <h2>Hi, I'm Rose!</h2>
-          <p>
-            Rose is an IT Trading Analyst for a Fortune 500 company that lives in Houston, Texas. 
-            She's a wife, dog mom, and cancer survivor who likes to play soccer, travel, and read in her free time.
-          </p>
-          <p>
-            Rose started trading in 2020. She mainly focuses on options with a primary focus on SPX right now.
-          </p>
-          <p>
-            Rose likes to use <strong>#TheStrat</strong> and Market Structure to swing trade and intraday trade. 
-            She loves to pay it forward by teaching others what has brought her success in trading.
-          </p>
-        </div>
+    <div class="about-grid">
+      <div class="profile-frame">
+        <img src="/rose-photo.jpg" alt="Rosemary Edmunds" class="profile-img" />
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">📈</div>
-          <h3>My Approach</h3>
-          <p>#TheStrat and Market Structure for swing and intraday trading</p>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🎯</div>
-          <h3>Main Focus</h3>
-          <p>SPX Options Trading</p>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🎓</div>
-          <h3>My Mission</h3>
-          <p>Teaching technical analysis, risk management, and trading psychology</p>
-        </div>
+      <div class="about-text">
+        <h2>Hi, I'm Rose!</h2>
+        <p>
+          Rose is an IT Trading Analyst for a Fortune 500 company that lives in Houston, Texas.
+          She's a wife, dog mom, and cancer survivor who likes to play soccer, travel, and read in her free time.
+        </p>
+        <p>
+          Rose started trading in 2020. She mainly focuses on options with a primary focus on SPX right now.
+        </p>
+        <p>
+          Rose likes to use <strong>#TheStrat</strong> and Market Structure to swing trade and intraday trade.
+          She loves to pay it forward by teaching others what has brought her success in trading.
+        </p>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" id="icon-approach"></div>
+        <h3>My Approach</h3>
+        <p>#TheStrat and Market Structure for swing and intraday trading</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" id="icon-focus"></div>
+        <h3>Main Focus</h3>
+        <p>SPX Options Trading</p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" id="icon-mission"></div>
+        <h3>My Mission</h3>
+        <p>Teaching technical analysis, risk management, and trading psychology</p>
       </div>
     </div>
   </section>
+
 </Layout>
 
+<!-- Lucide Icons via CDN -->
+<script src="https://unpkg.com/lucide@latest" is:inline></script>
+
 <script is:inline>
-  function onEnableAlertsClick() {
+  // ─── Render Lucide icons ───────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    const iconApproach = document.getElementById('icon-approach');
+    const iconFocus    = document.getElementById('icon-focus');
+    const iconMission  = document.getElementById('icon-mission');
+    const bellWrapper  = document.getElementById('bell-icon-wrapper');
+
+    if (iconApproach) iconApproach.innerHTML  = '<i data-lucide="trending-up"></i>';
+    if (iconFocus)    iconFocus.innerHTML     = '<i data-lucide="crosshair"></i>';
+    if (iconMission)  iconMission.innerHTML   = '<i data-lucide="graduation-cap"></i>';
+    if (bellWrapper)  bellWrapper.innerHTML   = '<i data-lucide="bell"></i>';
+
+    if (window.lucide) window.lucide.createIcons();
+
+    // ─── Show alert banner & detect iOS PWA state ────────────────────────────
+    const banner    = document.getElementById('alert-banner');
+    const pwaHint   = document.getElementById('pwa-hint');
+    const btnLabel  = document.getElementById('alert-btn-label');
+
+    if (banner) banner.style.display = 'flex';
+
+    const isIOS       = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone === true; // true only inside PWA
+
+    if (isIOS && !isStandalone) {
+      // On iPhone but NOT in Home Screen PWA mode — show install hint
+      if (btnLabel) btnLabel.textContent = 'Enable Trade Alerts';
+      if (pwaHint)  pwaHint.style.display = 'block';
+    }
+  });
+
+  // ─── Button click handler ──────────────────────────────────────────────────
+  function handleAlertsClick() {
+    const isIOS        = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone === true;
+
+    if (isIOS && !isStandalone) {
+      // Can't do push here — guide them to install
+      const pwaHint = document.getElementById('pwa-hint');
+      if (pwaHint) {
+        pwaHint.style.display = 'block';
+        pwaHint.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      return;
+    }
+
+    // Non-iOS OR already running as installed PWA on iOS 16.4+
     if (window.OneSignal) {
-      window.OneSignal.Slidedown.promptPush().then(() => {
-        console.log("Prompt shown");
-      }).catch(err => {
-        alert("Check your browser settings—notifications might be blocked.");
-        console.error(err);
-      });
+      if (window.OneSignal.Slidedown) {
+        window.OneSignal.Slidedown.promptPush()
+          .then(() => console.log('OneSignal prompt shown'))
+          .catch(err => {
+            console.error('OneSignal error:', err);
+            alert('Notifications may be blocked. Check your browser/system settings and try again.');
+          });
+      } else {
+        // Fallback for older OneSignal SDK
+        window.OneSignal.push(() => {
+          window.OneSignal.showSlidedownPrompt();
+        });
+      }
     } else {
-      alert("OneSignal is still loading... wait 2 seconds and try again.");
+      // OneSignal not loaded yet — retry once after 1s
+      setTimeout(() => {
+        if (window.OneSignal?.Slidedown) {
+          window.OneSignal.Slidedown.promptPush();
+        } else {
+          alert('Alert service is loading slowly. Please refresh and try again.');
+        }
+      }, 1000);
     }
   }
 </script>
 
 <style>
-  /* Restore Dark Background and Text */
+  /* ── Brand color tokens ──────────────────────────────────────────────────── */
+  :root {
+    --bg-primary:    #0B0C15;
+    --bg-secondary:  #1C1E2D;
+    --text-primary:  #E0E0E0;
+    --accent-purple: #998BFF;
+    --accent-blue:   #5F5CFF;
+  }
+
   :global(body) {
-    background-color: #0b0b0b;
-    color: #ffffff;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
   }
 
-  .about-hero {
-    padding: 4rem 0;
-  }
-
+  /* ── Alert Banner ─────────────────────────────────────────────────────────── */
   .alert-banner {
     display: flex;
-    justify-content: center;
-    margin-bottom: 3rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid rgba(153, 139, 255, 0.2);
   }
 
   .enable-btn {
-    background: #e63946;
-    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-blue);
+    color: #fff;
     border: none;
-    padding: 0.8rem 1.5rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 8px;
-    font-weight: bold;
+    font-size: 1rem;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
-    transition: transform 0.2s;
+    box-shadow: 0 4px 20px rgba(95, 92, 255, 0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .enable-btn:hover {
+    box-shadow: 0 6px 24px rgba(95, 92, 255, 0.5);
+    transform: translateY(-1px);
   }
 
   .enable-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.97);
+  }
+
+  .btn-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: #fff;
+  }
+
+  .pwa-hint {
+    font-size: 0.9rem;
+    color: var(--accent-purple);
+    text-align: center;
+    max-width: 420px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0.5rem 1rem;
+    background: rgba(153, 139, 255, 0.08);
+    border: 1px solid rgba(153, 139, 255, 0.25);
+    border-radius: 8px;
+  }
+
+  /* ── Page layout ──────────────────────────────────────────────────────────── */
+  .about-hero {
+    padding: 4rem 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
   }
 
   .page-title {
@@ -128,8 +220,10 @@ import Layout from '../layouts/Layout.astro';
     font-size: 3rem;
     margin-bottom: 3rem;
     font-weight: 800;
+    color: var(--accent-purple);
   }
 
+  /* ── About Grid ───────────────────────────────────────────────────────────── */
   .about-grid {
     display: grid;
     grid-template-columns: 1fr 1.5fr;
@@ -139,7 +233,7 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .profile-frame {
-    border: 3px solid #e63946;
+    border: 3px solid var(--accent-purple);
     border-radius: 20px;
     overflow: hidden;
     line-height: 0;
@@ -152,18 +246,23 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .about-text h2 {
-    color: #e63946;
+    color: var(--accent-purple);
     font-size: 2rem;
     margin-bottom: 1.5rem;
   }
 
   .about-text p {
     line-height: 1.8;
-    color: #ccc;
+    color: var(--text-primary);
     margin-bottom: 1.2rem;
     font-size: 1.1rem;
   }
 
+  .about-text strong {
+    color: var(--accent-blue);
+  }
+
+  /* ── Stats Grid ───────────────────────────────────────────────────────────── */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -171,28 +270,44 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .stat-card {
-    background: #161616;
+    background: var(--bg-secondary);
     padding: 2rem;
     border-radius: 16px;
     text-align: center;
-    border: 1px solid #222;
+    border: 1px solid rgba(153, 139, 255, 0.15);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(153, 139, 255, 0.4);
+    box-shadow: 0 4px 24px rgba(153, 139, 255, 0.1);
   }
 
   .stat-icon {
-    font-size: 2rem;
+    display: flex;
+    justify-content: center;
     margin-bottom: 1rem;
   }
 
+  .stat-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--accent-purple);
+  }
+
   .stat-card h3 {
-    color: #e63946;
+    color: var(--accent-purple);
     margin-bottom: 0.5rem;
+    font-size: 1.1rem;
   }
 
   .stat-card p {
     color: #888;
     font-size: 0.9rem;
+    line-height: 1.5;
   }
 
+  /* ── Responsive ───────────────────────────────────────────────────────────── */
   @media (max-width: 768px) {
     .about-grid {
       grid-template-columns: 1fr;
@@ -200,6 +315,10 @@ import Layout from '../layouts/Layout.astro';
     }
     .page-title {
       font-size: 2.2rem;
+    }
+    .profile-frame {
+      max-width: 280px;
+      margin: 0 auto;
     }
   }
 </style>
