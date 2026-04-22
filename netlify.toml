@@ -13,11 +13,3 @@
   from   = "/rose-command-center-x7k2"
   to     = "/rose-command-center-x7k2"
   status = 200
-
-  [functions]
-  # Increase timeout to 26 seconds (max for Pro/Standard)
-  timeout = 26 
-
-[functions."morning-brief"]
-  # Specific configuration for this function if needed
-  timeout = 30
