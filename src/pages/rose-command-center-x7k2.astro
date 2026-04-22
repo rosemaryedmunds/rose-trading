@@ -44,32 +44,47 @@
         <button class="chip" data-value="Tweezer Bottom">Tweezer Bottom</button>
       </div>
 
-      <div class="section-label">DIRECTION</div>
+      <div class="section-label">CALL / PUT</div>
       <div class="chip-grid" id="direction-chips">
-        <button class="chip chip-green" data-value="LONG 🟢">LONG 🟢</button>
-        <button class="chip chip-red" data-value="SHORT 🔴">SHORT 🔴</button>
+        <button class="chip chip-green" data-value="CALL 🟢">CALL 🟢</button>
+        <button class="chip chip-red" data-value="PUT 🔴">PUT 🔴</button>
       </div>
 
       <div class="section-label">ACTION</div>
       <div class="chip-grid" id="action-chips">
         <button class="chip" data-value="ENTRY">ENTRY</button>
-        <button class="chip" data-value="EXIT ✅">EXIT ✅</button>
-        <button class="chip" data-value="STOP HIT ❌">STOP HIT ❌</button>
-        <button class="chip" data-value="WATCHING 👀">WATCHING 👀</button>
+        <button class="chip" data-value="EXIT">EXIT</button>
+        <button class="chip" data-value="STOP HIT">STOP HIT</button>
+        <button class="chip" data-value="WATCHING">WATCHING</button>
+      </div>
+
+      <div class="input-row three-col">
+        <div class="input-col">
+          <div class="section-label">STRIKE PRICE</div>
+          <input class="text-input" id="strike-input" type="number" placeholder="e.g. 5400" />
+        </div>
+        <div class="input-col">
+          <div class="section-label">EXPIRY</div>
+          <input class="text-input" id="expiry-input" type="date" />
+        </div>
+        <div class="input-col">
+          <div class="section-label">PREMIUM PAID</div>
+          <input class="text-input" id="premium-input" type="number" step="0.01" placeholder="e.g. 1.55" />
+        </div>
       </div>
 
       <div class="section-label">SPX PRICE (optional)</div>
       <input class="text-input" id="price-input" type="number" placeholder="e.g. 5420" />
 
-      <div class="section-label">EXTRA NOTE (optional)</div>
+      <div class="section-label">NOTE (optional)</div>
       <textarea class="text-input" id="note-input" rows="2" placeholder="e.g. waiting for confirmation candle..."></textarea>
 
       <div class="preview-box" id="preview-box">
         <span class="preview-label">PREVIEW</span>
-        <span id="preview-text">Select setup, direction & action above</span>
+        <span id="preview-text">Select setup, call/put & action above</span>
       </div>
 
-      <button class="fire-btn" id="fire-btn" onclick="fireAlert()">
+      <button class="fire-btn" id="fire-btn">
         <i data-lucide="send"></i> SEND ALERT
       </button>
       <div class="status-msg" id="status-msg"></div>
@@ -81,15 +96,15 @@
 
       <div class="section-label">TYPE</div>
       <div class="chip-grid" id="review-type-chips">
-        <button class="chip" data-value="PRE-MARKET ☀️">PRE-MARKET ☀️</button>
-        <button class="chip" data-value="POST-MARKET 🌙">POST-MARKET 🌙</button>
+        <button class="chip" data-value="PRE-MARKET">PRE-MARKET</button>
+        <button class="chip" data-value="POST-MARKET">POST-MARKET</button>
       </div>
 
       <div class="section-label">REVIEW</div>
       <textarea class="text-input" id="review-input" rows="7"
         placeholder="Write your pre or post market thoughts here...&#10;&#10;What are you watching? Key levels? Bias? How did the day go?"></textarea>
 
-      <button class="fire-btn secondary-btn" id="review-btn" onclick="postReview()">
+      <button class="fire-btn secondary-btn" id="review-btn">
         <i data-lucide="edit-3"></i> POST REVIEW
       </button>
       <div class="status-msg" id="review-status-msg"></div>
@@ -107,105 +122,129 @@
 </div>
 
 <script is:inline>
-  // ── State ────────────────────────────────────────────────────────────────
-  const state = { setup: null, direction: null, action: null };
+document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Clock ────────────────────────────────────────────────────────────────
+  // ── Lucide icons ──────────────────────────────────────────────────────────
+  if (window.lucide) window.lucide.createIcons();
+
+  // ── Clock ─────────────────────────────────────────────────────────────────
   function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
-      timeZone: 'America/Chicago',
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {
+      timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', second: '2-digit'
     }) + ' CT';
   }
   setInterval(updateClock, 1000);
   updateClock();
 
-  // ── Chip selection ───────────────────────────────────────────────────────
-  function setupChips(groupId, stateKey) {
-    document.getElementById(groupId).querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        document.getElementById(groupId).querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  // ── State ─────────────────────────────────────────────────────────────────
+  const state = { setup: null, direction: null, action: null };
+  let reviewType = null;
+
+  // ── Default expiry to today ───────────────────────────────────────────────
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }); // YYYY-MM-DD
+  document.getElementById('expiry-input').value = today;
+
+  // ── Chip selection helper ─────────────────────────────────────────────────
+  function bindChips(groupId, stateKey, callback) {
+    const group = document.getElementById(groupId);
+    if (!group) return;
+    group.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
-        state[stateKey] = chip.dataset.value;
+        if (stateKey) state[stateKey] = chip.dataset.value;
+        if (callback) callback(chip.dataset.value);
         updatePreview();
       });
     });
   }
 
-  setupChips('setup-chips', 'setup');
-  setupChips('direction-chips', 'direction');
-  setupChips('action-chips', 'action');
+  bindChips('setup-chips',     'setup');
+  bindChips('direction-chips', 'direction');
+  bindChips('action-chips',    'action');
+  bindChips('review-type-chips', null, (val) => { reviewType = val; });
 
-  document.getElementById('price-input').addEventListener('input', updatePreview);
-  document.getElementById('note-input').addEventListener('input', updatePreview);
-
-  let reviewType = null;
-  document.getElementById('review-type-chips').querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.getElementById('review-type-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      reviewType = chip.dataset.value;
-    });
+  // ── Live preview ──────────────────────────────────────────────────────────
+  ['strike-input','expiry-input','premium-input','price-input','note-input'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updatePreview);
   });
 
-  // ── Preview ──────────────────────────────────────────────────────────────
   function updatePreview() {
-    const price = document.getElementById('price-input').value;
-    const note  = document.getElementById('note-input').value;
-    const parts = [];
+    const strike = document.getElementById('strike-input').value;
+    const expiry = document.getElementById('expiry-input').value;
+    const price  = document.getElementById('price-input').value;
+    const note   = document.getElementById('note-input').value;
+
+    const premium = document.getElementById('premium-input').value;
+    const parts = ['SPX'];
     if (state.direction) parts.push(state.direction);
-    if (state.action)    parts.push(state.action);
-    if (state.setup)     parts.push(`| ${state.setup}`);
-    if (price)           parts.push(`@ ${price}`);
-    if (note)            parts.push(`— ${note}`);
-    const text = parts.length ? parts.join(' ') : 'Select setup, direction & action above';
+    if (strike)          parts.push(strike);
+    if (expiry) {
+      const [y, m, d] = expiry.split('-');
+      parts.push(`${parseInt(m)}/${parseInt(d)}`);
+    }
+    if (premium)      parts.push(`@ $${parseFloat(premium).toFixed(2)}`);
+    if (state.action) parts.push('|', state.action);
+    if (state.setup)  parts.push('|', state.setup);
+    if (price)        parts.push('| SPX @', price);
+    if (note)         parts.push('|', note);
+
+    const text = parts.length > 1 ? parts.join(' ') : 'Select setup, call/put & action above';
     document.getElementById('preview-text').textContent = text;
   }
 
-  // ── Fire Alert ───────────────────────────────────────────────────────────
-  async function fireAlert() {
+  // ── Fire Alert ────────────────────────────────────────────────────────────
+  document.getElementById('fire-btn').addEventListener('click', async () => {
     if (!state.setup || !state.direction || !state.action) {
-      showStatus('status-msg', '⚠️ Please select setup, direction, and action.', 'warn');
+      showStatus('status-msg', 'Please select a setup, call/put, and action.', 'warn');
       return;
     }
 
-    const price = document.getElementById('price-input').value;
-    const note  = document.getElementById('note-input').value;
-    const parts = ['🚨 SPX ALERT', state.direction, state.action, `| ${state.setup}`];
-    if (price) parts.push(`@ ${price}`);
-    if (note)  parts.push(`— ${note}`);
+    const strike = document.getElementById('strike-input').value;
+    const expiry = document.getElementById('expiry-input').value;
+    const price  = document.getElementById('price-input').value;
+    const note   = document.getElementById('note-input').value;
+
+    // Build message
+    const premium = document.getElementById('premium-input').value;
+    const parts = ['SPX', state.direction];
+    if (strike) parts.push(strike);
+    if (expiry) {
+      const [y, m, d] = expiry.split('-');
+      parts.push(`${parseInt(m)}/${parseInt(d)}`);
+    }
+    if (premium) parts.push(`@ $${parseFloat(premium).toFixed(2)}`);
+    parts.push('|', state.action, '|', state.setup);
+    if (price) parts.push('| SPX @', price);
+    if (note)  parts.push('|', note);
     const message = parts.join(' ');
 
     const btn = document.getElementById('fire-btn');
     btn.disabled = true;
-    btn.innerHTML = '<i data-lucide="loader"></i> Sending...';
+    btn.innerHTML = '<i data-lucide="loader-2"></i> Sending...';
     if (window.lucide) window.lucide.createIcons();
 
     try {
-      // 1. Send OneSignal push
-      await sendOneSignalPush('🚨 SPX Alert', message);
-
-      // 2. Save to Netlify feed
+      await sendOneSignalPush('SPX Alert', message);
       await saveFeedItem({ type: 'alert', message, timestamp: new Date().toISOString() });
-
-      showStatus('status-msg', '✅ Alert sent!', 'success');
+      showStatus('status-msg', 'Alert sent!', 'success');
       resetAlertForm();
       loadFeed();
     } catch (err) {
-      showStatus('status-msg', '❌ Error: ' + err.message, 'error');
+      showStatus('status-msg', 'Error: ' + err.message, 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i data-lucide="send"></i> SEND ALERT';
       if (window.lucide) window.lucide.createIcons();
     }
-  }
+  });
 
-  // ── Post Review ──────────────────────────────────────────────────────────
-  async function postReview() {
+  // ── Post Review ───────────────────────────────────────────────────────────
+  document.getElementById('review-btn').addEventListener('click', async () => {
     const review = document.getElementById('review-input').value.trim();
     if (!reviewType || !review) {
-      showStatus('review-status-msg', '⚠️ Select type and write your review.', 'warn');
+      showStatus('review-status-msg', 'Select type and write your review.', 'warn');
       return;
     }
 
@@ -213,25 +252,23 @@
     btn.disabled = true;
 
     try {
-      const title = reviewType === 'PRE-MARKET ☀️' ? '☀️ Pre-Market Review' : '🌙 Post-Market Review';
+      const title = reviewType === 'PRE-MARKET' ? 'Pre-Market Review' : 'Post-Market Review';
       await sendOneSignalPush(title, review.substring(0, 100) + (review.length > 100 ? '...' : ''));
       await saveFeedItem({ type: 'review', reviewType, message: review, timestamp: new Date().toISOString() });
-
-      showStatus('review-status-msg', '✅ Review posted!', 'success');
+      showStatus('review-status-msg', 'Review posted!', 'success');
       document.getElementById('review-input').value = '';
       document.getElementById('review-type-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       reviewType = null;
       loadFeed();
     } catch (err) {
-      showStatus('review-status-msg', '❌ Error: ' + err.message, 'error');
+      showStatus('review-status-msg', 'Error: ' + err.message, 'error');
     } finally {
       btn.disabled = false;
     }
-  }
+  });
 
-  // ── OneSignal API ────────────────────────────────────────────────────────
+  // ── OneSignal API ─────────────────────────────────────────────────────────
   async function sendOneSignalPush(title, message) {
-    // Uses Netlify function as proxy to keep REST API key secret
     const res = await fetch('/.netlify/functions/send-alert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -240,7 +277,7 @@
     if (!res.ok) throw new Error('Push failed');
   }
 
-  // ── Netlify Feed Storage ─────────────────────────────────────────────────
+  // ── Netlify Feed Storage ──────────────────────────────────────────────────
   async function saveFeedItem(item) {
     const res = await fetch('/.netlify/functions/save-feed', {
       method: 'POST',
@@ -264,12 +301,14 @@
     const el = document.getElementById('feed-preview');
     if (!items.length) { el.innerHTML = '<div class="feed-loading">No activity yet.</div>'; return; }
     el.innerHTML = items.map(item => {
-      const time = new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const time = new Date(item.timestamp).toLocaleString('en-US', {
+        timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
       const isAlert = item.type === 'alert';
       return `
         <div class="feed-item ${isAlert ? 'feed-alert' : 'feed-review'}">
           <div class="feed-item-header">
-            <span class="feed-tag">${isAlert ? '🚨 ALERT' : item.reviewType || 'REVIEW'}</span>
+            <span class="feed-tag">${isAlert ? 'ALERT' : item.reviewType || 'REVIEW'}</span>
             <span class="feed-time">${time} CT</span>
           </div>
           <div class="feed-item-msg">${item.message}</div>
@@ -277,7 +316,7 @@
     }).join('');
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
   function showStatus(id, msg, type) {
     const el = document.getElementById(id);
     el.textContent = msg;
@@ -286,60 +325,51 @@
   }
 
   function resetAlertForm() {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    Object.keys(state).forEach(k => state[k] = null);
+    document.getElementById('setup-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('direction-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('action-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    state.setup = null; state.direction = null; state.action = null;
+    document.getElementById('strike-input').value = '';
+    document.getElementById('premium-input').value = '';
     document.getElementById('price-input').value = '';
     document.getElementById('note-input').value = '';
-    document.getElementById('preview-text').textContent = 'Select setup, direction & action above';
+    // Reset expiry to today
+    document.getElementById('expiry-input').value = today;
+    document.getElementById('preview-text').textContent = 'Select setup, call/put & action above';
   }
 
-  // ── Init ─────────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    if (window.lucide) window.lucide.createIcons();
-    loadFeed();
-  });
+  // ── Init ──────────────────────────────────────────────────────────────────
+  loadFeed();
+
+}); // end DOMContentLoaded
 </script>
 
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:        #0B0C15;
-    --surface:   #1C1E2D;
-    --border:    rgba(153,139,255,0.15);
-    --purple:    #998BFF;
-    --blue:      #5F5CFF;
-    --green:     #3DDC84;
-    --red:       #FF5C5C;
-    --text:      #E0E0E0;
-    --muted:     #666;
-    --mono:      'JetBrains Mono', monospace;
-    --display:   'Syne', sans-serif;
+    --bg:      #0B0C15;
+    --surface: #1C1E2D;
+    --border:  rgba(153,139,255,0.15);
+    --purple:  #998BFF;
+    --blue:    #5F5CFF;
+    --green:   #3DDC84;
+    --red:     #FF5C5C;
+    --text:    #E0E0E0;
+    --muted:   #666;
+    --mono:    'JetBrains Mono', monospace;
+    --display: 'Syne', sans-serif;
   }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    min-height: 100vh;
-  }
+  body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
 
-  .terminal {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem;
-  }
+  .terminal { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
 
   /* Top Bar */
   .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px 12px 0 0;
-    padding: 0.75rem 1.25rem;
-    margin-bottom: 2px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px 12px 0 0; padding: 0.75rem 1.25rem; margin-bottom: 2px;
   }
   .top-bar-left { display: flex; gap: 6px; align-items: center; }
   .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
@@ -350,145 +380,91 @@
   .top-bar-time  { font-size: 0.75rem; color: var(--muted); }
 
   /* Panel Grid */
-  .panel-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-  }
-
+  .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
   .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 1.75rem; display: flex; flex-direction: column; gap: 0.75rem;
   }
   .panel:first-child { border-radius: 0 0 0 12px; }
   .panel:last-child  { border-radius: 0 0 12px 0; }
 
   .panel-title {
-    font-family: var(--display);
-    font-size: 1rem;
-    letter-spacing: 0.1em;
-    color: var(--purple);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 0.25rem;
+    font-family: var(--display); font-size: 1rem; letter-spacing: 0.1em;
+    color: var(--purple); display: flex; align-items: center; gap: 0.5rem;
+    padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); margin-bottom: 0.25rem;
   }
   .panel-title svg { width: 16px; height: 16px; stroke: var(--purple); }
 
-  .section-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    margin-top: 0.25rem;
-  }
+  .section-label { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted); margin-top: 0.25rem; }
 
   /* Chips */
   .chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .chip {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s;
+    background: transparent; border: 1px solid var(--border); color: var(--text);
+    font-family: var(--mono); font-size: 0.75rem; padding: 0.35rem 0.75rem;
+    border-radius: 6px; cursor: pointer; transition: all 0.15s;
   }
-  .chip:hover { border-color: var(--purple); color: var(--purple); }
-  .chip.active { background: var(--blue); border-color: var(--blue); color: #fff; }
-  .chip-green.active { background: var(--green); border-color: var(--green); color: #000; }
-  .chip-red.active   { background: var(--red);   border-color: var(--red);   color: #fff; }
+  .chip:hover              { border-color: var(--purple); color: var(--purple); }
+  .chip.active             { background: var(--blue);  border-color: var(--blue);  color: #fff; }
+  .chip-green.active       { background: var(--green); border-color: var(--green); color: #000; }
+  .chip-red.active         { background: var(--red);   border-color: var(--red);   color: #fff; }
+
+  /* Input row */
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .input-row.three-col { grid-template-columns: 1fr 1fr 1fr; }
+  .input-col { display: flex; flex-direction: column; gap: 0.4rem; }
 
   /* Inputs */
   .text-input {
-    width: 100%;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    padding: 0.6rem 0.85rem;
-    resize: vertical;
-    transition: border-color 0.15s;
+    width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: var(--mono);
+    font-size: 0.85rem; padding: 0.6rem 0.85rem; resize: vertical; transition: border-color 0.15s;
   }
-  .text-input:focus { outline: none; border-color: var(--purple); }
+  .text-input:focus       { outline: none; border-color: var(--purple); }
   .text-input::placeholder { color: var(--muted); }
+
+  /* Date input styling */
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
 
   /* Preview */
   .preview-box {
-    background: rgba(95,92,255,0.08);
-    border: 1px dashed rgba(95,92,255,0.3);
-    border-radius: 8px;
-    padding: 0.85rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+    background: rgba(95,92,255,0.08); border: 1px dashed rgba(95,92,255,0.3);
+    border-radius: 8px; padding: 0.85rem 1rem; display: flex; flex-direction: column; gap: 0.3rem;
   }
   .preview-label { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--blue); }
   #preview-text  { font-size: 0.9rem; color: var(--text); line-height: 1.4; }
 
   /* Buttons */
   .fire-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
-    padding: 0.85rem;
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-family: var(--display);
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-    margin-top: 0.25rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    width: 100%; padding: 0.85rem; background: var(--blue); color: #fff; border: none;
+    border-radius: 8px; font-family: var(--display); font-size: 0.95rem; font-weight: 700;
+    letter-spacing: 0.08em; cursor: pointer; transition: opacity 0.15s, transform 0.1s; margin-top: 0.25rem;
   }
   .fire-btn:hover    { opacity: 0.9; }
   .fire-btn:active   { transform: scale(0.98); }
   .fire-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .fire-btn svg      { width: 16px; height: 16px; stroke: #fff; }
-
-  .secondary-btn { background: var(--purple); }
+  .secondary-btn     { background: var(--purple); }
 
   /* Status */
-  .status-msg { font-size: 0.8rem; text-align: center; min-height: 1.2em; }
+  .status-msg     { font-size: 0.8rem; text-align: center; min-height: 1.2em; }
   .status-success { color: var(--green); }
   .status-warn    { color: #FFBD2E; }
   .status-error   { color: var(--red); }
 
   /* Feed */
   .feed-divider {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 0.5rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    color: var(--muted);
+    display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem;
+    font-size: 0.6rem; letter-spacing: 0.2em; color: var(--muted);
   }
   .feed-divider::before,
   .feed-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  .feed-preview { display: flex; flex-direction: column; gap: 0.6rem; }
-  .feed-loading { font-size: 0.8rem; color: var(--muted); text-align: center; padding: 1rem; }
+  .feed-preview  { display: flex; flex-direction: column; gap: 0.6rem; }
+  .feed-loading  { font-size: 0.8rem; color: var(--muted); text-align: center; padding: 1rem; }
 
-  .feed-item {
-    border-radius: 8px;
-    padding: 0.75rem 0.9rem;
-    border-left: 3px solid transparent;
-  }
+  .feed-item { border-radius: 8px; padding: 0.75rem 0.9rem; border-left: 3px solid transparent; }
   .feed-alert  { background: rgba(255,92,92,0.06);  border-color: var(--red); }
   .feed-review { background: rgba(153,139,255,0.06); border-color: var(--purple); }
 
@@ -501,6 +477,7 @@
     .panel-grid { grid-template-columns: 1fr; }
     .panel:first-child { border-radius: 0; }
     .panel:last-child  { border-radius: 0 0 12px 12px; }
+    .input-row { grid-template-columns: 1fr; }
   }
 </style>
 
