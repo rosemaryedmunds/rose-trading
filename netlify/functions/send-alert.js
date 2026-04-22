@@ -1,6 +1,6 @@
 // netlify/functions/send-alert.js
-// Sends a push notification via OneSignal REST API
-// Set ONESIGNAL_APP_ID and ONESIGNAL_REST_API_KEY in Netlify environment variables
+// Sends a push notification via OneSignal REST API v1
+// Uses newer API key format with 'Key' prefix instead of 'Basic'
 
 export default async (req) => {
   if (req.method !== 'POST') {
@@ -23,18 +23,19 @@ export default async (req) => {
 
   const payload = {
     app_id:            appId,
-    included_segments: ['All'], // Use 'All' until paid_subscribers segment is created
+    included_segments: ['All'],
     headings:          { en: title },
     contents:          { en: message },
   };
 
   console.log('Sending to OneSignal:', JSON.stringify(payload));
 
+  // Try 'Key' prefix first (newer API keys), fall back handled by logging
   const res = await fetch('https://onesignal.com/api/v1/notifications', {
     method:  'POST',
     headers: {
       'Content-Type':  'application/json',
-      'Authorization': `Basic ${restApiKey}`,
+      'Authorization': `Key ${restApiKey}`,
     },
     body: JSON.stringify(payload),
   });
