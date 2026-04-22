@@ -21,11 +21,13 @@ const { title, description = "Your guide to options trading" } = Astro.props;
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="/rose-logo.png">
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
+
+<script is:inline>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
+  window.OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
-      appId: "48b95503-4b11-4a91-9806-059e84277551",
+      appId: "Y48b95503-4b11-4a91-9806-059e84277551", // Double check this matches your dashboard!
+      allowLocalhostAsSecureOrigin: true,
     });
   });
 </script>
