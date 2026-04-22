@@ -1,0 +1,253 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Trade Alerts | Rose Trading">
+
+  <section class="alerts-page">
+    <div class="page-header">
+      <div class="live-dot-wrap">
+        <span class="live-dot"></span>
+        <span class="live-label">LIVE FEED</span>
+      </div>
+      <h1 class="page-title">Trade Alerts</h1>
+      <p class="page-sub">Real-time SPX trade alerts and market reviews from Rose. <br/>
+        <a href="/about" class="upgrade-link">Join the alerts list →</a>
+      </p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="alert">🚨 Alerts</button>
+      <button class="filter-btn" data-filter="review">📋 Reviews</button>
+    </div>
+
+    <!-- Feed -->
+    <div class="feed" id="feed">
+      <div class="feed-skeleton">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <div class="empty-icon">📡</div>
+      <p>No alerts yet. Check back during market hours.</p>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+  :root {
+    --bg:      #0B0C15;
+    --surface: #1C1E2D;
+    --border:  rgba(153,139,255,0.15);
+    --purple:  #998BFF;
+    --blue:    #5F5CFF;
+    --green:   #3DDC84;
+    --red:     #FF5C5C;
+    --text:    #E0E0E0;
+    --muted:   #555;
+  }
+
+  :global(body) { background: var(--bg); color: var(--text); }
+
+  .alerts-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  /* Header */
+  .page-header { text-align: center; margin-bottom: 2.5rem; }
+
+  .live-dot-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(61,220,132,0.08);
+    border: 1px solid rgba(61,220,132,0.2);
+    padding: 0.3rem 0.85rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  .live-label { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--green); font-family: 'JetBrains Mono', monospace; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(61,220,132,0.4); }
+    50%       { opacity: 0.7; box-shadow: 0 0 0 6px rgba(61,220,132,0); }
+  }
+
+  .page-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--purple);
+    margin-bottom: 0.75rem;
+  }
+
+  .page-sub { color: var(--muted); font-size: 1rem; line-height: 1.6; }
+  .upgrade-link { color: var(--blue); text-decoration: none; font-weight: 600; }
+  .upgrade-link:hover { text-decoration: underline; }
+
+  /* Filter Bar */
+  .filter-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+  }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .filter-btn:hover { border-color: var(--purple); color: var(--purple); }
+  .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  /* Feed */
+  .feed { display: flex; flex-direction: column; gap: 1rem; }
+
+  /* Feed Cards */
+  .feed-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid transparent;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    animation: fadeIn 0.3s ease;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.08); }
+  .feed-card.type-alert  { border-left-color: var(--red); }
+  .feed-card.type-review { border-left-color: var(--purple); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+  }
+  .type-alert  .card-tag { background: rgba(255,92,92,0.1);  color: var(--red);    }
+  .type-review .card-tag { background: rgba(153,139,255,0.1); color: var(--purple); }
+
+  .card-time { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .card-message {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  /* Alert-specific styling */
+  .type-alert .card-message { font-weight: 600; font-size: 1.05rem; }
+
+  /* Skeleton */
+  .feed-skeleton { display: flex; flex-direction: column; gap: 1rem; }
+  .skeleton-card {
+    height: 90px;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    animation: shimmer 1.5s infinite;
+    background: linear-gradient(90deg, var(--surface) 25%, #22243a 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Empty */
+  .empty-state { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+  .empty-icon  { font-size: 3rem; margin-bottom: 1rem; }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<script is:inline>
+  let allItems = [];
+  let currentFilter = 'all';
+
+  async function loadFeed() {
+    try {
+      const res = await fetch('/feed.json?t=' + Date.now());
+      allItems = res.ok ? await res.json() : [];
+    } catch {
+      allItems = [];
+    }
+    renderFeed();
+  }
+
+  function renderFeed() {
+    const feed   = document.getElementById('feed');
+    const empty  = document.getElementById('empty-state');
+    const items  = currentFilter === 'all'
+      ? allItems
+      : allItems.filter(i => i.type === currentFilter);
+
+    if (!items.length) {
+      feed.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    feed.innerHTML = items.map(item => {
+      const isAlert = item.type === 'alert';
+      const tag     = isAlert ? '🚨 ALERT' : (item.reviewType || 'REVIEW');
+      const time    = new Date(item.timestamp).toLocaleString('en-US', {
+        timeZone: 'America/Chicago',
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      }) + ' CT';
+      return `
+        <div class="feed-card type-${item.type}">
+          <div class="card-header">
+            <span class="card-tag">${tag}</span>
+            <span class="card-time">${time}</span>
+          </div>
+          <div class="card-message">${item.message}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderFeed();
+    });
+  });
+
+  // Auto-refresh every 60 seconds
+  loadFeed();
+  setInterval(loadFeed, 60000);
+</script>
+

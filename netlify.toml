@@ -1,33 +1,15 @@
 [build]
   command = "npm run build"
-  publish = "dist"
+  publish = "dist/"
 
-[functions]
-  # This forces Netlify to look in the correct folder
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-  # Default memory is 1024MB, which is plenty for Gemini
-  included_files = ["node_modules/@google/generative-ai/**"]
+# Redirect /feed.json to the serverless function
+[[redirects]]
+  from   = "/feed.json"
+  to     = "/.netlify/functions/feed-json"
+  status = 200
 
-[functions."morning-brief"]
-  # Gemini search grounding can take 15-20 seconds
-  # Note: Standard limit is 10s. If you see a 'Task Timed Out', you may need Pro.
-  timeout = 29
-
-[functions."discord-morning-brief"]
-  timeout = 26
-  schedule = "0 13 * * 1-5"
-
-[functions."anthropic-proxy"]
-  timeout = 26
-
-[functions."notion-proxy"]
-  timeout = 26
-
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    # Added GET for the Morning Brief request
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type"
+# Redirect the secret command center URL
+[[redirects]]
+  from   = "/rose-command-center-x7k2"
+  to     = "/rose-command-center-x7k2"
+  status = 200
