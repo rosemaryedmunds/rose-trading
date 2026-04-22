@@ -4,12 +4,37 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout title="About Me | Rose Trading">
   <section class="about-hero">
-    <div class="container">
-      <div class="alert-banner">
-        <button onclick="onEnableAlertsClick()" class="enable-btn">
-          🔔 Enable Trade Alerts
-        </button>
-      </div>
+   <div class="alert-cta">
+  <button id="onesignal-button" class="enable-btn">
+    <span class="bell-icon">🔔</span> Enable Trade Alerts
+  </button>
+</div>
+
+<script is:inline>
+  // This function handles the actual click logic
+  function initOneSignalButton() {
+    const btn = document.getElementById('onesignal-button');
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      // Check if OneSignal is initialized
+      if (window.OneSignal && window.OneSignal.Slidedown) {
+        console.log("Attempting to show OneSignal prompt...");
+        window.OneSignal.Slidedown.promptPush();
+      } else {
+        console.error("OneSignal SDK not found or not initialized.");
+        alert("Alert system is still syncing. Please refresh or wait 5 seconds.");
+      }
+    });
+  }
+
+  // Run the function as soon as the page is ready
+  if (document.readyState === 'complete') {
+    initOneSignalButton();
+  } else {
+    window.addEventListener('load', initOneSignalButton);
+  }
+</script>
 
       <h1 class="page-title">About Me</h1>
       
