@@ -1,11 +1,9 @@
 ---
-// Members-only alerts feed
-// Protected by Whop OAuth — session verified on every page load
 import Layout from '../layouts/Layout.astro';
 import { Icon } from 'astro-icon/components';
 ---
 
-<Layout title="Members Alerts | Rose Trading">
+<Layout title="Members Alerts | Rose.Trading">
 
 <Fragment slot="head">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,9 +18,11 @@ import { Icon } from 'astro-icon/components';
 
   <!-- Auth failed -->
   <div id="auth-failed" class="auth-screen" style="display:none;">
-    <div class="auth-icon"><Icon name="lucide:lock" /></div>
+    <div class="auth-icon">
+      <Icon name="lucide:lock" />
+    </div>
     <h2>Access Required</h2>
-    <p>You need an active Rose Trading subscription to view this page.</p>
+    <p>You need an active Rose.Trading subscription to view this page.</p>
     <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" class="auth-btn">Subscribe for $39.99/mo →</a>
     <a href="/.netlify/functions/whop-login" class="auth-link">Already subscribed? Sign in</a>
   </div>
@@ -38,7 +38,6 @@ import { Icon } from 'astro-icon/components';
       </div>
       <p class="page-sub">Real-time SPX alerts and market reviews from Rose.</p>
 
-      <!-- Enable alerts button -->
       <div class="alert-cta">
         <button id="enable-alerts-btn" class="enable-btn" onclick="enableNotifications()">
           <Icon name="lucide:bell" />
@@ -47,49 +46,27 @@ import { Icon } from 'astro-icon/components';
         <p class="notif-hint" id="notif-hint"></p>
       </div>
 
-      <!-- PWA install instructions -->
       <div class="pwa-card">
         <div class="pwa-card-header">
           <Icon name="lucide:smartphone" />
           <span>Get Alerts on Your iPhone</span>
         </div>
         <ol class="pwa-steps">
-          <li>
-            <span class="step-num">1</span>
-            <span>Open <strong>rose.trading</strong> in Safari</span>
-          </li>
-          <li>
-            <span class="step-num">2</span>
-            <span>Tap the <strong>Share</strong> button at the bottom of Safari</span>
-          </li>
-          <li>
-            <span class="step-num">3</span>
-            <span>Scroll down and tap <strong>"Add to Home Screen"</strong></span>
-          </li>
-          <li>
-            <span class="step-num">4</span>
-            <span>Tap <strong>Add</strong> in the top right corner</span>
-          </li>
-          <li>
-            <span class="step-num">5</span>
-            <span>Open the app from your Home Screen and tap <strong>Enable Trade Alerts</strong></span>
-          </li>
+          <li><span class="step-num">1</span><span>Open <strong>rose.trading</strong> in Safari</span></li>
+          <li><span class="step-num">2</span><span>Tap the <strong>Share</strong> button at the bottom of Safari</span></li>
+          <li><span class="step-num">3</span><span>Scroll down and tap <strong>"Add to Home Screen"</strong></span></li>
+          <li><span class="step-num">4</span><span>Tap <strong>Add</strong> in the top right corner</span></li>
+          <li><span class="step-num">5</span><span>Open the app from your Home Screen and tap <strong>Enable Trade Alerts</strong></span></li>
         </ol>
       </div>
     </div>
 
-    <!-- Filter Bar -->
     <div class="filter-bar">
       <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="alert">
-        <Icon name="lucide:zap" /> Alerts
-      </button>
-      <button class="filter-btn" data-filter="review">
-        <Icon name="lucide:file-text" /> Reviews
-      </button>
+      <button class="filter-btn" data-filter="alert">Alerts</button>
+      <button class="filter-btn" data-filter="review">Reviews</button>
     </div>
 
-    <!-- Feed -->
     <div class="feed" id="feed">
       <div class="feed-skeleton">
         <div class="skeleton-card"></div>
@@ -99,7 +76,7 @@ import { Icon } from 'astro-icon/components';
     </div>
 
     <div class="empty-state" id="empty-state" style="display:none;">
-      <div class="empty-icon"><Icon name="lucide:radio-tower" /></div>
+      <Icon name="lucide:radio-tower" />
       <p>No alerts yet today. Check back during market hours (9:30 AM – 4:00 PM CT).</p>
     </div>
 
@@ -156,38 +133,36 @@ import { Icon } from 'astro-icon/components';
 
     feed.innerHTML = items.map(item => {
       const isAlert = item.type === 'alert';
-      const time    = new Date(item.timestamp).toLocaleString('en-US', {
+      const time = new Date(item.timestamp).toLocaleString('en-US', {
         timeZone: 'America/Chicago',
         weekday: 'short', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit'
       }) + ' CT';
 
       if (isAlert) {
-        // Detect direction for color
         const isCall = item.message.includes('CALL');
         const isPut  = item.message.includes('PUT');
-        const dirClass = isCall ? 'dir-call' : isPut ? 'dir-put' : '';
+        const accent = isCall ? '#3DDC84' : isPut ? '#FF5C5C' : '#998BFF';
         return `
-          <div class="feed-card type-alert ${dirClass}">
+          <div class="feed-card" style="border-left-color: ${accent};">
             <div class="card-header">
-              <span class="card-tag alert-tag">ALERT</span>
+              <span class="card-tag" style="color:${accent}; background:${accent}22; border-color:${accent}44;">ALERT</span>
               <span class="card-time">${time}</span>
             </div>
-            <div class="card-message alert-message">${item.message}</div>
+            <div class="alert-message">${item.message}</div>
           </div>`;
       }
 
       const reviewType = item.reviewType || 'NOTE';
-      const isPre  = reviewType === 'PRE-MARKET';
-      const isPost = reviewType === 'POST-MARKET';
-      const tagLabel = isPre ? 'PRE-MARKET' : isPost ? 'POST-MARKET' : reviewType;
+      const label = reviewType === 'PRE-MARKET' ? 'PRE-MARKET' :
+                    reviewType === 'POST-MARKET' ? 'POST-MARKET' : reviewType;
       return `
-        <div class="feed-card type-review">
+        <div class="feed-card" style="border-left-color: #998BFF;">
           <div class="card-header">
-            <span class="card-tag review-tag">${tagLabel}</span>
+            <span class="card-tag" style="color:#998BFF; background:rgba(153,139,255,0.1); border-color:rgba(153,139,255,0.25);">${label}</span>
             <span class="card-time">${time}</span>
           </div>
-          <div class="card-message review-message">${item.message}</div>
+          <div class="review-message">${item.message}</div>
         </div>`;
     }).join('');
   }
@@ -205,7 +180,6 @@ import { Icon } from 'astro-icon/components';
     const hint  = document.getElementById('notif-hint');
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isPWA = window.navigator.standalone === true;
-
     if (isIOS && !isPWA) {
       hint.textContent = 'Follow the install steps below to enable alerts on iPhone.';
       hint.style.color = '#998BFF';
@@ -239,7 +213,7 @@ import { Icon } from 'astro-icon/components';
 
   :global(body) { background: var(--bg); color: var(--text); }
 
-  /* ── Auth ──────────────────────────────────────────────────────────────── */
+  /* ── Auth ─────────────────────────────────────────────────────── */
   .auth-screen {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; min-height: 60vh; text-align: center;
@@ -252,22 +226,22 @@ import { Icon } from 'astro-icon/components';
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   .auth-icon [data-icon] { width: 3rem; height: 3rem; stroke: var(--purple); }
-  .auth-screen h2 { color: var(--text); font-family: 'Syne', sans-serif !important; font-size: 1.5rem; }
+  .auth-screen h2 { color: var(--text); font-family: 'Syne', sans-serif; font-size: 1.5rem; }
   .auth-screen p  { color: var(--muted); font-size: 0.95rem; max-width: 340px; }
   .auth-btn {
     background: var(--blue); color: #fff; text-decoration: none;
     padding: 0.75rem 1.75rem; border-radius: 10px; font-weight: 700;
-    font-size: 0.95rem; font-family: 'Syne', sans-serif !important;
+    font-size: 0.95rem; font-family: 'Syne', sans-serif;
   }
   .auth-link { color: var(--purple); font-size: 0.82rem; text-decoration: none; }
   .auth-link:hover { text-decoration: underline; }
 
-  /* ── Page ──────────────────────────────────────────────────────────────── */
+  /* ── Page ─────────────────────────────────────────────────────── */
   .alerts-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
-  .page-header { text-align: center; margin-bottom: 2.5rem; }
+  .page-header  { text-align: center; margin-bottom: 2.5rem; }
 
   .page-title {
-    font-family: 'Syne', sans-serif !important;
+    font-family: 'Syne', sans-serif;
     font-size: 3rem; font-weight: 800;
     background: linear-gradient(135deg, #998BFF, #5F5CFF);
     -webkit-background-clip: text;
@@ -280,7 +254,7 @@ import { Icon } from 'astro-icon/components';
     display: inline-flex; align-items: center; gap: 0.4rem;
     background: rgba(61,220,132,0.1); border: 1px solid rgba(61,220,132,0.25);
     color: var(--green); font-size: 0.75rem;
-    font-family: 'JetBrains Mono', monospace !important;
+    font-family: 'JetBrains Mono', monospace;
     letter-spacing: 0.1em; padding: 0.3rem 0.85rem;
     border-radius: 100px; margin-bottom: 1rem;
   }
@@ -288,14 +262,14 @@ import { Icon } from 'astro-icon/components';
 
   .page-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
 
-  /* ── Enable Button ─────────────────────────────────────────────────────── */
+  /* ── Enable Button ────────────────────────────────────────────── */
   .alert-cta { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
 
   .enable-btn {
     display: inline-flex; align-items: center; gap: 0.6rem;
     background: #5F5CFF; color: #fff; border: none;
-    padding: 0.8rem 1.75rem; border-radius: 8px;
-    font-family: 'Syne', sans-serif !important;
+    padding: 0.85rem 1.75rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif;
     font-size: 1rem; font-weight: 700; cursor: pointer;
     box-shadow: 0 4px 20px rgba(95,92,255,0.35);
     transition: transform 0.15s, box-shadow 0.15s;
@@ -305,42 +279,33 @@ import { Icon } from 'astro-icon/components';
   .enable-btn:active { transform: scale(0.97); }
   .notif-hint { font-size: 0.82rem; min-height: 1.2em; margin: 0; }
 
-  /* ── PWA Card ──────────────────────────────────────────────────────────── */
+  /* ── PWA Card ─────────────────────────────────────────────────── */
   .pwa-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 14px; padding: 1.5rem;
-    text-align: left; max-width: 480px; margin: 0 auto;
+    text-align: left; max-width: 500px; margin: 0 auto;
   }
-
   .pwa-card-header {
     display: flex; align-items: center; gap: 0.6rem;
-    font-family: 'Syne', sans-serif !important;
+    font-family: 'Syne', sans-serif;
     font-size: 0.95rem; font-weight: 700; color: var(--purple);
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem; padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border);
   }
   .pwa-card-header [data-icon] { width: 18px; height: 18px; stroke: var(--purple); }
-
-  .pwa-steps {
-    list-style: none; padding: 0;
-    display: flex; flex-direction: column; gap: 0.85rem;
-  }
-  .pwa-steps li {
-    display: flex; align-items: flex-start; gap: 0.85rem;
-    font-size: 0.88rem; color: var(--text); line-height: 1.5;
-  }
+  .pwa-steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.85rem; }
+  .pwa-steps li { display: flex; align-items: flex-start; gap: 0.85rem; font-size: 0.88rem; color: var(--text); line-height: 1.5; }
   .step-num {
     display: flex; align-items: center; justify-content: center;
     min-width: 24px; height: 24px;
     background: rgba(95,92,255,0.15); border: 1px solid rgba(95,92,255,0.3);
     color: var(--blue); border-radius: 50%;
-    font-family: 'JetBrains Mono', monospace !important;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.72rem; font-weight: 700;
   }
   .pwa-steps strong { color: var(--purple); }
 
-  /* ── Filter Bar ────────────────────────────────────────────────────────── */
+  /* ── Filters ──────────────────────────────────────────────────── */
   .filter-bar {
     display: flex; gap: 0.5rem; margin-bottom: 2rem;
     border-bottom: 1px solid var(--border); padding-bottom: 1rem;
@@ -351,61 +316,61 @@ import { Icon } from 'astro-icon/components';
     padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.8rem;
     cursor: pointer; transition: all 0.15s; font-family: inherit;
   }
-  .filter-btn [data-icon] { width: 13px; height: 13px; }
   .filter-btn:hover  { border-color: var(--purple); color: var(--purple); }
   .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 
-  /* ── Feed Cards ────────────────────────────────────────────────────────── */
+  /* ── Feed Cards ───────────────────────────────────────────────── */
   .feed { display: flex; flex-direction: column; gap: 1rem; }
 
   .feed-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 1.25rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid transparent;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
     animation: fadeIn 0.3s ease;
     transition: box-shadow 0.2s, border-color 0.2s;
-    position: relative; overflow: hidden;
   }
-  .feed-card::before {
-    content: ''; position: absolute;
-    left: 0; top: 0; bottom: 0; width: 4px;
-  }
-  .type-alert::before  { background: var(--red); }
-  .type-review::before { background: var(--purple); }
-  .dir-call { background: linear-gradient(135deg, var(--surface), rgba(61,220,132,0.04)); }
-  .dir-put  { background: linear-gradient(135deg, var(--surface), rgba(255,92,92,0.04)); }
-
-  .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.1); border-color: rgba(153,139,255,0.3); }
+  .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.1); }
 
   @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-
+  .card-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 0.75rem;
+  }
   .card-tag {
     font-size: 0.65rem; letter-spacing: 0.15em;
-    font-family: 'JetBrains Mono', monospace !important; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
     padding: 0.25rem 0.65rem; border-radius: 6px;
+    border: 1px solid transparent;
   }
-  .alert-tag  { background: rgba(255,92,92,0.12);  color: var(--red);    border: 1px solid rgba(255,92,92,0.2); }
-  .review-tag { background: rgba(153,139,255,0.1); color: var(--purple); border: 1px solid rgba(153,139,255,0.2); }
-  .card-time  { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace !important; }
+  .card-time {
+    font-size: 0.7rem; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
 
   .alert-message {
-    font-family: 'Syne', sans-serif !important;
-    font-size: 1.05rem; font-weight: 700; color: var(--text); line-height: 1.5;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem; font-weight: 700;
+    color: var(--text); line-height: 1.5;
   }
-  .review-message { font-size: 0.92rem; color: #b0b0c0; line-height: 1.75; white-space: pre-wrap; }
+  .review-message {
+    font-size: 0.92rem; color: #b0b0c0;
+    line-height: 1.75; white-space: pre-wrap;
+  }
 
-  /* ── Skeleton ──────────────────────────────────────────────────────────── */
+  /* ── Skeleton ─────────────────────────────────────────────────── */
   .feed-skeleton { display: flex; flex-direction: column; gap: 1rem; }
   .skeleton-card {
-    height: 90px; border-radius: 14px; border: 1px solid var(--border);
+    height: 100px; border-radius: 14px; border: 1px solid var(--border);
     background: linear-gradient(90deg, var(--surface) 25%, #22243a 50%, var(--surface) 75%);
     background-size: 200% 100%; animation: shimmer 1.5s infinite;
   }
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
   .empty-state { text-align: center; padding: 4rem 1rem; color: var(--muted); }
-  .empty-icon [data-icon] { width: 3rem; height: 3rem; stroke: var(--muted); margin-bottom: 1rem; }
+  .empty-state [data-icon] { width: 3rem; height: 3rem; stroke: var(--muted); margin-bottom: 1rem; }
   .empty-state p { margin-top: 0.5rem; }
 
   .refresh-note {
@@ -415,6 +380,6 @@ import { Icon } from 'astro-icon/components';
 
   @media (max-width: 600px) {
     .page-title { font-size: 2.2rem; }
-    .pwa-card { padding: 1rem; }
+    .pwa-card   { padding: 1rem; }
   }
 </style>
