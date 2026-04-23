@@ -1,15 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
 export default async (req, context) => {
-  const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long", year: "numeric", month: "long", day: "numeric"
-  });
-
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    tools: [{ googleSearch: {} }]
   });
 
   const prompt = `
@@ -41,9 +36,15 @@ export default async (req, context) => {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
 
+    const responseText = result.text;
     const jsonString = responseText.replace(/```json|```/g, "").trim();
     const data = JSON.parse(jsonString);
 
