@@ -15,12 +15,32 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content={description}>
-  <title>{title} | Rose Trading</title>
+  <title>{title}</title>
+
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:site_name"   content="Rose.Trading" />
+  <meta property="og:title"       content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image"       content="https://rose.trading/rose-banner.png" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url"         content="https://rose.trading" />
+
+  <!-- Twitter / X card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image"       content="https://rose.trading/rose-banner.png" />
+
   <link rel="manifest" href="/manifest.json" />
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="/rose-logo.png">
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/rose-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <slot name="head" />
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
 <script is:inline>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -68,7 +88,7 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   <footer style="background: var(--bg-secondary); padding: 3rem 0; margin-top: 4rem;">
     <div class="container">
       <p style="text-align: center; color: var(--text-secondary);">
-        © 2026 Rose Trading. Start your journey.
+        © 2026 Rose.Trading. Start your journey.
       </p>
     </div>
   </footer>

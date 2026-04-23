@@ -1,116 +1,228 @@
 ---
+// Members-only alerts feed
+// Protected by Whop OAuth — session verified on every page load
 import Layout from '../layouts/Layout.astro';
 import { Icon } from 'astro-icon/components';
 ---
 
-<Layout title="Trade Alerts | Rose Trading">
+<Layout title="Members Alerts | Rose Trading">
 
-  <section class="alerts-page">
+<Fragment slot="head">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+</Fragment>
+
+  <!-- Auth gate -->
+  <div id="auth-checking" class="auth-screen">
+    <div class="auth-spinner"></div>
+    <p>Verifying your membership...</p>
+  </div>
+
+  <!-- Auth failed -->
+  <div id="auth-failed" class="auth-screen" style="display:none;">
+    <div class="auth-icon"><Icon name="lucide:lock" /></div>
+    <h2>Access Required</h2>
+    <p>You need an active Rose Trading subscription to view this page.</p>
+    <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" class="auth-btn">Subscribe for $39.99/mo →</a>
+    <a href="/.netlify/functions/whop-login" class="auth-link">Already subscribed? Sign in</a>
+  </div>
+
+  <!-- Main content -->
+  <section class="alerts-page" id="main-content" style="display:none;">
+
     <div class="page-header">
       <h1 class="page-title">Trade Alerts</h1>
-      <p class="page-sub">Real-time SPX trade alerts and pre/post market reviews from Rose.</p>
-    </div>
-
-    <!-- Lock Banner -->
-    <div class="lock-banner">
-      <div class="lock-banner-left">
-        <span class="lock-icon"><Icon name="lucide:lock" /></span>
-        <div>
-          <div class="lock-title">Members Only</div>
-          <div class="lock-desc">Get live SPX alerts straight to your phone for <strong>$39.99/mo</strong></div>
-        </div>
+      <div class="member-badge">
+        <Icon name="lucide:shield-check" />
+        Members Access
       </div>
-      <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" target="_blank" class="unlock-btn">
-        Unlock Alerts →
-      </a>
-    </div>
+      <p class="page-sub">Real-time SPX alerts and market reviews from Rose.</p>
 
-    <!-- Blurred Feed Preview -->
-    <div class="feed-wrap">
-      <div class="feed-blur-overlay">
-        <div class="overlay-card">
-          <div class="overlay-icon"><Icon name="lucide:radio-tower" /></div>
-          <h2 class="overlay-title">Subscribe to See Live Alerts</h2>
-          <p class="overlay-sub">Real-time SPX entries, exits, and daily market reviews — delivered to your phone the moment Rose trades.</p>
-          <div class="price-badge">$39.99 / month</div>
-          <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" target="_blank" class="overlay-btn">
-            <Icon name="lucide:unlock" /> Unlock Full Access
-          </a>
-          <p class="overlay-fine">Instant access · Cancel anytime</p>
-        </div>
+      <!-- Enable alerts button -->
+      <div class="alert-cta">
+        <button id="enable-alerts-btn" class="enable-btn" onclick="enableNotifications()">
+          <Icon name="lucide:bell" />
+          Enable Trade Alerts
+        </button>
+        <p class="notif-hint" id="notif-hint"></p>
       </div>
 
-      <!-- Fake blurred cards underneath -->
-      <div class="feed blurred" aria-hidden="true">
-        <div class="feed-card type-alert">
-          <div class="card-header">
-            <span class="card-tag">ALERT</span>
-            <span class="card-time">Today, 9:47 AM CT</span>
-          </div>
-          <div class="card-message">🚀 ENTRY | SPX CALL 🟢 5412 4/22 @ $1.20</div>
+      <!-- PWA install instructions -->
+      <div class="pwa-card">
+        <div class="pwa-card-header">
+          <Icon name="lucide:smartphone" />
+          <span>Get Alerts on Your iPhone</span>
         </div>
-        <div class="feed-card type-review">
-          <div class="card-header">
-            <span class="card-tag">PRE-MARKET</span>
-            <span class="card-time">Today, 8:15 AM CT</span>
-          </div>
-          <div class="card-message">Watching 5400 as key support. Phase oscillator showing bullish momentum. Bias is long above 5395, looking for ORB setup at open.</div>
-        </div>
-        <div class="feed-card type-alert">
-          <div class="card-header">
-            <span class="card-tag">ALERT</span>
-            <span class="card-time">Yesterday, 2:48 PM CT</span>
-          </div>
-          <div class="card-message">✅ EXIT | SPX CALL 🟢 5400 4/21 @ $2.55</div>
-        </div>
-        <div class="feed-card type-review">
-          <div class="card-header">
-            <span class="card-tag">POST-MARKET</span>
-            <span class="card-time">Yesterday, 4:05 PM CT</span>
-          </div>
-          <div class="card-message">Great follow-through today. Both trades hit target. Market respected pivot ribbon all day.</div>
-        </div>
-        <div class="feed-card type-alert">
-          <div class="card-header">
-            <span class="card-tag">ALERT</span>
-            <span class="card-time">Yesterday, 10:22 AM CT</span>
-          </div>
-          <div class="card-message">❌ STOP HIT | SPX PUT 🔴 5380 4/21 @ $0.85</div>
-        </div>
+        <ol class="pwa-steps">
+          <li>
+            <span class="step-num">1</span>
+            <span>Open <strong>rose.trading</strong> in Safari</span>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <span>Tap the <strong>Share</strong> button at the bottom of Safari</span>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <span>Scroll down and tap <strong>"Add to Home Screen"</strong></span>
+          </li>
+          <li>
+            <span class="step-num">4</span>
+            <span>Tap <strong>Add</strong> in the top right corner</span>
+          </li>
+          <li>
+            <span class="step-num">5</span>
+            <span>Open the app from your Home Screen and tap <strong>Enable Trade Alerts</strong></span>
+          </li>
+        </ol>
       </div>
     </div>
 
-    <!-- Value props -->
-    <div class="value-grid">
-      <div class="value-card">
-        <div class="value-icon"><Icon name="lucide:bell-ring" /></div>
-        <h3>Instant Push Alerts</h3>
-        <p>Get notified the moment Rose enters or exits a trade — right on your iPhone or Android.</p>
-      </div>
-      <div class="value-card">
-        <div class="value-icon"><Icon name="lucide:sun" /></div>
-        <h3>Daily Market Reviews</h3>
-        <p>Pre-market bias and post-market breakdowns every trading day.</p>
-      </div>
-      <div class="value-card">
-        <div class="value-icon"><Icon name="lucide:trending-up" /></div>
-        <h3>SPX Options Focus</h3>
-        <p>All alerts are SPX 0DTE options trades using #TheStrat and Saty's indicators.</p>
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="alert">
+        <Icon name="lucide:zap" /> Alerts
+      </button>
+      <button class="filter-btn" data-filter="review">
+        <Icon name="lucide:file-text" /> Reviews
+      </button>
+    </div>
+
+    <!-- Feed -->
+    <div class="feed" id="feed">
+      <div class="feed-skeleton">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
       </div>
     </div>
 
-    <div class="bottom-cta">
-      <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" target="_blank" class="overlay-btn large-btn">
-        <Icon name="lucide:unlock" /> Get Access for $39.99/mo
-      </a>
-      <p class="overlay-fine">Cancel anytime from your Whop dashboard</p>
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <div class="empty-icon"><Icon name="lucide:radio-tower" /></div>
+      <p>No alerts yet today. Check back during market hours (9:30 AM – 4:00 PM CT).</p>
     </div>
 
+    <p class="refresh-note">Feed auto-refreshes every 60 seconds</p>
   </section>
+
 </Layout>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script is:inline>
+  let allItems  = [];
+  let curFilter = 'all';
+
+  async function checkAuth() {
+    try {
+      const res  = await fetch('/.netlify/functions/verify-session');
+      const data = await res.json();
+      document.getElementById('auth-checking').style.display = 'none';
+      if (data.valid) {
+        document.getElementById('main-content').style.display = 'block';
+        loadFeed();
+        setInterval(loadFeed, 60000);
+      } else {
+        if (data.reason === 'no_session' || data.reason === 'expired') {
+          window.location.href = '/.netlify/functions/whop-login';
+        } else {
+          document.getElementById('auth-failed').style.display = 'flex';
+        }
+      }
+    } catch {
+      document.getElementById('auth-checking').style.display = 'none';
+      document.getElementById('auth-failed').style.display = 'flex';
+    }
+  }
+
+  async function loadFeed() {
+    try {
+      const res = await fetch('/feed.json?t=' + Date.now());
+      allItems  = res.ok ? await res.json() : [];
+    } catch { allItems = []; }
+    renderFeed();
+  }
+
+  function renderFeed() {
+    const feed  = document.getElementById('feed');
+    const empty = document.getElementById('empty-state');
+    const items = curFilter === 'all' ? allItems : allItems.filter(i => i.type === curFilter);
+
+    if (!items.length) {
+      feed.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    feed.innerHTML = items.map(item => {
+      const isAlert = item.type === 'alert';
+      const time    = new Date(item.timestamp).toLocaleString('en-US', {
+        timeZone: 'America/Chicago',
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      }) + ' CT';
+
+      if (isAlert) {
+        // Detect direction for color
+        const isCall = item.message.includes('CALL');
+        const isPut  = item.message.includes('PUT');
+        const dirClass = isCall ? 'dir-call' : isPut ? 'dir-put' : '';
+        return `
+          <div class="feed-card type-alert ${dirClass}">
+            <div class="card-header">
+              <span class="card-tag alert-tag">ALERT</span>
+              <span class="card-time">${time}</span>
+            </div>
+            <div class="card-message alert-message">${item.message}</div>
+          </div>`;
+      }
+
+      const reviewType = item.reviewType || 'NOTE';
+      const isPre  = reviewType === 'PRE-MARKET';
+      const isPost = reviewType === 'POST-MARKET';
+      const tagLabel = isPre ? 'PRE-MARKET' : isPost ? 'POST-MARKET' : reviewType;
+      return `
+        <div class="feed-card type-review">
+          <div class="card-header">
+            <span class="card-tag review-tag">${tagLabel}</span>
+            <span class="card-time">${time}</span>
+          </div>
+          <div class="card-message review-message">${item.message}</div>
+        </div>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      curFilter = btn.dataset.filter;
+      renderFeed();
+    });
+  });
+
+  function enableNotifications() {
+    const hint  = document.getElementById('notif-hint');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isPWA = window.navigator.standalone === true;
+
+    if (isIOS && !isPWA) {
+      hint.textContent = 'Follow the install steps below to enable alerts on iPhone.';
+      hint.style.color = '#998BFF';
+      document.querySelector('.pwa-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+    if (window.OneSignal?.Slidedown) {
+      window.OneSignal.Slidedown.promptPush()
+        .then(() => { hint.textContent = 'Subscribed! Alerts will come straight to your phone.'; hint.style.color = '#3DDC84'; })
+        .catch(() => { hint.textContent = 'Notifications may be blocked. Check your browser settings.'; hint.style.color = '#FF5C5C'; });
+    } else {
+      hint.textContent = 'Still loading... please wait a moment and try again.';
+    }
+  }
+
+  checkAuth();
+</script>
 
 <style>
   :root {
@@ -127,222 +239,182 @@ import { Icon } from 'astro-icon/components';
 
   :global(body) { background: var(--bg); color: var(--text); }
 
-  .alerts-page {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 3rem 1.5rem 5rem;
+  /* ── Auth ──────────────────────────────────────────────────────────────── */
+  .auth-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 60vh; text-align: center;
+    gap: 1rem; padding: 2rem; color: var(--muted);
   }
+  .auth-spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--purple); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .auth-icon [data-icon] { width: 3rem; height: 3rem; stroke: var(--purple); }
+  .auth-screen h2 { color: var(--text); font-family: 'Syne', sans-serif !important; font-size: 1.5rem; }
+  .auth-screen p  { color: var(--muted); font-size: 0.95rem; max-width: 340px; }
+  .auth-btn {
+    background: var(--blue); color: #fff; text-decoration: none;
+    padding: 0.75rem 1.75rem; border-radius: 10px; font-weight: 700;
+    font-size: 0.95rem; font-family: 'Syne', sans-serif !important;
+  }
+  .auth-link { color: var(--purple); font-size: 0.82rem; text-decoration: none; }
+  .auth-link:hover { text-decoration: underline; }
 
-  /* Header */
-  .page-header { text-align: center; margin-bottom: 2rem; }
+  /* ── Page ──────────────────────────────────────────────────────────────── */
+  .alerts-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .page-header { text-align: center; margin-bottom: 2.5rem; }
 
   .page-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 2.8rem;
-    font-weight: 800;
+    font-family: 'Syne', sans-serif !important;
+    font-size: 3rem; font-weight: 800;
     background: linear-gradient(135deg, #998BFF, #5F5CFF);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 0.75rem;
   }
-  .page-sub { color: var(--muted); font-size: 1rem; }
 
-  /* Lock Banner */
-  .lock-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(95,92,255,0.08);
-    border: 1px solid rgba(95,92,255,0.25);
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 1.5rem;
-    gap: 1rem;
-    flex-wrap: wrap;
+  .member-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(61,220,132,0.1); border: 1px solid rgba(61,220,132,0.25);
+    color: var(--green); font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace !important;
+    letter-spacing: 0.1em; padding: 0.3rem 0.85rem;
+    border-radius: 100px; margin-bottom: 1rem;
   }
-  .lock-banner-left { display: flex; align-items: center; gap: 0.85rem; }
-  .lock-icon  { display: flex; color: var(--purple); }
-  .lock-icon [data-icon] { width: 20px; height: 20px; }
-  .lock-title { font-weight: 700; color: var(--text); font-size: 0.95rem; font-family: 'Syne', sans-serif; }
-  .lock-desc  { color: var(--muted); font-size: 0.82rem; margin-top: 0.1rem; }
-  .lock-desc strong { color: var(--purple); }
+  .member-badge [data-icon] { width: 13px; height: 13px; stroke: var(--green); }
 
-  .unlock-btn {
-    background: var(--blue);
-    color: #fff;
-    text-decoration: none;
-    padding: 0.55rem 1.25rem;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.88rem;
-    font-family: 'Syne', sans-serif;
-    white-space: nowrap;
-    transition: opacity 0.15s;
+  .page-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+
+  /* ── Enable Button ─────────────────────────────────────────────────────── */
+  .alert-cta { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
+
+  .enable-btn {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: #5F5CFF; color: #fff; border: none;
+    padding: 0.8rem 1.75rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif !important;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(95,92,255,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
   }
-  .unlock-btn:hover { opacity: 0.85; }
+  .enable-btn [data-icon] { width: 18px; height: 18px; stroke: #fff; }
+  .enable-btn:hover  { box-shadow: 0 6px 24px rgba(95,92,255,0.5); transform: translateY(-1px); }
+  .enable-btn:active { transform: scale(0.97); }
+  .notif-hint { font-size: 0.82rem; min-height: 1.2em; margin: 0; }
 
-  /* Feed wrap + blur */
-  .feed-wrap { position: relative; margin-bottom: 3rem; }
-
-  .feed-blur-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(to bottom,
-      rgba(11,12,21,0) 0%,
-      rgba(11,12,21,0.75) 20%,
-      rgba(11,12,21,0.97) 45%
-    );
-    border-radius: 12px;
-    padding: 1rem;
+  /* ── PWA Card ──────────────────────────────────────────────────────────── */
+  .pwa-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.5rem;
+    text-align: left; max-width: 480px; margin: 0 auto;
   }
 
-  .overlay-card {
-    text-align: center;
-    max-width: 420px;
-    padding: 2rem 1.5rem;
-    background: var(--surface);
-    border: 1px solid rgba(153,139,255,0.25);
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    margin-top: 8rem;
-  }
-
-  .overlay-icon {
-    display: flex;
-    justify-content: center;
-    color: var(--purple);
-    margin-bottom: 0.75rem;
-  }
-  .overlay-icon [data-icon] { width: 40px; height: 40px; }
-
-  .overlay-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 0.75rem;
-  }
-  .overlay-sub {
-    color: var(--muted);
-    font-size: 0.9rem;
-    line-height: 1.6;
+  .pwa-card-header {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-family: 'Syne', sans-serif !important;
+    font-size: 0.95rem; font-weight: 700; color: var(--purple);
     margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
   }
+  .pwa-card-header [data-icon] { width: 18px; height: 18px; stroke: var(--purple); }
 
-  .price-badge {
-    display: inline-block;
-    background: rgba(153,139,255,0.1);
-    border: 1px solid rgba(153,139,255,0.3);
-    color: var(--purple);
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 1.1rem;
-    padding: 0.4rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.25rem;
+  .pwa-steps {
+    list-style: none; padding: 0;
+    display: flex; flex-direction: column; gap: 0.85rem;
   }
-
-  .overlay-btn {
-    background: var(--blue);
-    color: #fff;
-    text-decoration: none;
-    padding: 0.85rem 2rem;
-    border-radius: 10px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    letter-spacing: 0.03em;
-    transition: opacity 0.15s, transform 0.1s;
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+  .pwa-steps li {
+    display: flex; align-items: flex-start; gap: 0.85rem;
+    font-size: 0.88rem; color: var(--text); line-height: 1.5;
   }
-  .overlay-btn [data-icon] { width: 18px; height: 18px; }
-  .overlay-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-  .overlay-fine { font-size: 0.75rem; color: var(--muted); }
+  .step-num {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 24px; height: 24px;
+    background: rgba(95,92,255,0.15); border: 1px solid rgba(95,92,255,0.3);
+    color: var(--blue); border-radius: 50%;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.72rem; font-weight: 700;
+  }
+  .pwa-steps strong { color: var(--purple); }
 
-  /* Blurred feed */
+  /* ── Filter Bar ────────────────────────────────────────────────────────── */
+  .filter-bar {
+    display: flex; gap: 0.5rem; margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 1rem;
+  }
+  .filter-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.8rem;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .filter-btn [data-icon] { width: 13px; height: 13px; }
+  .filter-btn:hover  { border-color: var(--purple); color: var(--purple); }
+  .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  /* ── Feed Cards ────────────────────────────────────────────────────────── */
   .feed { display: flex; flex-direction: column; gap: 1rem; }
-  .blurred { filter: blur(5px); pointer-events: none; user-select: none; }
 
   .feed-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.25rem 1.5rem;
-    position: relative;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.25rem 1.5rem;
+    animation: fadeIn 0.3s ease;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    position: relative; overflow: hidden;
   }
   .feed-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 4px;
+    content: ''; position: absolute;
+    left: 0; top: 0; bottom: 0; width: 4px;
   }
   .type-alert::before  { background: var(--red); }
   .type-review::before { background: var(--purple); }
+  .dir-call { background: linear-gradient(135deg, var(--surface), rgba(61,220,132,0.04)); }
+  .dir-put  { background: linear-gradient(135deg, var(--surface), rgba(255,92,92,0.04)); }
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.6rem;
-  }
+  .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.1); border-color: rgba(153,139,255,0.3); }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+
   .card-tag {
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    font-family: 'JetBrains Mono', monospace !important; font-weight: 700;
+    padding: 0.25rem 0.65rem; border-radius: 6px;
   }
-  .type-alert  .card-tag { color: var(--red);    background: rgba(255,92,92,0.1);   border: 1px solid rgba(255,92,92,0.2); }
-  .type-review .card-tag { color: var(--purple); background: rgba(153,139,255,0.1); border: 1px solid rgba(153,139,255,0.2); }
-  .card-time { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .alert-tag  { background: rgba(255,92,92,0.12);  color: var(--red);    border: 1px solid rgba(255,92,92,0.2); }
+  .review-tag { background: rgba(153,139,255,0.1); color: var(--purple); border: 1px solid rgba(153,139,255,0.2); }
+  .card-time  { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace !important; }
 
-  .card-message { font-size: 0.95rem; line-height: 1.65; color: var(--text); }
-  .type-alert .card-message { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+  .alert-message {
+    font-family: 'Syne', sans-serif !important;
+    font-size: 1.05rem; font-weight: 700; color: var(--text); line-height: 1.5;
+  }
+  .review-message { font-size: 0.92rem; color: #b0b0c0; line-height: 1.75; white-space: pre-wrap; }
 
-  /* Value Grid */
-  .value-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 2.5rem;
+  /* ── Skeleton ──────────────────────────────────────────────────────────── */
+  .feed-skeleton { display: flex; flex-direction: column; gap: 1rem; }
+  .skeleton-card {
+    height: 90px; border-radius: 14px; border: 1px solid var(--border);
+    background: linear-gradient(90deg, var(--surface) 25%, #22243a 50%, var(--surface) 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite;
   }
-  .value-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: border-color 0.2s;
-  }
-  .value-card:hover { border-color: rgba(153,139,255,0.35); }
-  .value-icon {
-    display: flex;
-    justify-content: center;
-    color: var(--purple);
-    margin-bottom: 0.75rem;
-  }
-  .value-icon [data-icon] { width: 28px; height: 28px; }
-  .value-card h3 { color: var(--purple); font-size: 0.95rem; margin-bottom: 0.5rem; font-family: 'Syne', sans-serif; }
-  .value-card p  { color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-  /* Bottom CTA */
-  .bottom-cta { text-align: center; }
-  .large-btn  { max-width: 340px; margin: 0 auto 0.75rem; font-size: 1.05rem; padding: 1rem 2rem; }
+  .empty-state { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+  .empty-icon [data-icon] { width: 3rem; height: 3rem; stroke: var(--muted); margin-bottom: 1rem; }
+  .empty-state p { margin-top: 0.5rem; }
+
+  .refresh-note {
+    text-align: center; font-size: 0.72rem; color: var(--muted);
+    margin-top: 2rem; font-family: 'JetBrains Mono', monospace;
+  }
 
   @media (max-width: 600px) {
-    .page-title   { font-size: 2rem; }
-    .lock-banner  { flex-direction: column; align-items: flex-start; }
-    .overlay-card { margin-top: 5rem; }
+    .page-title { font-size: 2.2rem; }
+    .pwa-card { padding: 1rem; }
   }
 </style>
