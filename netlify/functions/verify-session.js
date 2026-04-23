@@ -1,6 +1,7 @@
 // netlify/functions/verify-session.js
 // Called by the members page on load to check if session cookie is valid
 // Returns { valid: true/false }
+// Set ADMIN_BYPASS_KEY in Netlify env vars for owner access
 
 export default async (req) => {
   const cookieHeader = req.headers.get('cookie') || '';
@@ -10,6 +11,13 @@ export default async (req) => {
       return [k, v.join('=')];
     })
   );
+
+  // ── Admin bypass — set ADMIN_BYPASS_KEY in Netlify env vars ──────────────
+  const adminKey     = process.env.ADMIN_BYPASS_KEY;
+  const adminCookie  = cookies['rose_admin'];
+  if (adminKey && adminCookie === adminKey) {
+    return json({ valid: true, userId: 'admin' });
+  }
 
   const sessionToken = cookies['rose_session'];
 

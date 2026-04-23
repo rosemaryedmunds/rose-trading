@@ -33,17 +33,6 @@
     <div class="panel">
       <h2 class="panel-title"><i data-lucide="zap"></i> FIRE ALERT</h2>
 
-      <div class="section-label">SETUP</div>
-      <div class="chip-grid" id="setup-chips">
-        <button class="chip" data-value="ORB">ORB</button>
-        <button class="chip" data-value="Vomy">Vomy</button>
-        <button class="chip" data-value="iVomy">iVomy</button>
-        <button class="chip" data-value="Flag Into Ribbon">Flag Into Ribbon</button>
-        <button class="chip" data-value="Divergence From Extreme">Divergence From Extreme</button>
-        <button class="chip" data-value="1-min EOD Divergence">1-min EOD Div</button>
-        <button class="chip" data-value="Tweezer Bottom">Tweezer Bottom</button>
-      </div>
-
       <div class="section-label">CALL / PUT</div>
       <div class="chip-grid" id="direction-chips">
         <button class="chip chip-green" data-value="CALL 🟢">CALL 🟢</button>
@@ -52,10 +41,10 @@
 
       <div class="section-label">ACTION</div>
       <div class="chip-grid" id="action-chips">
-        <button class="chip" data-value="ENTRY">ENTRY</button>
-        <button class="chip" data-value="EXIT">EXIT</button>
-        <button class="chip" data-value="STOP HIT">STOP HIT</button>
-        <button class="chip" data-value="WATCHING">WATCHING</button>
+        <button class="chip chip-green" data-value="🟢 ENTRY">🟢 ENTRY</button>
+        <button class="chip chip-blue" data-value="✅ EXIT">✅ EXIT</button>
+        <button class="chip chip-red" data-value="🛑 STOP HIT">🛑 STOP HIT</button>
+        <button class="chip" data-value="👀 WATCHING">👀 WATCHING</button>
       </div>
 
       <div class="input-row three-col">
@@ -93,6 +82,15 @@
     <!-- RIGHT: Pre/Post Market Review + History -->
     <div class="panel">
       <h2 class="panel-title"><i data-lucide="file-text"></i> MARKET REVIEW</h2>
+
+      <div class="section-label">ADHOC NOTE</div>
+      <textarea class="text-input" id="adhoc-input" rows="3" placeholder="Send a quick note to subscribers e.g. market is choppy, sitting out..."></textarea>
+      <button class="fire-btn adhoc-btn" id="adhoc-btn">
+        <i data-lucide="message-square"></i> SEND NOTE
+      </button>
+      <div class="status-msg" id="adhoc-status-msg"></div>
+
+      <div class="feed-divider" style="margin-top:0.5rem"><span>MARKET REVIEW</span></div>
 
       <div class="section-label">TYPE</div>
       <div class="chip-grid" id="review-type-chips">
@@ -137,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateClock();
 
   // ── State ─────────────────────────────────────────────────────────────────
-  const state = { setup: null, direction: null, action: null };
+  const state = { direction: null, action: null };
   let reviewType = null;
 
   // ── Default expiry to today ───────────────────────────────────────────────
@@ -160,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  bindChips('setup-chips',     'setup');
   bindChips('direction-chips', 'direction');
   bindChips('action-chips',    'action');
   bindChips('review-type-chips', null, (val) => { reviewType = val; });
@@ -177,7 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const note   = document.getElementById('note-input').value;
 
     const premium = document.getElementById('premium-input').value;
-    const parts = ['SPX'];
+    const parts = [];
+    if (state.action)    parts.push(state.action);
+    parts.push('| SPX');
     if (state.direction) parts.push(state.direction);
     if (strike)          parts.push(strike);
     if (expiry) {
@@ -185,19 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
       parts.push(`${parseInt(m)}/${parseInt(d)}`);
     }
     if (premium)      parts.push(`@ $${parseFloat(premium).toFixed(2)}`);
-    if (state.action) parts.push('|', state.action);
-    if (state.setup)  parts.push('|', state.setup);
     if (price)        parts.push('| SPX @', price);
     if (note)         parts.push('|', note);
 
-    const text = parts.length > 1 ? parts.join(' ') : 'Select setup, call/put & action above';
+    const text = parts.length > 1 ? parts.join(' ') : 'Select call/put & action above';
     document.getElementById('preview-text').textContent = text;
   }
 
   // ── Fire Alert ────────────────────────────────────────────────────────────
   document.getElementById('fire-btn').addEventListener('click', async () => {
-    if (!state.setup || !state.direction || !state.action) {
-      showStatus('status-msg', 'Please select a setup, call/put, and action.', 'warn');
+    if (!state.direction || !state.action) {
+      showStatus('status-msg', 'Please select call/put and action.', 'warn');
       return;
     }
 
@@ -206,16 +203,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const price  = document.getElementById('price-input').value;
     const note   = document.getElementById('note-input').value;
 
-    // Build message
+    // Build message — action first, no setup
     const premium = document.getElementById('premium-input').value;
-    const parts = ['SPX', state.direction];
+    const parts = [state.action, '| SPX', state.direction];
     if (strike) parts.push(strike);
     if (expiry) {
       const [y, m, d] = expiry.split('-');
       parts.push(`${parseInt(m)}/${parseInt(d)}`);
     }
     if (premium) parts.push(`@ $${parseFloat(premium).toFixed(2)}`);
-    parts.push('|', state.action, '|', state.setup);
     if (price) parts.push('| SPX @', price);
     if (note)  parts.push('|', note);
     const message = parts.join(' ');
@@ -262,6 +258,28 @@ document.addEventListener('DOMContentLoaded', () => {
       loadFeed();
     } catch (err) {
       showStatus('review-status-msg', 'Error: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ── Adhoc Note ───────────────────────────────────────────────────────────
+  document.getElementById('adhoc-btn').addEventListener('click', async () => {
+    const note = document.getElementById('adhoc-input').value.trim();
+    if (!note) {
+      showStatus('adhoc-status-msg', 'Write a note first.', 'warn');
+      return;
+    }
+    const btn = document.getElementById('adhoc-btn');
+    btn.disabled = true;
+    try {
+      await sendOneSignalPush('📝 Note from Rose', note);
+      await saveFeedItem({ type: 'review', reviewType: 'NOTE 📝', message: note, timestamp: new Date().toISOString() });
+      showStatus('adhoc-status-msg', 'Note sent!', 'success');
+      document.getElementById('adhoc-input').value = '';
+      loadFeed();
+    } catch (err) {
+      showStatus('adhoc-status-msg', 'Error: ' + err.message, 'error');
     } finally {
       btn.disabled = false;
     }
@@ -325,10 +343,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetAlertForm() {
-    document.getElementById('setup-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     document.getElementById('direction-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     document.getElementById('action-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    state.setup = null; state.direction = null; state.action = null;
+    state.direction = null; state.action = null;
     document.getElementById('strike-input').value = '';
     document.getElementById('premium-input').value = '';
     document.getElementById('price-input').value = '';
@@ -408,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
   .chip.active             { background: var(--blue);  border-color: var(--blue);  color: #fff; }
   .chip-green.active       { background: var(--green); border-color: var(--green); color: #000; }
   .chip-red.active         { background: var(--red);   border-color: var(--red);   color: #fff; }
+  .chip-blue.active        { background: #3DDC84;      border-color: #3DDC84;      color: #000; }
 
   /* Input row */
   .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
@@ -445,7 +463,9 @@ document.addEventListener('DOMContentLoaded', () => {
   .fire-btn:active   { transform: scale(0.98); }
   .fire-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .fire-btn svg      { width: 16px; height: 16px; stroke: #fff; }
-  .secondary-btn     { background: var(--purple); }
+  .secondary-btn { background: var(--purple); }
+  .adhoc-btn     { background: #3a3a5c; margin-top: 0; }
+  .adhoc-btn:hover { background: #4a4a7c; opacity: 1; }
 
   /* Status */
   .status-msg     { font-size: 0.8rem; text-align: center; min-height: 1.2em; }
