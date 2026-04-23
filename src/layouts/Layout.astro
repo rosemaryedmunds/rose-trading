@@ -84,15 +84,14 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   .nav-dropdown-btn {
     background: none;
     border: none;
-    color: inherit;
+    color: var(--accent-primary);
     font: inherit;
     font-size: inherit;
     cursor: pointer;
     padding: 0;
-    color: var(--text-primary);
     transition: color 0.2s;
   }
-  .nav-dropdown-btn:hover { color: var(--accent-primary); }
+  .nav-dropdown-btn:hover { color: var(--accent-secondary); }
 
   .nav-dropdown-menu {
     display: none;
