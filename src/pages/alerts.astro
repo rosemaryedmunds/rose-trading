@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Icon } from 'astro-icon/components';
 ---
 
 <Layout title="Trade Alerts | Rose Trading">
@@ -13,7 +14,7 @@ import Layout from '../layouts/Layout.astro';
     <!-- Lock Banner -->
     <div class="lock-banner">
       <div class="lock-banner-left">
-        <span class="lock-icon">🔒</span>
+        <span class="lock-icon"><Icon name="lucide:lock" /></span>
         <div>
           <div class="lock-title">Members Only</div>
           <div class="lock-desc">Get live SPX alerts straight to your phone for <strong>$39.99/mo</strong></div>
@@ -28,12 +29,12 @@ import Layout from '../layouts/Layout.astro';
     <div class="feed-wrap">
       <div class="feed-blur-overlay">
         <div class="overlay-card">
-          <div class="overlay-icon">📡</div>
+          <div class="overlay-icon"><Icon name="lucide:radio-tower" /></div>
           <h2 class="overlay-title">Subscribe to See Live Alerts</h2>
           <p class="overlay-sub">Real-time SPX entries, exits, and daily market reviews — delivered to your phone the moment Rose trades.</p>
           <div class="price-badge">$39.99 / month</div>
           <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" target="_blank" class="overlay-btn">
-            🔓 Unlock Full Access
+            <Icon name="lucide:unlock" /> Unlock Full Access
           </a>
           <p class="overlay-fine">Instant access · Cancel anytime</p>
         </div>
@@ -43,38 +44,38 @@ import Layout from '../layouts/Layout.astro';
       <div class="feed blurred" aria-hidden="true">
         <div class="feed-card type-alert">
           <div class="card-header">
-            <span class="card-tag">🚨 ALERT</span>
+            <span class="card-tag">ALERT</span>
             <span class="card-time">Today, 9:47 AM CT</span>
           </div>
-          <div class="card-message">LONG 🟢 ENTRY | ORB @ 5412 — clean break above initial balance</div>
+          <div class="card-message">🚀 ENTRY | SPX CALL 🟢 5412 4/22 @ $1.20</div>
         </div>
         <div class="feed-card type-review">
           <div class="card-header">
-            <span class="card-tag">☀️ PRE-MARKET</span>
+            <span class="card-tag">PRE-MARKET</span>
             <span class="card-time">Today, 8:15 AM CT</span>
           </div>
-          <div class="card-message">Watching 5400 as key support. Phase oscillator showing bullish momentum. Bias is long above 5395, looking for ORB setup at open. ATR levels are tight so will size accordingly.</div>
+          <div class="card-message">Watching 5400 as key support. Phase oscillator showing bullish momentum. Bias is long above 5395, looking for ORB setup at open.</div>
         </div>
         <div class="feed-card type-alert">
           <div class="card-header">
-            <span class="card-tag">🚨 ALERT</span>
+            <span class="card-tag">ALERT</span>
             <span class="card-time">Yesterday, 2:48 PM CT</span>
           </div>
-          <div class="card-message">SHORT 🔴 EXIT ✅ | Tweezer Bottom — took profits at target</div>
+          <div class="card-message">✅ EXIT | SPX CALL 🟢 5400 4/21 @ $2.55</div>
         </div>
         <div class="feed-card type-review">
           <div class="card-header">
-            <span class="card-tag">🌙 POST-MARKET</span>
+            <span class="card-tag">POST-MARKET</span>
             <span class="card-time">Yesterday, 4:05 PM CT</span>
           </div>
-          <div class="card-message">Great follow-through today. Both trades hit target. Market respected pivot ribbon all day. Tomorrow watching for continuation or failed auction at highs.</div>
+          <div class="card-message">Great follow-through today. Both trades hit target. Market respected pivot ribbon all day.</div>
         </div>
         <div class="feed-card type-alert">
           <div class="card-header">
-            <span class="card-tag">🚨 ALERT</span>
+            <span class="card-tag">ALERT</span>
             <span class="card-time">Yesterday, 10:22 AM CT</span>
           </div>
-          <div class="card-message">SHORT 🔴 ENTRY | Divergence From Extreme @ 5388 — phase osc diverging</div>
+          <div class="card-message">❌ STOP HIT | SPX PUT 🔴 5380 4/21 @ $0.85</div>
         </div>
       </div>
     </div>
@@ -82,17 +83,17 @@ import Layout from '../layouts/Layout.astro';
     <!-- Value props -->
     <div class="value-grid">
       <div class="value-card">
-        <div class="value-icon">⚡</div>
+        <div class="value-icon"><Icon name="lucide:bell-ring" /></div>
         <h3>Instant Push Alerts</h3>
         <p>Get notified the moment Rose enters or exits a trade — right on your iPhone or Android.</p>
       </div>
       <div class="value-card">
-        <div class="value-icon">☀️</div>
+        <div class="value-icon"><Icon name="lucide:sun" /></div>
         <h3>Daily Market Reviews</h3>
         <p>Pre-market bias and post-market breakdowns every trading day.</p>
       </div>
       <div class="value-card">
-        <div class="value-icon">📈</div>
+        <div class="value-icon"><Icon name="lucide:trending-up" /></div>
         <h3>SPX Options Focus</h3>
         <p>All alerts are SPX 0DTE options trades using #TheStrat and Saty's indicators.</p>
       </div>
@@ -100,7 +101,7 @@ import Layout from '../layouts/Layout.astro';
 
     <div class="bottom-cta">
       <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" target="_blank" class="overlay-btn large-btn">
-        🔓 Get Access for $39.99/mo
+        <Icon name="lucide:unlock" /> Get Access for $39.99/mo
       </a>
       <p class="overlay-fine">Cancel anytime from your Whop dashboard</p>
     </div>
@@ -139,7 +140,10 @@ import Layout from '../layouts/Layout.astro';
     font-family: 'Syne', sans-serif;
     font-size: 2.8rem;
     font-weight: 800;
-    color: var(--purple);
+    background: linear-gradient(135deg, #998BFF, #5F5CFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 0.75rem;
   }
   .page-sub { color: var(--muted); font-size: 1rem; }
@@ -158,8 +162,9 @@ import Layout from '../layouts/Layout.astro';
     flex-wrap: wrap;
   }
   .lock-banner-left { display: flex; align-items: center; gap: 0.85rem; }
-  .lock-icon  { font-size: 1.4rem; }
-  .lock-title { font-weight: 700; color: var(--text); font-size: 0.95rem; }
+  .lock-icon  { display: flex; color: var(--purple); }
+  .lock-icon [data-icon] { width: 20px; height: 20px; }
+  .lock-title { font-weight: 700; color: var(--text); font-size: 0.95rem; font-family: 'Syne', sans-serif; }
   .lock-desc  { color: var(--muted); font-size: 0.82rem; margin-top: 0.1rem; }
   .lock-desc strong { color: var(--purple); }
 
@@ -171,16 +176,14 @@ import Layout from '../layouts/Layout.astro';
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.88rem;
+    font-family: 'Syne', sans-serif;
     white-space: nowrap;
     transition: opacity 0.15s;
   }
   .unlock-btn:hover { opacity: 0.85; }
 
   /* Feed wrap + blur */
-  .feed-wrap {
-    position: relative;
-    margin-bottom: 3rem;
-  }
+  .feed-wrap { position: relative; margin-bottom: 3rem; }
 
   .feed-blur-overlay {
     position: absolute;
@@ -209,7 +212,14 @@ import Layout from '../layouts/Layout.astro';
     margin-top: 8rem;
   }
 
-  .overlay-icon  { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .overlay-icon {
+    display: flex;
+    justify-content: center;
+    color: var(--purple);
+    margin-bottom: 0.75rem;
+  }
+  .overlay-icon [data-icon] { width: 40px; height: 40px; }
+
   .overlay-title {
     font-family: 'Syne', sans-serif;
     font-size: 1.4rem;
@@ -249,28 +259,35 @@ import Layout from '../layouts/Layout.astro';
     letter-spacing: 0.03em;
     transition: opacity 0.15s, transform 0.1s;
     margin-bottom: 0.75rem;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
+  .overlay-btn [data-icon] { width: 18px; height: 18px; }
   .overlay-btn:hover { opacity: 0.9; transform: translateY(-1px); }
   .overlay-fine { font-size: 0.75rem; color: var(--muted); }
 
   /* Blurred feed */
   .feed { display: flex; flex-direction: column; gap: 1rem; }
-  .blurred {
-    filter: blur(5px);
-    pointer-events: none;
-    user-select: none;
-  }
+  .blurred { filter: blur(5px); pointer-events: none; user-select: none; }
 
   .feed-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left: 4px solid transparent;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
   }
-  .feed-card.type-alert  { border-left-color: var(--red); }
-  .feed-card.type-review { border-left-color: var(--purple); }
+  .feed-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .type-alert::before  { background: var(--red); }
+  .type-review::before { background: var(--purple); }
 
   .card-header {
     display: flex;
@@ -278,12 +295,20 @@ import Layout from '../layouts/Layout.astro';
     align-items: center;
     margin-bottom: 0.6rem;
   }
-  .card-tag  { font-size: 0.65rem; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace; }
+  .card-tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+  }
+  .type-alert  .card-tag { color: var(--red);    background: rgba(255,92,92,0.1);   border: 1px solid rgba(255,92,92,0.2); }
+  .type-review .card-tag { color: var(--purple); background: rgba(153,139,255,0.1); border: 1px solid rgba(153,139,255,0.2); }
   .card-time { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .type-alert  .card-tag { color: var(--red); }
-  .type-review .card-tag { color: var(--purple); }
+
   .card-message { font-size: 0.95rem; line-height: 1.65; color: var(--text); }
-  .type-alert .card-message { font-weight: 600; }
+  .type-alert .card-message { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
 
   /* Value Grid */
   .value-grid {
@@ -301,8 +326,14 @@ import Layout from '../layouts/Layout.astro';
     transition: border-color 0.2s;
   }
   .value-card:hover { border-color: rgba(153,139,255,0.35); }
-  .value-icon    { font-size: 1.75rem; margin-bottom: 0.75rem; }
-  .value-card h3 { color: var(--purple); font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .value-icon {
+    display: flex;
+    justify-content: center;
+    color: var(--purple);
+    margin-bottom: 0.75rem;
+  }
+  .value-icon [data-icon] { width: 28px; height: 28px; }
+  .value-card h3 { color: var(--purple); font-size: 0.95rem; margin-bottom: 0.5rem; font-family: 'Syne', sans-serif; }
   .value-card p  { color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
 
   /* Bottom CTA */

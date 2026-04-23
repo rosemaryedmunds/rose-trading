@@ -6,13 +6,13 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout title="Members Alerts | Rose Trading">
 
-  <!-- Auth gate — shown while checking session -->
+  <!-- Auth gate -->
   <div id="auth-checking" class="auth-screen">
     <div class="auth-spinner"></div>
     <p>Verifying your membership...</p>
   </div>
 
-  <!-- Auth failed — shown if not a subscriber -->
+  <!-- Auth failed -->
   <div id="auth-failed" class="auth-screen" style="display:none;">
     <div class="auth-icon">🔒</div>
     <h2>Access Required</h2>
@@ -21,26 +21,43 @@ import Layout from '../layouts/Layout.astro';
     <a href="/.netlify/functions/whop-login" class="auth-link">Already subscribed? Sign in</a>
   </div>
 
-  <!-- Main content — shown only after verified -->
+  <!-- Main content -->
   <section class="alerts-page" id="main-content" style="display:none;">
+
     <div class="page-header">
-      <div class="live-dot-wrap">
-        <span class="live-dot"></span>
-        <span class="live-label">LIVE FEED</span>
-      </div>
       <h1 class="page-title">Trade Alerts</h1>
       <div class="member-badge">✅ Members Access</div>
-      <p class="page-sub">Real-time SPX alerts and market reviews. Enable push notifications to get alerts on your phone.</p>
-      <button class="notif-btn" onclick="enableNotifications()">🔔 Enable Push Notifications</button>
-      <p class="notif-hint" id="notif-hint"></p>
+      <p class="page-sub">Real-time SPX alerts and market reviews from Rose.</p>
+
+      <!-- Enable alerts button — matches About page style -->
+      <div class="alert-cta">
+        <button id="enable-alerts-btn" class="enable-btn" onclick="enableNotifications()">
+          <span>🔔</span> Enable Trade Alerts
+        </button>
+        <p class="notif-hint" id="notif-hint"></p>
+      </div>
+
+      <!-- PWA install instructions -->
+      <div class="pwa-instructions">
+        <div class="pwa-title"><span>📱</span> Get alerts on your iPhone</div>
+        <ol class="pwa-steps">
+          <li>Open <strong>rose.trading</strong> in Safari</li>
+          <li>Tap the <strong>Share</strong> button <span class="share-icon">⬆️</span> at the bottom</li>
+          <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+          <li>Tap <strong>Add</strong> in the top right</li>
+          <li>Open the app from your Home Screen and tap <strong>Enable Trade Alerts</strong></li>
+        </ol>
+      </div>
     </div>
 
+    <!-- Filter Bar -->
     <div class="filter-bar">
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="alert">🚨 Alerts</button>
       <button class="filter-btn" data-filter="review">📋 Reviews</button>
     </div>
 
+    <!-- Feed -->
     <div class="feed" id="feed">
       <div class="feed-skeleton">
         <div class="skeleton-card"></div>
@@ -66,24 +83,20 @@ import Layout from '../layouts/Layout.astro';
   let allItems  = [];
   let curFilter = 'all';
 
-  // ── Auth Check ─────────────────────────────────────────────────────────────
+  // ── Auth Check ──────────────────────────────────────────────────────────────
   async function checkAuth() {
     try {
       const res  = await fetch('/.netlify/functions/verify-session');
       const data = await res.json();
-
       document.getElementById('auth-checking').style.display = 'none';
-
       if (data.valid) {
         document.getElementById('main-content').style.display = 'block';
         loadFeed();
         setInterval(loadFeed, 60000);
       } else {
-        // Not subscribed or session expired — redirect to Whop login
         if (data.reason === 'no_session' || data.reason === 'expired') {
           window.location.href = '/.netlify/functions/whop-login';
         } else {
-          // Has session but no active sub (cancelled)
           document.getElementById('auth-failed').style.display = 'flex';
         }
       }
@@ -93,14 +106,12 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-  // ── Load Feed ──────────────────────────────────────────────────────────────
+  // ── Load Feed ───────────────────────────────────────────────────────────────
   async function loadFeed() {
     try {
       const res = await fetch('/feed.json?t=' + Date.now());
       allItems  = res.ok ? await res.json() : [];
-    } catch {
-      allItems = [];
-    }
+    } catch { allItems = []; }
     renderFeed();
   }
 
@@ -115,26 +126,44 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
     empty.style.display = 'none';
+
     feed.innerHTML = items.map(item => {
-      const isAlert = item.type === 'alert';
-      const tag     = isAlert ? '🚨 ALERT' : (item.reviewType || 'REVIEW');
-      const time    = new Date(item.timestamp).toLocaleString('en-US', {
+      const isAlert  = item.type === 'alert';
+      const isReview = item.type === 'review';
+      const tag      = isAlert ? '🚨 ALERT' : (item.reviewType || 'NOTE');
+      const time     = new Date(item.timestamp).toLocaleString('en-US', {
         timeZone: 'America/Chicago',
         weekday: 'short', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit'
       }) + ' CT';
+
+      // Parse alert message into structured parts for better display
+      if (isAlert) {
+        return `
+          <div class="feed-card type-alert">
+            <div class="card-header">
+              <span class="card-tag alert-tag">🚨 ALERT</span>
+              <span class="card-time">${time}</span>
+            </div>
+            <div class="card-message alert-message">${item.message}</div>
+          </div>`;
+      }
+
+      // Review / note card
+      const reviewEmoji = item.reviewType === 'PRE-MARKET' ? '☀️' :
+                          item.reviewType === 'POST-MARKET' ? '🌙' : '📝';
       return `
-        <div class="feed-card type-${item.type}">
+        <div class="feed-card type-review">
           <div class="card-header">
-            <span class="card-tag">${tag}</span>
+            <span class="card-tag review-tag">${reviewEmoji} ${item.reviewType || 'NOTE'}</span>
             <span class="card-time">${time}</span>
           </div>
-          <div class="card-message">${item.message}</div>
+          <div class="card-message review-message">${item.message}</div>
         </div>`;
     }).join('');
   }
 
-  // ── Filters ────────────────────────────────────────────────────────────────
+  // ── Filters ─────────────────────────────────────────────────────────────────
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -144,27 +173,34 @@ import Layout from '../layouts/Layout.astro';
     });
   });
 
-  // ── Push Notifications ─────────────────────────────────────────────────────
+  // ── Push Notifications ──────────────────────────────────────────────────────
   function enableNotifications() {
     const hint  = document.getElementById('notif-hint');
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isPWA = window.navigator.standalone === true;
 
     if (isIOS && !isPWA) {
-      hint.textContent = '📱 On iPhone: tap Share → Add to Home Screen, open the app, then tap this button.';
+      hint.textContent = 'Follow the install steps below to enable alerts on iPhone.';
       hint.style.color = '#998BFF';
+      // Scroll to PWA instructions
+      document.querySelector('.pwa-instructions').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       return;
     }
     if (window.OneSignal?.Slidedown) {
       window.OneSignal.Slidedown.promptPush()
-        .then(() => { hint.textContent = '✅ Subscribed! Alerts will come straight to your phone.'; hint.style.color = '#3DDC84'; })
-        .catch(() => { hint.textContent = '⚠️ Notifications may be blocked. Check your browser settings.'; hint.style.color = '#FF5C5C'; });
+        .then(() => {
+          hint.textContent = '✅ Subscribed! Alerts will come straight to your phone.';
+          hint.style.color = '#3DDC84';
+        })
+        .catch(() => {
+          hint.textContent = '⚠️ Notifications may be blocked. Check your browser settings.';
+          hint.style.color = '#FF5C5C';
+        });
     } else {
       hint.textContent = 'Still loading... please wait a moment and try again.';
     }
   }
 
-  // ── Init ───────────────────────────────────────────────────────────────────
   checkAuth();
 </script>
 
@@ -183,52 +219,29 @@ import Layout from '../layouts/Layout.astro';
 
   :global(body) { background: var(--bg); color: var(--text); }
 
-  /* Auth screens */
+  /* ── Auth screens ──────────────────────────────────────────────────────── */
   .auth-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    text-align: center;
-    gap: 1rem;
-    padding: 2rem;
-    color: var(--muted);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 60vh; text-align: center;
+    gap: 1rem; padding: 2rem; color: var(--muted);
   }
-
   .auth-spinner {
-    width: 36px; height: 36px;
-    border: 3px solid var(--border);
-    border-top-color: var(--purple);
-    border-radius: 50%;
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--purple); border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .auth-icon { font-size: 3rem; }
   .auth-screen h2 { color: var(--text); font-family: 'Syne', sans-serif; font-size: 1.5rem; }
   .auth-screen p  { color: var(--muted); font-size: 0.95rem; max-width: 340px; }
-
   .auth-btn {
-    background: var(--blue);
-    color: #fff;
-    text-decoration: none;
-    padding: 0.75rem 1.75rem;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    transition: opacity 0.15s;
+    background: var(--blue); color: #fff; text-decoration: none;
+    padding: 0.75rem 1.75rem; border-radius: 10px; font-weight: 700; font-size: 0.95rem;
   }
-  .auth-btn:hover { opacity: 0.85; }
-
-  .auth-link {
-    color: var(--purple);
-    font-size: 0.82rem;
-    text-decoration: none;
-  }
+  .auth-link { color: var(--purple); font-size: 0.82rem; text-decoration: none; }
   .auth-link:hover { text-decoration: underline; }
 
-  /* Main page */
+  /* ── Main page ─────────────────────────────────────────────────────────── */
   .alerts-page {
     max-width: 760px;
     margin: 0 auto;
@@ -237,34 +250,14 @@ import Layout from '../layouts/Layout.astro';
 
   .page-header { text-align: center; margin-bottom: 2.5rem; }
 
-  .live-dot-wrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(61,220,132,0.08);
-    border: 1px solid rgba(61,220,132,0.2);
-    padding: 0.3rem 0.85rem;
-    border-radius: 100px;
-    margin-bottom: 1rem;
-  }
-  .live-dot {
-    width: 8px; height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-  .live-label { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--green); font-family: 'JetBrains Mono', monospace; }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(61,220,132,0.4); }
-    50%       { opacity: 0.7; box-shadow: 0 0 0 6px rgba(61,220,132,0); }
-  }
-
   .page-title {
     font-family: 'Syne', sans-serif;
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: 800;
-    color: var(--purple);
+    background: linear-gradient(135deg, #998BFF, #5F5CFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 0.75rem;
   }
 
@@ -281,70 +274,144 @@ import Layout from '../layouts/Layout.astro';
     margin-bottom: 1rem;
   }
 
-  .page-sub  { color: var(--muted); font-size: 0.95rem; margin-bottom: 1rem; }
+  .page-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
 
-  .notif-btn {
-    background: transparent;
-    border: 1px solid rgba(153,139,255,0.35);
-    color: var(--purple);
-    padding: 0.55rem 1.25rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.15s;
-    margin-bottom: 0.6rem;
-  }
-  .notif-btn:hover { background: rgba(153,139,255,0.08); }
-  .notif-hint { font-size: 0.8rem; min-height: 1.2em; margin: 0; }
-
-  .filter-bar {
+  /* ── Enable alerts button — matches About page ─────────────────────────── */
+  .alert-cta {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .enable-btn {
+    display: inline-flex;
+    align-items: center;
     gap: 0.5rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1rem;
+    background: #5F5CFF;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(95, 92, 255, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+  .enable-btn:hover  { box-shadow: 0 6px 20px rgba(95,92,255,0.4); transform: translateY(-1px); }
+  .enable-btn:active { transform: scale(0.95); }
+
+  .notif-hint { font-size: 0.82rem; min-height: 1.2em; margin: 0; }
+
+  /* ── PWA Instructions ──────────────────────────────────────────────────── */
+  .pwa-instructions {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    max-width: 480px;
+    margin: 0 auto 0.5rem;
+  }
+
+  .pwa-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--purple);
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pwa-steps {
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .pwa-steps li {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .pwa-steps strong { color: var(--purple); }
+  .share-icon { font-size: 0.9rem; }
+
+  /* ── Filter Bar ────────────────────────────────────────────────────────── */
+  .filter-bar {
+    display: flex; gap: 0.5rem; margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 1rem;
   }
   .filter-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 0.4rem 1rem;
-    border-radius: 100px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.8rem;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
   }
   .filter-btn:hover  { border-color: var(--purple); color: var(--purple); }
   .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 
+  /* ── Feed ──────────────────────────────────────────────────────────────── */
   .feed { display: flex; flex-direction: column; gap: 1rem; }
 
   .feed-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left: 4px solid transparent;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 1.25rem 1.5rem;
     animation: fadeIn 0.3s ease;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+    overflow: hidden;
   }
-  .type-alert  { border-left-color: var(--red); }
-  .type-review { border-left-color: var(--purple); }
+  .feed-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .type-alert::before  { background: var(--red); }
+  .type-review::before { background: var(--purple); }
 
-  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; } }
+  .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.1); border-color: rgba(153,139,255,0.3); }
 
-  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
-  .card-tag    { font-size: 0.65rem; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace; }
-  .card-time   { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .type-alert  .card-tag { color: var(--red); }
-  .type-review .card-tag { color: var(--purple); }
-  .card-message { font-size: 1rem; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
-  .type-alert .card-message { font-weight: 600; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
+  .card-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;
+  }
+  .card-tag {
+    font-size: 0.68rem; letter-spacing: 0.12em;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    padding: 0.25rem 0.65rem; border-radius: 6px;
+  }
+  .alert-tag  { background: rgba(255,92,92,0.12);  color: var(--red);    border: 1px solid rgba(255,92,92,0.2); }
+  .review-tag { background: rgba(153,139,255,0.1); color: var(--purple); border: 1px solid rgba(153,139,255,0.2); }
+
+  .card-time { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .alert-message {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .review-message {
+    font-size: 0.92rem;
+    color: #b0b0c0;
+    line-height: 1.75;
+    white-space: pre-wrap;
+  }
+
+  /* ── Skeleton ──────────────────────────────────────────────────────────── */
   .feed-skeleton { display: flex; flex-direction: column; gap: 1rem; }
   .skeleton-card {
-    height: 90px; border-radius: 12px; border: 1px solid var(--border);
+    height: 90px; border-radius: 14px; border: 1px solid var(--border);
     background: linear-gradient(90deg, var(--surface) 25%, #22243a 50%, var(--surface) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
@@ -355,5 +422,8 @@ import Layout from '../layouts/Layout.astro';
   .empty-icon  { font-size: 3rem; margin-bottom: 1rem; }
   .refresh-note { text-align: center; font-size: 0.72rem; color: var(--muted); margin-top: 2rem; font-family: 'JetBrains Mono', monospace; }
 
-  @media (max-width: 600px) { .page-title { font-size: 2rem; } }
+  @media (max-width: 600px) {
+    .page-title { font-size: 2.2rem; }
+    .pwa-instructions { padding: 1rem; }
+  }
 </style>
