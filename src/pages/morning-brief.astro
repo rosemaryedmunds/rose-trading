@@ -11,7 +11,10 @@ import Layout from '../layouts/Layout.astro';
       </div>
       <div class="mb-header-right">
         <span class="mb-badge">Gemini 2.5 · Live Search</span>
-        <button id="refresh-btn" class="mb-btn">↺ Refresh</button>
+        <button id="refresh-btn" class="mb-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          Refresh
+        </button>
       </div>
     </header>
 
@@ -22,71 +25,282 @@ import Layout from '../layouts/Layout.astro';
     <div id="error-state" class="mb-status error hidden"></div>
 
     <div id="brief-content" class="mb-grid hidden">
-      <section class="mb-card span-2">
-        <div class="card-header"><span class="dot blue"></span> Market Tone</div>
+
+      <!-- Market Tone — full width -->
+      <section class="mb-card span-2 tone-card">
+        <div class="card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Market Tone
+        </div>
         <div class="card-body">
-          <p id="tone-text" class="large-text"></p>
+          <p id="tone-text" class="tone-text"></p>
+          <p id="bias-text" class="bias-text"></p>
         </div>
       </section>
 
+      <!-- Econ Calendar -->
       <section class="mb-card">
-        <div class="card-header"><span class="dot violet"></span> Trump Schedule</div>
-        <div class="card-body">
-          <ul id="trump-list" class="brief-list"></ul>
+        <div class="card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          Economic Calendar
         </div>
-      </section>
-
-      <section class="mb-card">
-        <div class="card-header"><span class="dot teal"></span> Pre-Market Gaps</div>
-        <div class="card-body">
-          <div id="gaps-container"></div>
-        </div>
-      </section>
-
-      <section class="mb-card">
-        <div class="card-header"><span class="dot amber"></span> Econ Calendar</div>
         <div class="card-body">
           <ul id="econ-list" class="brief-list"></ul>
         </div>
       </section>
 
+      <!-- Pre-Market Gaps -->
       <section class="mb-card">
-        <div class="card-header"><span class="dot red"></span> Ratings & News</div>
+        <div class="card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Pre-Market Earnings Gaps
+        </div>
+        <div class="card-body">
+          <div id="gaps-container"></div>
+        </div>
+      </section>
+
+      <!-- Upgrades & News -->
+      <section class="mb-card">
+        <div class="card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+          Upgrades &amp; Catalyst News
+        </div>
         <div class="card-body">
           <ul id="news-list" class="brief-list"></ul>
         </div>
       </section>
+
+      <!-- Trump Schedule -->
+      <section class="mb-card">
+        <div class="card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Trump Schedule
+        </div>
+        <div class="card-body">
+          <ul id="trump-list" class="brief-list"></ul>
+        </div>
+      </section>
+
     </div>
   </main>
 
   <style>
-    /* Rose Trading Color Palette */
     :root {
-      --bg-card: #1a1a2e;
-      --accent: #6b5ecd;
-      --text: #e8e6ff;
+      --bg-primary: #0B0C15;
+      --bg-card: #1C1E2D;
+      --border: #2d2f45;
+      --accent: #998BFF;
+      --text: #E0E0E0;
+      --text-muted: #8b8cb1;
     }
-    .mb-container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; color: var(--text); font-family: system-ui, sans-serif; }
-    .mb-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; }
-    .mb-date-display { font-family: monospace; color: var(--accent); margin-top: 0.5rem; }
-    .mb-badge { font-size: 0.7rem; background: rgba(107,94,205,0.1); border: 1px solid var(--accent); padding: 0.2rem 0.5rem; border-radius: 4px; margin-right: 0.5rem; }
-    .mb-btn { background: var(--accent); border: none; color: white; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
-    .mb-btn:hover { transform: scale(1.05); }
-    .mb-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+
+    .mb-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .mb-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    .mb-header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--accent);
+    }
+
+    .mb-date-display {
+      font-family: monospace;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+    }
+
+    .mb-header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .mb-badge {
+      font-size: 0.7rem;
+      background: rgba(153,139,255,0.08);
+      border: 1px solid rgba(153,139,255,0.3);
+      color: var(--accent);
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    .mb-btn {
+      background: var(--accent);
+      border: none;
+      color: #0B0C15;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: opacity 0.2s;
+    }
+
+    .mb-btn:hover { opacity: 0.85; }
+
+    /* Grid */
+    .mb-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
     .span-2 { grid-column: span 2; }
-    .mb-card { background: var(--bg-card); border: 1px solid #3d3d5c; border-radius: 12px; overflow: hidden; }
-    .card-header { background: rgba(255,255,255,0.03); padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #3d3d5c; display: flex; align-items: center; gap: 0.5rem; }
-    .card-body { padding: 1.25rem; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .blue { background: #3b82f6; } .violet { background: #8b5cf6; } .teal { background: #14b8a6; } .amber { background: #f59e0b; } .red { background: #ef4444; }
-    .large-text { font-size: 1.1rem; line-height: 1.6; color: #b8b4d8; }
-    .brief-list { list-style: none; padding: 0; margin: 0; }
-    .brief-list li { font-size: 0.85rem; padding: 0.6rem 0; border-bottom: 1px solid #2d2d4d; }
-    .mb-status { text-align: center; padding: 4rem; color: #b8b8d1; }
+
+    /* Cards */
+    .mb-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .tone-card {
+      border-color: rgba(59,130,246,0.25);
+    }
+
+    .card-header {
+      background: rgba(255,255,255,0.025);
+      padding: 0.65rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .card-body {
+      padding: 1rem 1.1rem;
+    }
+
+    /* Tone card */
+    .tone-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text);
+      margin: 0 0 0.6rem 0;
+    }
+
+    .bias-text {
+      font-size: 0.85rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+      border-left: 3px solid rgba(153,139,255,0.4);
+      padding-left: 0.75rem;
+      margin: 0;
+    }
+
+    /* Lists */
+    .brief-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .brief-list li {
+      font-size: 0.83rem;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .brief-list li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .brief-list li:first-child {
+      padding-top: 0;
+    }
+
+    /* Econ impact badges */
+    .impact-high { color: #ef4444; font-weight: 700; font-size: 0.7rem; }
+    .impact-med { color: #f59e0b; font-weight: 700; font-size: 0.7rem; }
+    .impact-low { color: var(--text-muted); font-size: 0.7rem; }
+
+    .event-time { color: var(--text-muted); font-size: 0.75rem; }
+
+    /* Gaps */
+    .gaps-group { margin-bottom: 0.75rem; }
+    .gaps-group:last-child { margin-bottom: 0; }
+    .gaps-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+    .gaps-label.up { color: #4ade80; }
+    .gaps-label.down { color: #f87171; }
+    .gap-item {
+      font-size: 0.82rem;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .gap-item:last-child { border-bottom: none; }
+    .gap-ticker { font-weight: 700; color: var(--text); }
+    .gap-move { font-size: 0.75rem; font-weight: 600; }
+    .gap-move.up { color: #4ade80; }
+    .gap-move.down { color: #f87171; }
+    .gap-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+    /* Trump schedule */
+    .trump-item { }
+    .trump-time { color: #8b5cf6; font-weight: 600; font-size: 0.75rem; }
+
+    /* Status */
+    .mb-status {
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .mb-status.error { color: #f87171; }
+
     .hidden { display: none; }
-    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--accent);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
     @keyframes spin { to { transform: rotate(360deg); } }
-    @media (max-width: 600px) { .mb-grid { grid-template-columns: 1fr; } .span-2 { grid-column: span 1; } }
+
+    @media (max-width: 640px) {
+      .mb-grid { grid-template-columns: 1fr; }
+      .span-2 { grid-column: span 1; }
+      .mb-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    }
   </style>
 
   <script>
@@ -94,7 +308,7 @@ import Layout from '../layouts/Layout.astro';
       const content = document.getElementById('brief-content');
       const loading = document.getElementById('loading-state');
       const errorEl = document.getElementById('error-state');
-      
+
       loading.classList.remove('hidden');
       content.classList.add('hidden');
       errorEl.classList.add('hidden');
@@ -105,44 +319,96 @@ import Layout from '../layouts/Layout.astro';
 
         if (data.error) throw new Error(data.error);
 
-        // Inject Tone
-        document.getElementById('tone-text').textContent = data.market_tone;
+        // Market Tone + Bias
+        document.getElementById('tone-text').textContent = data.market_tone || '';
+        document.getElementById('bias-text').textContent = data.morning_bias || '';
 
-        // Inject Trump
-        document.getElementById('trump-list').innerHTML = data.trump_schedule.map(s => 
-          `<li><strong>${s.time}:</strong> ${s.event}</li>`
-        ).join('') || '<li>No scheduled public events.</li>';
+        // Econ Calendar
+        const econItems = data.econ_calendar || [];
+        document.getElementById('econ-list').innerHTML = econItems.length > 0
+          ? econItems.map(e => {
+              const impactClass = e.impact === 'HIGH' ? 'impact-high' : e.impact === 'MED' ? 'impact-med' : 'impact-low';
+              return `<li>
+                <span class="event-time">${e.time}</span>
+                <span class="${impactClass}"> [${e.impact}]</span>
+                — ${e.event}
+                ${e.actual ? `<br><span style="color:#8b8cb1;font-size:0.75rem">Actual: ${e.actual} · Est: ${e.forecast}</span>` : ''}
+              </li>`;
+            }).join('')
+          : '<li style="color:#8b8cb1">No major data today.</li>';
 
-        // Inject Gaps
-        document.getElementById('gaps-container').innerHTML = `
-          <p style="color:#4ade80; margin-bottom: 0.5rem;">🟢 ${data.gaps.ups.join(', ') || 'None'}</p>
-          <p style="color:#f87171">🔴 ${data.gaps.downs.join(', ') || 'None'}</p>
-        `;
+        // Pre-Market Gaps
+        const ups = data.gaps?.ups || [];
+        const downs = data.gaps?.downs || [];
+        let gapsHtml = '';
 
-        // Inject Econ
-        document.getElementById('econ-list').innerHTML = data.econ_calendar.map(e => 
-          `<li><span style="color:#8b8cb1">${e.time}</span> — ${e.event} [${e.impact}]</li>`
-        ).join('') || '<li>No major data today.</li>';
+        if (ups.length > 0) {
+          gapsHtml += `<div class="gaps-group">
+            <div class="gaps-label up">▲ Beats / Gap Ups</div>
+            ${ups.map(g => {
+              if (typeof g === 'object') {
+                return `<div class="gap-item">
+                  <div>
+                    <span class="gap-ticker">${g.ticker}</span>
+                    <div class="gap-desc">${g.reason || ''}</div>
+                  </div>
+                  <span class="gap-move up">${g.move || ''}</span>
+                </div>`;
+              }
+              return `<div class="gap-item"><span class="gap-ticker">${g}</span><span class="gap-move up">↑</span></div>`;
+            }).join('')}
+          </div>`;
+        }
 
-        // Inject News & Analysts
-        const allNews = [...(data.analyst_actions || []), ...(data.breaking_news || [])];
-        document.getElementById('news-list').innerHTML = allNews.length > 0 
-          ? allNews.map(n => `<li>${n}</li>`).join('') 
-          : '<li>No major upgrades or breaking news.</li>';
+        if (downs.length > 0) {
+          gapsHtml += `<div class="gaps-group">
+            <div class="gaps-label down">▼ Misses / Gap Downs</div>
+            ${downs.map(g => {
+              if (typeof g === 'object') {
+                return `<div class="gap-item">
+                  <div>
+                    <span class="gap-ticker">${g.ticker}</span>
+                    <div class="gap-desc">${g.reason || ''}</div>
+                  </div>
+                  <span class="gap-move down">${g.move || ''}</span>
+                </div>`;
+              }
+              return `<div class="gap-item"><span class="gap-ticker">${g}</span><span class="gap-move down">↓</span></div>`;
+            }).join('')}
+          </div>`;
+        }
+
+        document.getElementById('gaps-container').innerHTML = gapsHtml || '<p style="color:#8b8cb1;font-size:0.83rem">No notable gaps today.</p>';
+
+        // Upgrades & Catalyst News
+        const allNews = [
+          ...(data.analyst_actions || []).map(n => `<span style="color:#998BFF">↑↓</span> ${n}`),
+          ...(data.breaking_news || []).map(n => `<span style="color:#f59e0b">●</span> ${n}`)
+        ];
+        document.getElementById('news-list').innerHTML = allNews.length > 0
+          ? allNews.map(n => `<li>${n}</li>`).join('')
+          : '<li style="color:#8b8cb1">No major ratings or catalyst news.</li>';
+
+        // Trump Schedule
+        const schedule = data.trump_schedule || [];
+        document.getElementById('trump-list').innerHTML = schedule.length > 0
+          ? schedule.map(s => `<li class="trump-item"><span class="trump-time">${s.time}</span> — ${s.event}</li>`).join('')
+          : '<li style="color:#8b8cb1">No scheduled public events.</li>';
 
         loading.classList.add('hidden');
         content.classList.remove('hidden');
       } catch (err) {
         loading.classList.add('hidden');
-        errorEl.textContent = `Update Error: ${err.message}`;
+        errorEl.textContent = `Error loading brief: ${err.message}`;
         errorEl.classList.remove('hidden');
       }
     }
 
-    document.getElementById('mb-date').textContent = new Date().toDateString();
+    document.getElementById('mb-date').textContent = new Date().toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
     document.getElementById('refresh-btn').addEventListener('click', fetchBrief);
-    
-    // Initial fetch on load
     fetchBrief();
   </script>
 </Layout>

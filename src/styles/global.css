@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+
 :root {
   --bg-primary: #0f0f1a;
   --bg-secondary: #1a1a2e;
@@ -23,6 +25,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
+  font-family: 'Syne', sans-serif;
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 1rem;
@@ -114,4 +117,48 @@ a:hover {
   .section {
     padding: 2rem 0;
   }
+}
+
+/* ── Alerts feed cards ───────────────────────────────────────────────────── */
+.feed-card {
+  background: #1C1E2D;
+  border: 1px solid rgba(153,139,255,0.15);
+  border-left: 4px solid transparent;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  transition: box-shadow 0.2s;
+}
+.feed-card:hover {
+  box-shadow: 0 4px 24px rgba(153,139,255,0.1);
+  transform: none;
+}
+.alert-message {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #E0E0E0;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+.review-message {
+  font-size: 0.92rem;
+  color: #b0b0c0;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  margin-bottom: 0;
+}
+.card-tag {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+.card-time {
+  font-size: 0.7rem;
+  color: #555;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 0;
 }
