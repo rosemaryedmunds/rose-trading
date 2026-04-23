@@ -21,151 +21,129 @@ import Layout from '../layouts/Layout.astro';
     <div id="loading-state" class="mb-status">
       <span class="spinner"></span> Scanning markets & schedule...
     </div>
-
     <div id="error-state" class="mb-status error hidden"></div>
 
-    <div id="brief-content" class="mb-grid hidden">
+    <div id="brief-content" class="hidden">
 
-      <!-- Market Tone — full width -->
-      <section class="mb-card span-2 tone-card">
+      <!-- Row 1: Market Tone full width -->
+      <section class="mb-card tone-card mb-row1">
         <div class="card-header">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-          Market Tone
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Market Tone &amp; Morning Bias
         </div>
-        <div class="card-body">
+        <div class="card-body tone-body">
           <p id="tone-text" class="tone-text"></p>
           <p id="bias-text" class="bias-text"></p>
         </div>
       </section>
 
-      <!-- Econ Calendar -->
-      <section class="mb-card">
-        <div class="card-header">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-          Economic Calendar
-        </div>
-        <div class="card-body">
-          <ul id="econ-list" class="brief-list"></ul>
-        </div>
-      </section>
+      <!-- Row 2: 3-column tiles -->
+      <div class="mb-grid3">
 
-      <!-- Pre-Market Gaps -->
-      <section class="mb-card">
-        <div class="card-header">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Pre-Market Earnings Gaps
-        </div>
-        <div class="card-body">
-          <div id="gaps-container"></div>
-        </div>
-      </section>
+        <!-- Econ Calendar -->
+        <section class="mb-card">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            US Economic Calendar
+          </div>
+          <div class="card-body">
+            <ul id="econ-list" class="brief-list"></ul>
+          </div>
+        </section>
 
-      <!-- Upgrades & News -->
-      <section class="mb-card">
-        <div class="card-header">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
-          Upgrades &amp; Catalyst News
-        </div>
-        <div class="card-body">
-          <ul id="news-list" class="brief-list"></ul>
-        </div>
-      </section>
+        <!-- Pre-Market Gaps -->
+        <section class="mb-card">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Pre-Market Earnings Gaps
+          </div>
+          <div class="card-body">
+            <div id="gaps-container"></div>
+          </div>
+        </section>
 
-      <!-- Trump Schedule -->
-      <section class="mb-card">
-        <div class="card-header">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-          Trump Schedule
-        </div>
-        <div class="card-body">
-          <ul id="trump-list" class="brief-list"></ul>
-        </div>
-      </section>
+        <!-- Trump Schedule -->
+        <section class="mb-card">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Trump Schedule
+          </div>
+          <div class="card-body">
+            <ul id="trump-list" class="brief-list"></ul>
+          </div>
+        </section>
 
+        <!-- Analyst Ratings -->
+        <section class="mb-card">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            Analyst Ratings
+          </div>
+          <div class="card-body">
+            <ul id="ratings-list" class="brief-list"></ul>
+          </div>
+        </section>
+
+        <!-- Catalyst News -->
+        <section class="mb-card span-2-of-3">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+            Catalyst News
+          </div>
+          <div class="card-body">
+            <ul id="news-list" class="brief-list news-grid"></ul>
+          </div>
+        </section>
+
+      </div>
     </div>
   </main>
 
   <style>
     :root {
-      --bg-primary: #0B0C15;
       --bg-card: #1C1E2D;
       --border: #2d2f45;
       --accent: #998BFF;
       --text: #E0E0E0;
       --text-muted: #8b8cb1;
+      --green: #4ade80;
+      --red: #f87171;
     }
 
     .mb-container {
-      max-width: 960px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 2rem 1rem;
+      padding: 2rem 1.25rem;
       color: var(--text);
       font-family: system-ui, -apple-system, sans-serif;
     }
 
+    /* Header */
     .mb-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 1.75rem;
+      margin-bottom: 1.5rem;
       border-bottom: 1px solid var(--border);
       padding-bottom: 1rem;
     }
-
-    .mb-header h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin: 0;
-      color: var(--accent);
-    }
-
-    .mb-date-display {
-      font-family: monospace;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      margin-top: 0.3rem;
-    }
-
-    .mb-header-right {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .mb-badge {
-      font-size: 0.7rem;
-      background: rgba(153,139,255,0.08);
-      border: 1px solid rgba(153,139,255,0.3);
-      color: var(--accent);
-      padding: 0.25rem 0.6rem;
-      border-radius: 20px;
-    }
-
-    .mb-btn {
-      background: var(--accent);
-      border: none;
-      color: #0B0C15;
-      padding: 0.45rem 0.9rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: opacity 0.2s;
-    }
-
+    .mb-header h1 { font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--accent); }
+    .mb-date-display { font-family: monospace; color: var(--text-muted); font-size: 0.78rem; margin-top: 0.3rem; }
+    .mb-header-right { display: flex; align-items: center; gap: 0.75rem; }
+    .mb-badge { font-size: 0.68rem; background: rgba(153,139,255,0.08); border: 1px solid rgba(153,139,255,0.3); color: var(--accent); padding: 0.2rem 0.55rem; border-radius: 20px; }
+    .mb-btn { background: var(--accent); border: none; color: #0B0C15; padding: 0.4rem 0.85rem; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.78rem; display: flex; align-items: center; gap: 0.4rem; transition: opacity 0.2s; }
     .mb-btn:hover { opacity: 0.85; }
 
-    /* Grid */
-    .mb-grid {
+    /* Row 1 — tone full width */
+    .mb-row1 { margin-bottom: 1rem; }
+
+    /* Row 2 — 3 column grid */
+    .mb-grid3 {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
     }
-
-    .span-2 { grid-column: span 2; }
+    .span-2-of-3 { grid-column: span 2; }
 
     /* Cards */
     .mb-card {
@@ -174,136 +152,112 @@ import Layout from '../layouts/Layout.astro';
       border-radius: 14px;
       overflow: hidden;
     }
-
-    .tone-card {
-      border-color: rgba(59,130,246,0.25);
-    }
+    .tone-card { border-color: rgba(59,130,246,0.2); }
 
     .card-header {
       background: rgba(255,255,255,0.025);
-      padding: 0.65rem 1rem;
-      font-size: 0.7rem;
+      padding: 0.6rem 1rem;
+      font-size: 0.68rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.07em;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       color: var(--text-muted);
     }
 
-    .card-body {
-      padding: 1rem 1.1rem;
-    }
+    .card-body { padding: 0.9rem 1rem; }
 
-    /* Tone card */
-    .tone-text {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: var(--text);
-      margin: 0 0 0.6rem 0;
-    }
-
-    .bias-text {
-      font-size: 0.85rem;
-      line-height: 1.55;
-      color: var(--text-muted);
-      border-left: 3px solid rgba(153,139,255,0.4);
-      padding-left: 0.75rem;
-      margin: 0;
-    }
+    /* Tone */
+    .tone-body { display: flex; gap: 2rem; align-items: flex-start; }
+    .tone-text { font-size: 0.9rem; line-height: 1.65; color: var(--text); margin: 0; flex: 1; }
+    .bias-text { font-size: 0.85rem; line-height: 1.6; color: var(--text-muted); border-left: 3px solid rgba(153,139,255,0.35); padding-left: 0.85rem; margin: 0; flex: 1; }
 
     /* Lists */
-    .brief-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
+    .brief-list { list-style: none; padding: 0; margin: 0; }
+    .brief-list li { font-size: 0.82rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); line-height: 1.45; color: var(--text); }
+    .brief-list li:last-child { border-bottom: none; padding-bottom: 0; }
+    .brief-list li:first-child { padding-top: 0; }
 
-    .brief-list li {
-      font-size: 0.83rem;
-      padding: 0.55rem 0;
-      border-bottom: 1px solid var(--border);
-      line-height: 1.5;
-      color: var(--text);
-    }
-
-    .brief-list li:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .brief-list li:first-child {
-      padding-top: 0;
-    }
-
-    /* Econ impact badges */
-    .impact-high { color: #ef4444; font-weight: 700; font-size: 0.7rem; }
-    .impact-med { color: #f59e0b; font-weight: 700; font-size: 0.7rem; }
-    .impact-low { color: var(--text-muted); font-size: 0.7rem; }
-
-    .event-time { color: var(--text-muted); font-size: 0.75rem; }
+    /* Econ */
+    .impact-HIGH { color: #ef4444; font-weight: 700; font-size: 0.68rem; }
+    .impact-MED  { color: #f59e0b; font-weight: 700; font-size: 0.68rem; }
+    .impact-LOW  { color: var(--text-muted); font-size: 0.68rem; }
+    .event-time  { color: var(--text-muted); font-size: 0.72rem; }
 
     /* Gaps */
-    .gaps-group { margin-bottom: 0.75rem; }
+    .gaps-group { margin-bottom: 0.6rem; }
     .gaps-group:last-child { margin-bottom: 0; }
-    .gaps-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
-    .gaps-label.up { color: #4ade80; }
-    .gaps-label.down { color: #f87171; }
-    .gap-item {
-      font-size: 0.82rem;
-      padding: 0.45rem 0;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
+    .gaps-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
+    .gaps-label.up { color: var(--green); }
+    .gaps-label.down { color: var(--red); }
+    .gap-item { font-size: 0.8rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
     .gap-item:last-child { border-bottom: none; }
+    .gap-left { flex: 1; min-width: 0; }
     .gap-ticker { font-weight: 700; color: var(--text); }
-    .gap-move { font-size: 0.75rem; font-weight: 600; }
-    .gap-move.up { color: #4ade80; }
-    .gap-move.down { color: #f87171; }
-    .gap-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .gap-move { font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+    .gap-move.up { color: var(--green); }
+    .gap-move.down { color: var(--red); }
+    .gap-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem; }
 
-    /* Trump schedule */
-    .trump-item { }
-    .trump-time { color: #8b5cf6; font-weight: 600; font-size: 0.75rem; }
+    /* Analyst ratings */
+    .rating-row { display: flex; align-items: baseline; gap: 0.4rem; }
+    .rating-badge { font-size: 0.65rem; font-weight: 800; padding: 0.1rem 0.35rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; }
+    .rating-badge.upgrade   { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+    .rating-badge.downgrade { background: rgba(248,113,113,0.15); color: var(--red);   border: 1px solid rgba(248,113,113,0.3); }
+    .rating-badge.initiated { background: rgba(153,139,255,0.15); color: var(--accent); border: 1px solid rgba(153,139,255,0.3); }
+    .rating-badge.neutral   { background: rgba(139,140,177,0.12); color: var(--text-muted); border: 1px solid rgba(139,140,177,0.2); }
+    .rating-text { font-size: 0.8rem; color: var(--text); }
+
+    /* Catalyst news grid (2-col inside the span-2 card) */
+    .news-grid { columns: 2; column-gap: 1.25rem; }
+    .news-grid li { break-inside: avoid; }
+    .news-dot { font-size: 0.65rem; margin-right: 0.3rem; color: #f97316; }
+
+    /* Trump */
+    .trump-time { color: #8b5cf6; font-weight: 600; font-size: 0.72rem; }
 
     /* Status */
-    .mb-status {
-      text-align: center;
-      padding: 5rem 2rem;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    .mb-status.error { color: #f87171; }
-
+    .mb-status { text-align: center; padding: 5rem 2rem; color: var(--text-muted); font-size: 0.9rem; }
+    .mb-status.error { color: var(--red); }
     .hidden { display: none; }
-
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid var(--accent);
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-right: 10px;
-      vertical-align: middle;
-    }
-
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    @media (max-width: 640px) {
-      .mb-grid { grid-template-columns: 1fr; }
-      .span-2 { grid-column: span 1; }
-      .mb-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    @media (max-width: 860px) {
+      .mb-grid3 { grid-template-columns: repeat(2, 1fr); }
+      .span-2-of-3 { grid-column: span 2; }
+      .news-grid { columns: 1; }
+      .tone-body { flex-direction: column; gap: 0.75rem; }
+    }
+    @media (max-width: 560px) {
+      .mb-grid3 { grid-template-columns: 1fr; }
+      .span-2-of-3 { grid-column: span 1; }
+      .mb-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
     }
   </style>
 
   <script>
+    function getBadge(text) {
+      const t = (text || '').toLowerCase();
+      if (t.includes('upgrade') || t.includes('raised') || t.includes('outperform') || t.includes('buy')) return 'upgrade';
+      if (t.includes('downgrade') || t.includes('cut') || t.includes('underperform') || t.includes('sell')) return 'downgrade';
+      if (t.includes('initiat') || t.includes('coverage') || t.includes('initiates')) return 'initiated';
+      return 'neutral';
+    }
+
+    function getBadgeLabel(text) {
+      const t = (text || '').toLowerCase();
+      if (t.includes('upgrade')) return '↑ Upgrade';
+      if (t.includes('downgrade')) return '↓ Downgrade';
+      if (t.includes('initiat')) return '● Initiated';
+      if (t.includes('raised') || t.includes('increase')) return '↑ PT Raised';
+      if (t.includes('cut') || t.includes('lower')) return '↓ PT Cut';
+      return '— Reiterated';
+    }
+
     async function fetchBrief() {
       const content = document.getElementById('brief-content');
       const loading = document.getElementById('loading-state');
@@ -316,83 +270,70 @@ import Layout from '../layouts/Layout.astro';
       try {
         const response = await fetch('/.netlify/functions/morning-brief');
         const data = await response.json();
-
         if (data.error) throw new Error(data.error);
 
         // Market Tone + Bias
         document.getElementById('tone-text').textContent = data.market_tone || '';
         document.getElementById('bias-text').textContent = data.morning_bias || '';
 
-        // Econ Calendar
-        const econItems = data.econ_calendar || [];
+        // US Econ Calendar
+        const econItems = (data.econ_calendar || []).filter(e => {
+          const ev = (e.event || '').toLowerCase();
+          // Keep only US-relevant events (exclude ECB, BOE, etc.)
+          return !ev.includes('ecb') && !ev.includes('boe') && !ev.includes('boj')
+            && !ev.includes('rba') && !ev.includes('canada') && !ev.includes('german')
+            && !ev.includes('eurozone') && !ev.includes('uk ') && !ev.includes('chinese')
+            && !ev.includes('japan') && !ev.includes('australia');
+        });
         document.getElementById('econ-list').innerHTML = econItems.length > 0
-          ? econItems.map(e => {
-              const impactClass = e.impact === 'HIGH' ? 'impact-high' : e.impact === 'MED' ? 'impact-med' : 'impact-low';
-              return `<li>
-                <span class="event-time">${e.time}</span>
-                <span class="${impactClass}"> [${e.impact}]</span>
-                — ${e.event}
-                ${e.actual ? `<br><span style="color:#8b8cb1;font-size:0.75rem">Actual: ${e.actual} · Est: ${e.forecast}</span>` : ''}
-              </li>`;
-            }).join('')
-          : '<li style="color:#8b8cb1">No major data today.</li>';
+          ? econItems.map(e => `<li>
+              <span class="event-time">${e.time}</span>
+              <span class="impact-${e.impact}"> [${e.impact}]</span>
+              — ${e.event}
+              ${e.actual ? `<br><span style="color:#8b8cb1;font-size:0.72rem">Actual: ${e.actual} · Est: ${e.forecast || '—'}</span>` : ''}
+            </li>`).join('')
+          : '<li style="color:#8b8cb1">No major US data today.</li>';
 
         // Pre-Market Gaps
         const ups = data.gaps?.ups || [];
         const downs = data.gaps?.downs || [];
         let gapsHtml = '';
-
         if (ups.length > 0) {
-          gapsHtml += `<div class="gaps-group">
-            <div class="gaps-label up">▲ Beats / Gap Ups</div>
-            ${ups.map(g => {
-              if (typeof g === 'object') {
-                return `<div class="gap-item">
-                  <div>
-                    <span class="gap-ticker">${g.ticker}</span>
-                    <div class="gap-desc">${g.reason || ''}</div>
-                  </div>
-                  <span class="gap-move up">${g.move || ''}</span>
-                </div>`;
-              }
-              return `<div class="gap-item"><span class="gap-ticker">${g}</span><span class="gap-move up">↑</span></div>`;
-            }).join('')}
-          </div>`;
+          gapsHtml += `<div class="gaps-group"><div class="gaps-label up">▲ Beats / Gap Ups</div>
+            ${ups.map(g => typeof g === 'object'
+              ? `<div class="gap-item"><div class="gap-left"><span class="gap-ticker">${g.ticker}</span><div class="gap-desc">${g.reason || ''}</div></div><span class="gap-move up">${g.move || ''}</span></div>`
+              : `<div class="gap-item"><span class="gap-ticker">${g}</span><span class="gap-move up">↑</span></div>`
+            ).join('')}</div>`;
         }
-
         if (downs.length > 0) {
-          gapsHtml += `<div class="gaps-group">
-            <div class="gaps-label down">▼ Misses / Gap Downs</div>
-            ${downs.map(g => {
-              if (typeof g === 'object') {
-                return `<div class="gap-item">
-                  <div>
-                    <span class="gap-ticker">${g.ticker}</span>
-                    <div class="gap-desc">${g.reason || ''}</div>
-                  </div>
-                  <span class="gap-move down">${g.move || ''}</span>
-                </div>`;
-              }
-              return `<div class="gap-item"><span class="gap-ticker">${g}</span><span class="gap-move down">↓</span></div>`;
-            }).join('')}
-          </div>`;
+          gapsHtml += `<div class="gaps-group"><div class="gaps-label down">▼ Misses / Gap Downs</div>
+            ${downs.map(g => typeof g === 'object'
+              ? `<div class="gap-item"><div class="gap-left"><span class="gap-ticker">${g.ticker}</span><div class="gap-desc">${g.reason || ''}</div></div><span class="gap-move down">${g.move || ''}</span></div>`
+              : `<div class="gap-item"><span class="gap-ticker">${g}</span><span class="gap-move down">↓</span></div>`
+            ).join('')}</div>`;
         }
+        document.getElementById('gaps-container').innerHTML = gapsHtml || '<p style="color:#8b8cb1;font-size:0.82rem">No notable gaps today.</p>';
 
-        document.getElementById('gaps-container').innerHTML = gapsHtml || '<p style="color:#8b8cb1;font-size:0.83rem">No notable gaps today.</p>';
+        // Analyst Ratings — color coded
+        const ratings = data.analyst_actions || [];
+        document.getElementById('ratings-list').innerHTML = ratings.length > 0
+          ? ratings.map(n => {
+              const badgeType = getBadge(n);
+              const badgeLabel = getBadgeLabel(n);
+              return `<li><div class="rating-row"><span class="rating-badge ${badgeType}">${badgeLabel}</span><span class="rating-text">${n}</span></div></li>`;
+            }).join('')
+          : '<li style="color:#8b8cb1">No analyst actions today.</li>';
 
-        // Upgrades & Catalyst News
-        const allNews = [
-          ...(data.analyst_actions || []).map(n => `<span style="color:#998BFF">↑↓</span> ${n}`),
-          ...(data.breaking_news || []).map(n => `<span style="color:#f59e0b">●</span> ${n}`)
-        ];
-        document.getElementById('news-list').innerHTML = allNews.length > 0
-          ? allNews.map(n => `<li>${n}</li>`).join('')
-          : '<li style="color:#8b8cb1">No major ratings or catalyst news.</li>';
+        // Catalyst News
+        const news = data.breaking_news || [];
+        document.getElementById('news-list').innerHTML = news.length > 0
+          ? news.map(n => `<li><span class="news-dot">●</span>${n}</li>`).join('')
+          : '<li style="color:#8b8cb1">No major catalyst news.</li>';
 
         // Trump Schedule
         const schedule = data.trump_schedule || [];
         document.getElementById('trump-list').innerHTML = schedule.length > 0
-          ? schedule.map(s => `<li class="trump-item"><span class="trump-time">${s.time}</span> — ${s.event}</li>`).join('')
+          ? schedule.map(s => `<li><span class="trump-time">${s.time}</span> — ${s.event}</li>`).join('')
           : '<li style="color:#8b8cb1">No scheduled public events.</li>';
 
         loading.classList.add('hidden');
@@ -407,7 +348,6 @@ import Layout from '../layouts/Layout.astro';
     document.getElementById('mb-date').textContent = new Date().toLocaleDateString('en-US', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
-
     document.getElementById('refresh-btn').addEventListener('click', fetchBrief);
     fetchBrief();
   </script>
