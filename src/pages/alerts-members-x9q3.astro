@@ -212,14 +212,26 @@ import { Icon } from 'astro-icon/components';
   }
 
   :global(body) { background: var(--bg); color: var(--text); }
-  :global(h1.page-title) {
+
+  :global(.page-title) {
     font-family: 'Syne', sans-serif !important;
+    font-size: 3rem !important;
     font-weight: 800 !important;
     background: linear-gradient(135deg, #998BFF, #5F5CFF) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
     color: transparent !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  :global(.alert-message) {
+    font-family: 'Syne', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #E0E0E0 !important;
+    line-height: 1.5 !important;
+    margin-bottom: 0 !important;
   }
 
   /* ── Auth ─────────────────────────────────────────────────────── */

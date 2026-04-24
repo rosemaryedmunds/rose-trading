@@ -1,5 +1,40 @@
 import { GoogleGenAI } from "@google/genai";
 
+const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+
+async function generateWithRetry(ai, prompt, maxRetries = 3) {
+  for (const model of MODELS) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: { tools: [{ googleSearch: {} }] },
+        });
+        console.log(`Success with ${model} on attempt ${attempt}`);
+        return result.text;
+      } catch (err) {
+        const is503 = err?.status === 503 || err?.message?.includes('503') || err?.message?.includes('UNAVAILABLE');
+        const isLast = attempt === maxRetries;
+        const isLastModel = model === MODELS[MODELS.length - 1];
+
+        if (is503 && !isLast) {
+          const delay = attempt * 2000; // 2s, 4s, 6s
+          console.log(`${model} attempt ${attempt} got 503, retrying in ${delay}ms...`);
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+        if (is503 && !isLastModel) {
+          console.log(`${model} exhausted retries, trying next model...`);
+          break; // try next model
+        }
+        throw err; // non-503 error or all models failed
+      }
+    }
+  }
+  throw new Error("All models unavailable. Try again in a few minutes.");
+}
+
 export default async (req, context) => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -30,21 +65,14 @@ export default async (req, context) => {
     }
     Rules:
     - impact must be exactly "HIGH", "MED", or "LOW" (uppercase)
+    - Only include US economic events, no ECB/BOE/BOJ/foreign central bank data
     - ticker symbols must include the $ prefix
     - If a field has no data, use an empty array []
     - Do not include any text outside the JSON object
   `;
 
   try {
-    const result = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        tools: [{ googleSearch: {} }],
-      },
-    });
-
-    const responseText = result.text;
+    const responseText = await generateWithRetry(ai, prompt);
     const jsonString = responseText.replace(/```json|```/g, "").trim();
     const data = JSON.parse(jsonString);
 
@@ -54,9 +82,12 @@ export default async (req, context) => {
 
   } catch (error) {
     console.error("Briefing Error:", error);
+    const is503 = error?.message?.includes('503') || error?.message?.includes('UNAVAILABLE') || error?.message?.includes('All models');
     return new Response(JSON.stringify({
-      error: "Search Latency Issue",
+      error: is503
+        ? "Gemini is under high demand right now. Please try refreshing in 1-2 minutes."
+        : "Error loading brief",
       details: error.message
-    }), { status: 500 });
+    }), { status: 503 });
   }
 };
