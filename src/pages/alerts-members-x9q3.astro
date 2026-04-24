@@ -213,27 +213,6 @@ import { Icon } from 'astro-icon/components';
 
   :global(body) { background: var(--bg); color: var(--text); }
 
-  :global(.page-title) {
-    font-family: 'Syne', sans-serif !important;
-    font-size: 3rem !important;
-    font-weight: 800 !important;
-    background: linear-gradient(135deg, #998BFF, #5F5CFF) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    color: transparent !important;
-    margin-bottom: 0.75rem !important;
-  }
-
-  :global(.alert-message) {
-    font-family: 'Syne', sans-serif !important;
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
-    color: #E0E0E0 !important;
-    line-height: 1.5 !important;
-    margin-bottom: 0 !important;
-  }
-
   /* ── Auth ─────────────────────────────────────────────────────── */
   .auth-screen {
     display: flex; flex-direction: column; align-items: center;
@@ -260,16 +239,6 @@ import { Icon } from 'astro-icon/components';
   /* ── Page ─────────────────────────────────────────────────────── */
   .alerts-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
   .page-header  { text-align: center; margin-bottom: 2.5rem; }
-
-  .page-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 3rem; font-weight: 800;
-    background: linear-gradient(135deg, #998BFF, #5F5CFF);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.75rem;
-  }
 
   .member-badge {
     display: inline-flex; align-items: center; gap: 0.4rem;
@@ -369,16 +338,6 @@ import { Icon } from 'astro-icon/components';
   .card-time {
     font-size: 0.7rem; color: var(--muted);
     font-family: 'JetBrains Mono', monospace;
-  }
-
-  .alert-message {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.05rem; font-weight: 700;
-    color: var(--text); line-height: 1.5;
-  }
-  .review-message {
-    font-size: 0.92rem; color: #b0b0c0;
-    line-height: 1.75; white-space: pre-wrap;
   }
 
   /* ── Skeleton ─────────────────────────────────────────────────── */
