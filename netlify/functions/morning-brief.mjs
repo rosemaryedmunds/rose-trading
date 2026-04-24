@@ -13,19 +13,45 @@ function extractText(result) {
 function repairJSON(raw) {
   let str = raw.replace(/```json|```/g, '').trim();
 
-  // Strip bad control characters (newlines/tabs inside JSON strings)
-  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ' '); // remove non-printable except \n \r \t
-  str = str.replace(/\n/g, ' ').replace(/\r/g, '').replace(/\t/g, ' '); // flatten newlines inside strings
+  // Flatten control characters that break JSON string parsing
+  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ' ');
+  str = str.replace(/\n/g, ' ').replace(/\r/g, '').replace(/\t/g, ' ');
 
+  // Extract JSON object boundaries
   const start = str.indexOf('{');
+  if (start !== -1) str = str.slice(start);
   const end = str.lastIndexOf('}');
-  if (start !== -1 && end !== -1) str = str.slice(start, end + 1);
+  if (end !== -1) str = str.slice(0, end + 1);
+
+  // Try clean parse
   try { return JSON.parse(str); } catch (_) {}
+
+  // Remove trailing commas
   str = str.replace(/,\s*([\]}])/g, '$1');
   try { return JSON.parse(str); } catch (_) {}
+
+  // Close any unterminated string (truncation mid-string)
+  // Find last unescaped quote position to detect open strings
+  let inString = false;
+  let lastStringStart = -1;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '"' && (i === 0 || str[i-1] !== '\\')) {
+      inString = !inString;
+      if (inString) lastStringStart = i;
+    }
+  }
+  if (inString) {
+    // Truncate to last complete value before the open string
+    str = str.slice(0, lastStringStart).trimEnd();
+    // Remove trailing comma/colon if any
+    str = str.replace(/[,:]$/, '');
+  }
+
+  // Close open arrays and objects
   const opens = (str.match(/\[/g) || []).length - (str.match(/\]/g) || []).length;
   const braces = (str.match(/\{/g) || []).length - (str.match(/\}/g) || []).length;
   str += ']'.repeat(Math.max(0, opens)) + '}'.repeat(Math.max(0, braces));
+
   try { return JSON.parse(str); } catch (e) {
     throw new Error(`JSON parse failed: ${e.message}`);
   }
@@ -42,7 +68,7 @@ async function generateWithRetry(ai, prompt, maxRetries = 2) {
           contents: prompt,
           config: {
             tools: [{ googleSearch: {} }],
-            maxOutputTokens: 2000,
+            maxOutputTokens: 8192,
           },
         });
         const text = extractText(result);
