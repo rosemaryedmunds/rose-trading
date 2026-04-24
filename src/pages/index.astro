@@ -25,6 +25,17 @@ import { Icon } from 'astro-icon/components';
           <span class="card-link alerts-link">Subscribe for $39.99/mo →</span>
         </a>
 
+        <!-- Members quick-access -->
+        <a href="/alerts-members-x9q3" class="main-card members-access-card">
+          <div class="members-badge-tag">Members</div>
+          <div class="card-icon">
+            <Icon name="lucide:zap" />
+          </div>
+          <h3>View Trade Alerts</h3>
+          <p>Already a member? Jump straight to the live feed — real-time alerts, notes, and pre/post market reviews.</p>
+          <span class="card-link members-link">Go to Members Feed →</span>
+        </a>
+
         <a href="/about" class="main-card">
           <div class="card-icon">
             <Icon name="lucide:user-round" />
@@ -310,4 +321,29 @@ import { Icon } from 'astro-icon/components';
 
   .alerts-link { color: #3DDC84 !important; }
   .alerts-card:hover .alerts-link { color: #3DDC84 !important; }
+
+  /* ── Members Access Card ──────────────────────────────────────────────── */
+  .members-access-card {
+    border-color: rgba(153, 139, 255, 0.4);
+    background: linear-gradient(135deg, rgba(153,139,255,0.07), rgba(95,92,255,0.03));
+  }
+
+  .members-badge-tag {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(153,139,255,0.15);
+    border: 1px solid rgba(153,139,255,0.35);
+    color: #998BFF;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .members-link { color: #998BFF !important; }
+  .members-access-card:hover { border-color: #998BFF; }
+  .members-access-card:hover .members-link { color: #b8adff !important; }
 </style>

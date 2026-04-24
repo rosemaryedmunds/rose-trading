@@ -32,12 +32,6 @@ import { Icon } from 'astro-icon/components';
 
     <div class="page-header">
       <h1 class="page-title">Trade Alerts</h1>
-      <div class="member-badge">
-        <Icon name="lucide:shield-check" />
-        Members Access
-      </div>
-      <p class="page-sub">Real-time SPX alerts and market reviews from Rose.</p>
-
       <div class="alert-cta">
         <button id="enable-alerts-btn" class="enable-btn" onclick="enableNotifications()">
           <Icon name="lucide:bell" />
@@ -59,6 +53,10 @@ import { Icon } from 'astro-icon/components';
           <li><span class="step-num">5</span><span>Open the app from your Home Screen and tap <strong>Enable Trade Alerts</strong></span></li>
         </ol>
       </div>
+    </div>
+
+    <div class="disclaimer-box">
+      <p>⚠️ <strong>Disclaimer:</strong> This content is for informational purposes only and is <strong>not financial advice</strong>. Trade at your own risk. SPX is a highly volatile ticker and options can quickly go to $0. Never trade more than you are willing to lose.</p>
     </div>
 
     <div class="filter-bar">
@@ -240,17 +238,24 @@ import { Icon } from 'astro-icon/components';
   .alerts-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
   .page-header  { text-align: center; margin-bottom: 2.5rem; }
 
-  .member-badge {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    background: rgba(61,220,132,0.1); border: 1px solid rgba(61,220,132,0.25);
-    color: var(--green); font-size: 0.75rem;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.1em; padding: 0.3rem 0.85rem;
-    border-radius: 100px; margin-bottom: 1rem;
-  }
-  .member-badge [data-icon] { width: 13px; height: 13px; stroke: var(--green); }
+  .member-badge { display: none; }
+  .page-sub { display: none; }
 
-  .page-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+  /* ── Disclaimer ───────────────────────────────────────────────── */
+  .disclaimer-box {
+    background: rgba(255, 200, 50, 0.06);
+    border: 1px solid rgba(255, 200, 50, 0.25);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  .disclaimer-box p {
+    color: #c8b97a;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    margin: 0;
+  }
+  .disclaimer-box strong { color: #e0c97a; }
 
   /* ── Enable Button ────────────────────────────────────────────── */
   .alert-cta { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
