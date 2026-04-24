@@ -149,7 +149,7 @@ import { Icon } from 'astro-icon/components';
               <span class="card-tag" style="color:${accent}; background:${accent}22; border-color:${accent}44;">ALERT</span>
               <span class="card-time">${time}</span>
             </div>
-            <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
+            <div class="alert-message">${item.message}</div>
           </div>`;
       }
 
@@ -377,6 +377,7 @@ import { Icon } from 'astro-icon/components';
     color: var(--text); line-height: 1.5;
   }
   .review-message {
+    font-family: 'Syne', sans-serif;
     font-size: 0.92rem; color: #b0b0c0;
     line-height: 1.75; white-space: pre-wrap;
   }
