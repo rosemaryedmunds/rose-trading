@@ -12,6 +12,11 @@ function extractText(result) {
 
 function repairJSON(raw) {
   let str = raw.replace(/```json|```/g, '').trim();
+
+  // Strip bad control characters (newlines/tabs inside JSON strings)
+  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ' '); // remove non-printable except \n \r \t
+  str = str.replace(/\n/g, ' ').replace(/\r/g, '').replace(/\t/g, ' '); // flatten newlines inside strings
+
   const start = str.indexOf('{');
   const end = str.lastIndexOf('}');
   if (start !== -1 && end !== -1) str = str.slice(start, end + 1);
@@ -28,7 +33,7 @@ function repairJSON(raw) {
 
 async function generateWithRetry(ai, prompt, maxRetries = 2) {
   let lastError;
-  const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+  const MODELS = ["gemini-2.5-flash", "gemini-1.5-flash"];
   for (const model of MODELS) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
