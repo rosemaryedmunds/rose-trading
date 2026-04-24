@@ -12,14 +12,13 @@ import Layout from '../layouts/Layout.astro';
 
     <div id="brief-content" class="hidden">
 
-      <!-- HEADER -->
       <div class="brief-header">
         <div>
           <h1 class="brief-title">Morning Brief</h1>
           <p id="mb-date" class="brief-date"></p>
         </div>
         <div class="brief-header-right">
-          <span class="ai-badge">AI-generated · Gemini 2.5</span>
+          <span class="ai-badge">AI · Gemini 2.5</span>
           <button id="refresh-btn" class="refresh-btn">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
             Refresh
@@ -27,66 +26,49 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
 
-      <!-- MARKET TONE -->
-      <div class="section-block" id="block-tone">
+      <div class="section-block">
         <div class="section-label">
-          <span class="dot dot-blue"></span>
-          <span>MARKET TONE</span>
+          <span class="dot dot-blue"></span>MARKET TONE
           <span class="gen-time" id="gen-time"></span>
         </div>
         <div class="tone-grid">
-          <div class="tone-pane" id="tone-text"></div>
-          <div class="tone-pane tone-pane-bias" id="bias-text"></div>
+          <div class="tone-pane">
+            <div class="tone-sublabel">OVERVIEW</div>
+            <p id="tone-text" class="tone-body"></p>
+          </div>
+          <div class="tone-pane tone-pane-right">
+            <div class="tone-sublabel" style="color:#a78bfa">BIAS &amp; WATCH</div>
+            <p id="bias-text" class="tone-body"></p>
+          </div>
         </div>
       </div>
 
-      <!-- ECON CALENDAR -->
-      <div class="section-block" id="block-econ">
-        <div class="section-label">
-          <span class="dot dot-amber"></span>
-          <span>ECONOMIC CALENDAR</span>
-        </div>
+      <div class="section-block">
+        <div class="section-label"><span class="dot dot-amber"></span>ECONOMIC CALENDAR</div>
         <div id="econ-list"></div>
       </div>
 
-      <!-- EARNINGS GAPS -->
-      <div class="section-block" id="block-gaps">
-        <div class="section-label">
-          <span class="dot dot-teal"></span>
-          <span>EARNINGS TODAY</span>
-        </div>
+      <div class="section-block">
+        <div class="section-label"><span class="dot dot-teal"></span>PRE-MARKET EARNINGS GAPS</div>
         <div id="gaps-container"></div>
       </div>
 
-      <!-- ANALYST ACTIONS -->
-      <div class="section-block" id="block-ratings">
-        <div class="section-label">
-          <span class="dot dot-purple"></span>
-          <span>ANALYST ACTIONS</span>
-        </div>
+      <div class="section-block">
+        <div class="section-label"><span class="dot dot-purple"></span>ANALYST RATINGS</div>
         <div id="ratings-list"></div>
       </div>
 
-      <!-- TRUMP SCHEDULE -->
-      <div class="section-block" id="block-trump">
-        <div class="section-label">
-          <span class="dot dot-red"></span>
-          <span>TRUMP SCHEDULE</span>
-        </div>
+      <div class="section-block">
+        <div class="section-label"><span class="dot dot-red"></span>TRUMP SCHEDULE</div>
         <div id="trump-list"></div>
       </div>
 
-      <!-- CATALYST NEWS -->
-      <div class="section-block" id="block-news">
-        <div class="section-label">
-          <span class="dot dot-green"></span>
-          <span>CATALYST NEWS</span>
-        </div>
+      <div class="section-block">
+        <div class="section-label"><span class="dot dot-orange"></span>CATALYST NEWS</div>
         <div id="news-list"></div>
       </div>
 
-      <p class="footer-note">AI-generated · Not financial advice · rose.trading</p>
-
+      <p class="footer-note">Generated <span id="gen-time2"></span> · AI-generated · Not financial advice</p>
     </div>
   </main>
 
@@ -94,163 +76,195 @@ import Layout from '../layouts/Layout.astro';
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     .mb-wrap {
-      max-width: 800px;
+      max-width: 820px;
       margin: 0 auto;
-      padding: 1.5rem 1rem 4rem;
+      padding: 1.75rem 1.25rem 4rem;
       font-family: 'SF Mono', 'JetBrains Mono', 'Fira Mono', monospace;
       color: #d4d4d8;
       font-size: 13px;
+      background: transparent;
     }
 
-    /* ── Header ── */
-    .brief-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-    .brief-title { font-family: system-ui, sans-serif; font-size: 1.5rem; font-weight: 800; color: #a78bfa; letter-spacing: -0.02em; }
-    .brief-date { font-size: 0.72rem; color: #52525b; margin-top: 0.2rem; }
-    .brief-header-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
-    .ai-badge { font-size: 0.65rem; color: #52525b; border: 1px solid #27272a; padding: 0.2rem 0.5rem; border-radius: 4px; }
-    .refresh-btn { background: #a78bfa; border: none; color: #0f0f11; padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; gap: 0.35rem; font-family: inherit; }
+    /* ── Header ─────────────────────────────────── */
+    .brief-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.75rem; }
+    .brief-title { font-family: system-ui, -apple-system, sans-serif; font-size: 1.6rem; font-weight: 800; color: #a78bfa; letter-spacing: -0.02em; }
+    .brief-date { font-size: 0.7rem; color: #52525b; margin-top: 0.25rem; font-family: system-ui, sans-serif; }
+    .brief-header-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; margin-top: 0.2rem; }
+    .ai-badge { font-size: 0.62rem; color: #3f3f46; border: 1px solid #27272a; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .refresh-btn { background: #a78bfa; border: none; color: #0a0a0c; padding: 0.38rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.7rem; display: flex; align-items: center; gap: 0.35rem; font-family: inherit; transition: opacity .15s; }
     .refresh-btn:hover { opacity: 0.85; }
 
-    /* ── Section blocks ── */
+    /* ── Section shell ───────────────────────────── */
     .section-block {
-      border: 1px solid #27272a;
-      border-radius: 10px;
-      margin-bottom: 0.75rem;
+      border: 1px solid #222226;
+      border-radius: 12px;
+      margin-bottom: 0.85rem;
       overflow: hidden;
-      background: #111113;
+      background: #0f0f12;
     }
-
     .section-label {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.55rem 0.85rem;
-      font-size: 0.65rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.6rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
-      color: #52525b;
-      border-bottom: 1px solid #1e1e21;
+      letter-spacing: 0.14em;
+      color: #3f3f46;
+      background: #0a0a0d;
+      border-bottom: 1px solid #1c1c20;
+    }
+    .gen-time { margin-left: auto; font-size: 0.58rem; color: #2d2d32; letter-spacing: 0; font-weight: 400; }
+
+    .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .dot-blue   { background: #3b82f6; box-shadow: 0 0 4px #3b82f680; }
+    .dot-amber  { background: #f59e0b; box-shadow: 0 0 4px #f59e0b80; }
+    .dot-teal   { background: #14b8a6; box-shadow: 0 0 4px #14b8a680; }
+    .dot-purple { background: #a78bfa; box-shadow: 0 0 4px #a78bfa80; }
+    .dot-red    { background: #f87171; box-shadow: 0 0 4px #f8717180; }
+    .dot-orange { background: #f97316; box-shadow: 0 0 4px #f9731680; }
+    .dot-green  { background: #4ade80; box-shadow: 0 0 4px #4ade8080; }
+
+    /* ── Market Tone ─────────────────────────────── */
+    .tone-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .tone-pane { padding: 1rem 1.1rem; }
+    .tone-pane-right { border-left: 1px solid #1c1c20; }
+    .tone-sublabel { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; color: #3b82f6; margin-bottom: 0.5rem; }
+    .tone-body { font-size: 0.82rem; line-height: 1.75; color: #a1a1aa; font-family: system-ui, sans-serif; }
+
+    /* ── Inner item rows ─────────────────────────── */
+    /* Each row is a mini-card with left accent + internal grid */
+    .item-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #161619;
+      transition: background .12s;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row:hover { background: #13131700; }
+
+    /* Left column — badge/chip */
+    .item-badge {
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      padding: 0.22rem 0.45rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      font-family: inherit;
+      text-align: center;
+      min-width: 44px;
+    }
+    .badge-high   { background: rgba(239,68,68,0.12);   color: #f87171; border: 1px solid rgba(239,68,68,0.22); }
+    .badge-med    { background: rgba(245,158,11,0.12);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.22); }
+    .badge-low    { background: rgba(82,82,91,0.15);    color: #52525b; border: 1px solid rgba(82,82,91,0.25); }
+    .badge-up     { background: rgba(74,222,128,0.1);   color: #4ade80; border: 1px solid rgba(74,222,128,0.22); }
+    .badge-down   { background: rgba(248,113,113,0.1);  color: #f87171; border: 1px solid rgba(248,113,113,0.22); }
+    .badge-upg    { background: rgba(74,222,128,0.1);   color: #4ade80; border: 1px solid rgba(74,222,128,0.22); }
+    .badge-dwng   { background: rgba(248,113,113,0.1);  color: #f87171; border: 1px solid rgba(248,113,113,0.22); }
+    .badge-init   { background: rgba(167,139,250,0.1);  color: #a78bfa; border: 1px solid rgba(167,139,250,0.22); }
+    .badge-neut   { background: rgba(82,82,91,0.12);    color: #52525b; border: 1px solid rgba(82,82,91,0.22); }
+    .badge-time   { background: rgba(167,139,250,0.08); color: #a78bfa; border: 1px solid rgba(167,139,250,0.18); font-size: 0.62rem; min-width: 64px; }
+    .badge-ticker { background: rgba(249,115,22,0.1);   color: #f97316; border: 1px solid rgba(249,115,22,0.22); font-size: 0.65rem; }
+
+    /* Middle column — main content */
+    .item-main { min-width: 0; }
+    .item-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #d4d4d8;
+      font-family: system-ui, sans-serif;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-title.green { color: #4ade80; }
+    .item-title.red   { color: #f87171; }
+    .item-title.purple { color: #a78bfa; }
+    .item-sub {
+      font-size: 0.72rem;
+      color: #3f3f46;
+      margin-top: 0.2rem;
+      font-family: system-ui, sans-serif;
+      line-height: 1.4;
     }
 
-    .gen-time { margin-left: auto; font-size: 0.6rem; color: #3f3f46; }
+    /* Right column — meta */
+    .item-right {
+      font-size: 0.7rem;
+      color: #2d2d32;
+      white-space: nowrap;
+      font-family: inherit;
+      text-align: right;
+    }
+    .item-right.actual { color: #4ade80; font-weight: 700; }
+    .item-right.move-up   { color: #4ade80; font-weight: 800; font-size: 0.78rem; }
+    .item-right.move-down { color: #f87171; font-weight: 800; font-size: 0.78rem; }
 
-    /* ── Dots ── */
-    .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .dot-blue   { background: #3b82f6; }
-    .dot-amber  { background: #f59e0b; }
-    .dot-teal   { background: #14b8a6; }
-    .dot-purple { background: #a78bfa; }
-    .dot-red    { background: #f87171; }
-    .dot-green  { background: #4ade80; }
+    /* Sublabels inside sections (gap ups / downs) */
+    .sub-divider {
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      padding: 0.45rem 1rem;
+      background: #0a0a0d;
+      border-bottom: 1px solid #161619;
+      border-top: 1px solid #161619;
+    }
+    .sub-divider:first-child { border-top: none; }
+    .sub-divider.up { color: #4ade80; }
+    .sub-divider.dn { color: #f87171; }
 
-    /* ── Tone ── */
-    .tone-grid { display: grid; grid-template-columns: 1fr 1fr; }
-    .tone-pane { padding: 0.85rem 1rem; font-size: 0.8rem; line-height: 1.7; color: #a1a1aa; font-family: system-ui, sans-serif; }
-    .tone-pane-bias { border-left: 1px solid #1e1e21; color: #71717a; }
+    /* News cards — slightly different, no 3-col grid */
+    .news-item {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid #161619;
+      border-left: 2px solid #f97316;
+    }
+    .news-item:last-child { border-bottom: none; }
+    .news-top { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .news-body { font-size: 0.8rem; color: #71717a; font-family: system-ui, sans-serif; line-height: 1.6; }
 
-    /* ── Econ ── */
-    .econ-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.65rem 0.85rem; border-bottom: 1px solid #1a1a1d; }
-    .econ-row:last-child { border-bottom: none; }
-    .econ-impact { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.15rem 0.35rem; border-radius: 3px; flex-shrink: 0; margin-top: 0.1rem; font-family: inherit; }
-    .econ-impact.HIGH { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
-    .econ-impact.MED  { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
-    .econ-impact.LOW  { background: rgba(82,82,91,0.2); color: #71717a; border: 1px solid rgba(82,82,91,0.3); }
-    .econ-body { flex: 1; }
-    .econ-name { color: #d4d4d8; font-size: 0.8rem; line-height: 1.35; font-family: system-ui, sans-serif; }
-    .econ-meta { display: flex; gap: 0.75rem; margin-top: 0.2rem; flex-wrap: wrap; }
-    .econ-time { color: #3f3f46; font-size: 0.7rem; }
-    .econ-actual { color: #4ade80; font-size: 0.7rem; font-weight: 700; }
-    .econ-est { color: #52525b; font-size: 0.7rem; }
+    /* Empty */
+    .empty-row { padding: 0.85rem 1rem; color: #2d2d32; font-size: 0.75rem; font-family: system-ui, sans-serif; }
 
-    /* ── Gaps ── */
-    .gaps-sublabel { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; padding: 0.45rem 0.85rem; color: #3f3f46; border-bottom: 1px solid #1a1a1d; background: #0d0d0f; }
-    .gaps-sublabel.up { color: #4ade80; }
-    .gaps-sublabel.dn { color: #f87171; }
-
-    .gap-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.65rem 0.85rem; border-bottom: 1px solid #1a1a1d; }
-    .gap-row:last-child { border-bottom: none; }
-    .gap-chip { font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.4rem; border-radius: 4px; flex-shrink: 0; font-family: inherit; min-width: 40px; text-align: center; }
-    .gap-chip.up { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
-    .gap-chip.dn { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.25); }
-    .gap-body { flex: 1; }
-    .gap-ticker { font-size: 0.82rem; font-weight: 700; font-family: inherit; }
-    .gap-chip.up ~ .gap-body .gap-ticker { color: #4ade80; }
-    .gap-chip.dn ~ .gap-body .gap-ticker { color: #f87171; }
-    .gap-reason { font-size: 0.73rem; color: #52525b; margin-top: 0.15rem; font-family: system-ui, sans-serif; line-height: 1.4; }
-    .gap-move { font-size: 0.78rem; font-weight: 700; white-space: nowrap; margin-left: auto; padding-top: 0.05rem; }
-
-    /* ── Analyst ratings ── */
-    .rating-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.65rem 0.85rem; border-bottom: 1px solid #1a1a1d; }
-    .rating-row:last-child { border-bottom: none; }
-    .rbadge { font-size: 0.6rem; font-weight: 700; padding: 0.15rem 0.4rem; border-radius: 3px; flex-shrink: 0; margin-top: 0.1rem; letter-spacing: 0.05em; font-family: inherit; }
-    .rbadge.upgrade   { background: rgba(74,222,128,0.12);  color: #4ade80;  border: 1px solid rgba(74,222,128,0.25); }
-    .rbadge.downgrade { background: rgba(248,113,113,0.12); color: #f87171;  border: 1px solid rgba(248,113,113,0.25); }
-    .rbadge.initiated { background: rgba(167,139,250,0.12); color: #a78bfa;  border: 1px solid rgba(167,139,250,0.25); }
-    .rbadge.neutral   { background: rgba(82,82,91,0.15);    color: #71717a;  border: 1px solid rgba(82,82,91,0.3); }
-    .rating-body { flex: 1; }
-    .rticker { font-size: 0.82rem; font-weight: 700; color: #a78bfa; }
-    .rdetail { font-size: 0.73rem; color: #52525b; margin-top: 0.15rem; font-family: system-ui, sans-serif; line-height: 1.4; }
-
-    /* ── Trump schedule ── */
-    .trump-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.65rem 0.85rem; border-bottom: 1px solid #1a1a1d; }
-    .trump-row:last-child { border-bottom: none; }
-    .trump-time-chip { font-size: 0.65rem; font-weight: 700; color: #a78bfa; background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); padding: 0.2rem 0.45rem; border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 0.05rem; font-family: inherit; }
-    .trump-event { font-size: 0.8rem; color: #a1a1aa; font-family: system-ui, sans-serif; line-height: 1.45; }
-
-    /* ── Catalyst news ── */
-    .news-card { padding: 0.75rem 0.85rem; border-bottom: 1px solid #1a1a1d; border-left: 3px solid #f97316; }
-    .news-card:last-child { border-bottom: none; }
-    .news-top { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; }
-    .news-chip { font-size: 0.62rem; font-weight: 700; background: rgba(249,115,22,0.12); color: #f97316; border: 1px solid rgba(249,115,22,0.25); padding: 0.12rem 0.4rem; border-radius: 3px; font-family: inherit; }
-    .news-body { font-size: 0.79rem; color: #71717a; font-family: system-ui, sans-serif; line-height: 1.55; }
-
-    /* ── Empty / status ── */
-    .empty-row { padding: 0.75rem 0.85rem; color: #3f3f46; font-size: 0.75rem; font-family: system-ui, sans-serif; }
-    .mb-status { text-align: center; padding: 5rem 2rem; color: #3f3f46; font-size: 0.85rem; }
+    /* Status */
+    .mb-status { text-align: center; padding: 5rem 2rem; color: #3f3f46; font-size: 0.85rem; font-family: system-ui, sans-serif; }
     .mb-status.err { color: #f87171; }
     .hidden { display: none; }
-    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #a78bfa; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #a78bfa; border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; margin-right: 8px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .footer-note { text-align: center; font-size: 0.62rem; color: #222226; margin-top: 1.5rem; font-family: system-ui, sans-serif; }
 
-    .footer-note { text-align: center; font-size: 0.65rem; color: #27272a; margin-top: 2rem; }
-
-    @media (max-width: 560px) {
+    @media (max-width: 580px) {
       .tone-grid { grid-template-columns: 1fr; }
-      .tone-pane-bias { border-left: none; border-top: 1px solid #1e1e21; }
+      .tone-pane-right { border-left: none; border-top: 1px solid #1c1c20; }
       .brief-header { flex-direction: column; gap: 0.75rem; }
+      .item-row { grid-template-columns: auto 1fr; }
+      .item-right { display: none; }
     }
   </style>
 
   <script>
-    function getBadgeType(t) {
+    function getBadgeClass(t) {
       t = (t||'').toLowerCase();
-      if (t.includes('upgrade')) return 'upgrade';
-      if (t.includes('downgrade')) return 'downgrade';
-      if (t.includes('initiat')) return 'initiated';
-      if (t.includes('raised')||t.includes('raises')||t.includes('increases')) return 'upgrade';
-      if (t.includes('cut')||t.includes('cuts')||t.includes('lowers')) return 'downgrade';
-      return 'neutral';
+      if (t.includes('upgrade')) return ['badge-upg','↑ UPGRADE'];
+      if (t.includes('downgrade')) return ['badge-dwng','↓ DOWNGRADE'];
+      if (t.includes('initiat')) return ['badge-init','● INITIATED'];
+      if (t.includes('raised')||t.includes('raises')) return ['badge-upg','↑ PT RAISED'];
+      if (t.includes('cut')||t.includes('cuts')||t.includes('lowers')) return ['badge-dwng','↓ PT CUT'];
+      if (t.includes('maintained')||t.includes('reiterates')) return ['badge-neut','= MAINTAINED'];
+      return ['badge-neut','— NOTE'];
     }
-    function getBadgeLabel(t) {
-      t = (t||'').toLowerCase();
-      if (t.includes('upgrade')) return '↑ UPGRADE';
-      if (t.includes('downgrade')) return '↓ DOWNGRADE';
-      if (t.includes('initiat')) return '● INITIATED';
-      if (t.includes('raised')||t.includes('raises')) return '↑ PT RAISED';
-      if (t.includes('cut')||t.includes('cuts')) return '↓ PT CUT';
-      if (t.includes('maintained')||t.includes('reiterates')) return '= MAINTAINED';
-      return '— NOTE';
-    }
-    function extractTicker(s) {
-      const m = s.match(/^\$([A-Z]{1,6})/);
-      return m ? m[0] : '';
-    }
-    function stripTicker(s) {
-      return s.replace(/^\$[A-Z]{1,6}\s*[—–\-]+\s*/, '').trim();
-    }
+    function extractTicker(s) { const m=s.match(/^\$([A-Z]{1,6})/); return m?m[0]:''; }
+    function stripTicker(s) { return s.replace(/^\$[A-Z]{1,6}\s*[—–\-]+\s*/,'').trim(); }
     function parseNews(s) {
       const m = s.match(/^(\$[A-Z]{1,6}|[A-Z][A-Za-z &\.]+?)\s*[—–\-]+\s*(.+)$/s);
-      return m ? { chip: m[1].trim(), body: m[2].trim() } : { chip: '', body: s };
+      return m ? {chip:m[1].trim(), body:m[2].trim()} : {chip:'', body:s};
     }
 
     async function fetchBrief() {
@@ -266,98 +280,108 @@ import Layout from '../layouts/Layout.astro';
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        // Gen time
         const now = new Date();
-        document.getElementById('gen-time').textContent =
-          'Generated ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+        const timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZoneName:'short'});
+        document.getElementById('gen-time').textContent = 'Generated ' + timeStr;
+        document.getElementById('gen-time2').textContent = timeStr;
 
-        // Tone
+        // ── Market Tone ──
         document.getElementById('tone-text').textContent = data.market_tone || '';
         document.getElementById('bias-text').textContent = data.morning_bias || '';
 
-        // Econ
+        // ── Econ ──
         const nonUS = ['ecb','boe','boj','rba','pboc','bank of canada','bank of england','bank of japan','eurozone','germany','german','france','uk ','china cpi','japan','australia'];
-        const econ = (data.econ_calendar||[]).filter(e => !nonUS.some(k=>(e.event||'').toLowerCase().includes(k)));
+        const econ = (data.econ_calendar||[]).filter(e=>!nonUS.some(k=>(e.event||'').toLowerCase().includes(k)));
         document.getElementById('econ-list').innerHTML = econ.length
-          ? econ.map(e=>`
-            <div class="econ-row">
-              <span class="econ-impact ${e.impact||'LOW'}">${e.impact||'LOW'}</span>
-              <div class="econ-body">
-                <div class="econ-name">${e.event}</div>
-                <div class="econ-meta">
-                  <span class="econ-time">${e.time}</span>
-                  ${e.actual?`<span class="econ-actual">▶ ${e.actual}</span>`:''}
-                  ${e.forecast?`<span class="econ-est">est ${e.forecast}</span>`:''}
+          ? econ.map(e => {
+              const imp = (e.impact||'LOW').toUpperCase();
+              const bc = imp==='HIGH'?'badge-high':imp==='MED'?'badge-med':'badge-low';
+              const actualHtml = e.actual
+                ? `<div class="item-right actual">▶ ${e.actual}</div>`
+                : e.forecast ? `<div class="item-right">est ${e.forecast}</div>` : `<div class="item-right">${e.time}</div>`;
+              return `<div class="item-row">
+                <span class="item-badge ${bc}">${imp}</span>
+                <div class="item-main">
+                  <div class="item-title">${e.event}</div>
+                  <div class="item-sub">${e.time}${e.forecast && !e.actual ? '' : e.actual ? ` · est ${e.forecast||'—'}` : ''}</div>
                 </div>
-              </div>
-            </div>`).join('')
+                ${actualHtml}
+              </div>`;
+            }).join('')
           : '<div class="empty-row">No major US economic data today.</div>';
 
-        // Gaps
+        // ── Gaps ──
         const ups = data.gaps?.ups||[];
         const downs = data.gaps?.downs||[];
         let gHtml = '';
         if (ups.length) {
-          gHtml += `<div class="gaps-sublabel up">▲ BEATS / GAP UPS</div>`;
-          gHtml += ups.map(g => typeof g === 'object'
-            ? `<div class="gap-row">
-                <span class="gap-chip up">${g.move||'↑'}</span>
-                <div class="gap-body">
-                  <div class="gap-ticker" style="color:#4ade80">${g.ticker}</div>
-                  <div class="gap-reason">${g.reason||''}</div>
-                </div>
-               </div>`
-            : `<div class="gap-row"><span class="gap-chip up">↑</span><div class="gap-body"><div class="gap-ticker" style="color:#4ade80">${g}</div></div></div>`
-          ).join('');
+          gHtml += `<div class="sub-divider up">▲ BEATS / GAP UPS</div>`;
+          gHtml += ups.map(g => {
+            const t = typeof g==='object'?g:{ticker:g,move:'↑',reason:''};
+            return `<div class="item-row">
+              <span class="item-badge badge-up">${t.move||'↑'}</span>
+              <div class="item-main">
+                <div class="item-title green">${t.ticker}</div>
+                <div class="item-sub">${t.reason||''}</div>
+              </div>
+              <div class="item-right move-up">${t.move||'↑'}</div>
+            </div>`;
+          }).join('');
         }
         if (downs.length) {
-          gHtml += `<div class="gaps-sublabel dn">▼ MISSES / GAP DOWNS</div>`;
-          gHtml += downs.map(g => typeof g === 'object'
-            ? `<div class="gap-row">
-                <span class="gap-chip dn">${g.move||'↓'}</span>
-                <div class="gap-body">
-                  <div class="gap-ticker" style="color:#f87171">${g.ticker}</div>
-                  <div class="gap-reason">${g.reason||''}</div>
-                </div>
-               </div>`
-            : `<div class="gap-row"><span class="gap-chip dn">↓</span><div class="gap-body"><div class="gap-ticker" style="color:#f87171">${g}</div></div></div>`
-          ).join('');
+          gHtml += `<div class="sub-divider dn">▼ MISSES / GAP DOWNS</div>`;
+          gHtml += downs.map(g => {
+            const t = typeof g==='object'?g:{ticker:g,move:'↓',reason:''};
+            return `<div class="item-row">
+              <span class="item-badge badge-down">${t.move||'↓'}</span>
+              <div class="item-main">
+                <div class="item-title red">${t.ticker}</div>
+                <div class="item-sub">${t.reason||''}</div>
+              </div>
+              <div class="item-right move-down">${t.move||'↓'}</div>
+            </div>`;
+          }).join('');
         }
-        document.getElementById('gaps-container').innerHTML = gHtml || '<div class="empty-row">No notable pre-market earnings gaps today.</div>';
+        document.getElementById('gaps-container').innerHTML = gHtml||'<div class="empty-row">No notable pre-market earnings gaps today.</div>';
 
-        // Analyst ratings
+        // ── Analyst Ratings ──
         const ratings = data.analyst_actions||[];
         document.getElementById('ratings-list').innerHTML = ratings.length
           ? ratings.map(n => {
+              const [bc, label] = getBadgeClass(n);
               const ticker = extractTicker(n);
               const detail = ticker ? stripTicker(n) : n;
-              return `<div class="rating-row">
-                <span class="rbadge ${getBadgeType(n)}">${getBadgeLabel(n)}</span>
-                <div class="rating-body">
-                  ${ticker?`<div class="rticker">${ticker}</div>`:''}
-                  <div class="rdetail">${detail}</div>
+              return `<div class="item-row">
+                <span class="item-badge ${bc}">${label}</span>
+                <div class="item-main">
+                  <div class="item-title purple">${ticker||'—'}</div>
+                  <div class="item-sub">${detail}</div>
                 </div>
+                <div class="item-right"></div>
               </div>`;
             }).join('')
           : '<div class="empty-row">No major analyst rating changes today.</div>';
 
-        // Trump
+        // ── Trump ──
         const sched = data.trump_schedule||[];
         document.getElementById('trump-list').innerHTML = sched.length
           ? sched.map(s=>`
-            <div class="trump-row">
-              <span class="trump-time-chip">${s.time}</span>
-              <span class="trump-event">${s.event}</span>
+            <div class="item-row">
+              <span class="item-badge badge-time">${s.time}</span>
+              <div class="item-main">
+                <div class="item-title">${s.event}</div>
+              </div>
+              <div class="item-right"></div>
             </div>`).join('')
           : '<div class="empty-row">No scheduled public events found.</div>';
 
-        // News
+        // ── Catalyst News ──
         const news = data.breaking_news||[];
         document.getElementById('news-list').innerHTML = news.length
-          ? news.map(n => {
-              const { chip, body } = parseNews(n);
-              return `<div class="news-card">
-                ${chip?`<div class="news-top"><span class="news-chip">${chip}</span></div>`:''}
+          ? news.map(n=>{
+              const {chip,body}=parseNews(n);
+              return `<div class="news-item">
+                ${chip?`<div class="news-top"><span class="item-badge badge-ticker">${chip}</span></div>`:''}
                 <div class="news-body">${body}</div>
               </div>`;
             }).join('')
@@ -372,8 +396,8 @@ import Layout from '../layouts/Layout.astro';
       }
     }
 
-    document.getElementById('mb-date').textContent = new Date().toLocaleDateString('en-US', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    document.getElementById('mb-date').textContent = new Date().toLocaleDateString('en-US',{
+      weekday:'long', year:'numeric', month:'long', day:'numeric'
     });
     document.getElementById('refresh-btn').addEventListener('click', fetchBrief);
     fetchBrief();
