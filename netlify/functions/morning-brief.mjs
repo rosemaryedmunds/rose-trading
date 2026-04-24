@@ -59,7 +59,7 @@ function repairJSON(raw) {
 
 async function generateWithRetry(ai, prompt, maxRetries = 2) {
   let lastError;
-  const MODELS = ["gemini-2.5-flash", "gemini-1.5-flash"];
+  const MODELS = ["gemini-2.5-flash"];
   for (const model of MODELS) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {

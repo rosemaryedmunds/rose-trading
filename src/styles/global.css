@@ -1,192 +1,152 @@
-:root {
-  --bg-primary: #0f0f1a;
-  --bg-secondary: #1a1a2e;
-  --bg-card: #252540;
-  --text-primary: #ffffff;
-  --text-secondary: #b8b8d1;
-  --accent-primary: #6c63ff;
-  --accent-secondary: #8b84ff;
-  --border-color: #3d3d5c;
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+const { title, description = "Your guide to options trading" } = Astro.props;
+---
 
-body {
-  font-family: 'Syne', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.6;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content={description}>
+  <title>{title}</title>
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-  color: inherit;
-}
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:site_name"   content="Rose.Trading" />
+  <meta property="og:title"       content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image"       content="https://rose.trading/rose-banner.png" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url"         content="https://rose.trading" />
 
-h1 { font-size: 3rem; }
-h2 { font-size: 2.5rem; }
-h3 { font-size: 2rem; }
-h4 { font-size: 1.5rem; }
+  <!-- Twitter / X card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image"       content="https://rose.trading/rose-banner.png" />
 
-p {
-  margin-bottom: 1rem;
-  color: var(--text-secondary);
-}
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/rose-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <slot name="head" />
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
-a {
-  color: var(--accent-primary);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
+<script is:inline>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "48b95503-4b11-4a91-9806-059e84277551", // ← verify this matches your OneSignal dashboard
+      allowLocalhostAsSecureOrigin: true,
+    });
+  });
+</script>
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0;">
+        <a href="/" style="display: flex; align-items: center; gap: 1rem; text-decoration: none;">
+          <img src="/rose-logo.png" alt="Rose Trading Logo" style="width: 60px; height: 60px; object-fit: contain;" />
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">
+           
+          </span>
+        </a>
+        <div style="display: flex; gap: 2rem;">
+          <a href="/">Home</a>
+          <a href="/about">About</a>
+          <a href="/morning-brief">Morning Brief</a>
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-btn">Learning ▾</button>
+            <div class="nav-dropdown-menu">
+              <a href="/course">Course</a>
+              <a href="/guides">Guides</a>
+              <a href="/resources">Resources</a>
+            </div>
+          </div>
+          <a href="/alerts">Alerts</a>
+          <a href="/contact">Contact</a>
+        </div>
+      </div>
+    </nav>
+  </header>
 
-a:hover {
-  color: var(--accent-secondary);
-}
+  <main>
+    <slot />
+  </main>
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
+  <footer style="background: var(--bg-secondary); padding: 3rem 0; margin-top: 4rem;">
+    <div class="container">
+      <p style="text-align: center; color: var(--text-secondary);">
+        © 2026 Rose.Trading. Start your journey.
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
 
-.section {
-  padding: 4rem 0;
-}
-
-.card {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 2rem;
-  border: 1px solid var(--border-color);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(108, 99, 255, 0.15);
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.75rem 2rem;
-  background: var(--accent-primary);
-  color: white;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.btn:hover {
-  background: var(--accent-secondary);
-  transform: translateY(-2px);
-  color: white;
-}
-
-.grid {
-  display: grid;
-  gap: 2rem;
-}
-
-.grid-2 {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.grid-3 {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-}
-
-@media (max-width: 768px) {
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.75rem; }
-  h3 { font-size: 1.5rem; }
-  
-  .container {
-    padding: 0 1rem;
+<style>
+  .nav-dropdown {
+    position: relative;
+    display: inline-block;
   }
-  
-  .section {
-    padding: 2rem 0;
+
+  .nav-dropdown-btn {
+    background: none;
+    border: none;
+    color: var(--accent-primary);
+    font: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
   }
-}
+  .nav-dropdown-btn:hover { color: var(--accent-secondary); }
 
-/* ── Page title gradient fix ─────────────────────────────── */
-.page-title {
-  font-family: 'Syne', sans-serif !important;
-  font-weight: 800 !important;
-  background: linear-gradient(135deg, #998BFF, #5F5CFF) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  color: transparent !important;
-}
+  .nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(153,139,255,0.2);
+    border-radius: 10px;
+    padding: 0.5rem;
+    min-width: 140px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    z-index: 100;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
 
-/* ── Alerts feed cards ───────────────────────────────────── */
-.feed-card {
-  background: #1C1E2D !important;
-  border: 1px solid rgba(153,139,255,0.15) !important;
-  border-left: 4px solid transparent !important;
-  border-radius: 14px !important;
-  padding: 1.25rem 1.5rem !important;
-  transition: box-shadow 0.2s !important;
-}
-.feed-card:hover {
-  transform: none !important;
-  box-shadow: 0 4px 24px rgba(153,139,255,0.1) !important;
-}
-.alert-message {
-  font-family: 'Syne', sans-serif !important;
-  font-size: 1.05rem !important;
-  font-weight: 700 !important;
-  color: #E0E0E0 !important;
-  line-height: 1.5 !important;
-  margin-bottom: 0 !important;
-}
-.review-message {
-  font-family: 'Syne', sans-serif !important;
-  font-size: 0.92rem !important;
-  color: #b0b0c0 !important;
-  line-height: 1.75 !important;
-  white-space: pre-wrap !important;
-  margin-bottom: 0 !important;
-}
-.card-tag {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 0.65rem !important;
-  letter-spacing: 0.15em !important;
-  font-weight: 700 !important;
-  padding: 0.25rem 0.65rem !important;
-  border-radius: 6px !important;
-}
-.card-time {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 0.7rem !important;
-  color: #555 !important;
-  margin-bottom: 0 !important;
-}
-.page-title {
-  font-family: 'Syne', sans-serif !important;
-  font-weight: 800 !important;
-  background: linear-gradient(135deg, #998BFF, #5F5CFF) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  color: transparent !important;
-}
+  .nav-dropdown:hover .nav-dropdown-menu,
+  .nav-dropdown-menu:hover {
+    display: flex;
+  }
 
-.alert-message {
-  font-family: 'Syne', sans-serif !important;
-  font-size: 1.05rem !important;
-  font-weight: 700 !important;
-  color: #E0E0E0 !important;
-  line-height: 1.5 !important;
-  margin-bottom: 0 !important;
-}
+  .nav-dropdown-menu a {
+    display: block;
+    padding: 0.55rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .nav-dropdown-menu a:hover {
+    background: rgba(153,139,255,0.1);
+    color: var(--accent-primary);
+  }
+</style>
