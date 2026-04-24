@@ -36,6 +36,16 @@ import { Icon } from 'astro-icon/components';
           <span class="card-link members-link">Go to Members Feed →</span>
         </a>
 
+        <!-- Schedule a Call -->
+        <a href="https://calendly.com/funsizedrose" target="_blank" rel="noopener noreferrer" class="main-card calendly-card">
+          <div class="card-icon">
+            <Icon name="lucide:calendar" />
+          </div>
+          <h3>Schedule a Call</h3>
+          <p>Book a 1-on-1 call with Rose to talk through your trading goals, questions, or get personalized guidance.</p>
+          <span class="card-link calendly-link">Book a Time →</span>
+        </a>
+
         <a href="/about" class="main-card">
           <div class="card-icon">
             <Icon name="lucide:user-round" />
@@ -346,4 +356,13 @@ import { Icon } from 'astro-icon/components';
   .members-link { color: #998BFF !important; }
   .members-access-card:hover { border-color: #998BFF; }
   .members-access-card:hover .members-link { color: #b8adff !important; }
+
+  /* ── Calendly Card ────────────────────────────────────────────────────── */
+  .calendly-card {
+    border-color: rgba(61, 220, 132, 0.25);
+    background: linear-gradient(135deg, rgba(61,220,132,0.05), rgba(61,220,132,0.02));
+  }
+  .calendly-card:hover { border-color: #3DDC84; }
+  .calendly-link { color: #3DDC84 !important; }
+  .calendly-card:hover .calendly-link { color: #6eeaa8 !important; }
 </style>
