@@ -1,8 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
 
-const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+// Only use 2.5-flash — fallbacks require paid quota on free tier anyway
+const MODELS = ["gemini-2.5-flash"];
 
-async function generateWithRetry(ai, prompt, maxRetries = 3) {
+function extractText(result) {
+  if (typeof result.text === 'string' && result.text.length > 0) return result.text;
+  if (typeof result.text === 'function') return result.text();
+  const part = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (part) return part;
+  if (typeof result?.response?.text === 'function') return result.response.text();
+  if (typeof result?.response?.text === 'string') return result.response.text;
+  throw new Error(`Empty or unrecognized response. Keys: ${JSON.stringify(Object.keys(result))}`);
+}
+
+async function generateWithRetry(ai, prompt, maxRetries = 2) {
+  let lastError;
+
   for (const model of MODELS) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -11,28 +24,36 @@ async function generateWithRetry(ai, prompt, maxRetries = 3) {
           contents: prompt,
           config: { tools: [{ googleSearch: {} }] },
         });
+        const text = extractText(result);
         console.log(`Success with ${model} on attempt ${attempt}`);
-        return result.text;
+        return text;
       } catch (err) {
-        const is503 = err?.status === 503 || err?.message?.includes('503') || err?.message?.includes('UNAVAILABLE');
-        const isLast = attempt === maxRetries;
-        const isLastModel = model === MODELS[MODELS.length - 1];
+        lastError = err;
+        const status = err?.status || 0;
+        const msg = err?.message || '';
 
-        if (is503 && !isLast) {
-          const delay = attempt * 2000; // 2s, 4s, 6s
+        // 429 = quota exhausted — no point retrying
+        if (status === 429 || msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) {
+          console.error(`Quota exceeded on ${model}. Check your Gemini billing at aistudio.google.com`);
+          throw new Error('QUOTA_EXCEEDED');
+        }
+
+        // 503 = temporary overload — retry with short delay
+        const is503 = status === 503 || msg.includes('503') || msg.includes('UNAVAILABLE');
+        if (is503 && attempt < maxRetries) {
+          const delay = attempt * 1500;
           console.log(`${model} attempt ${attempt} got 503, retrying in ${delay}ms...`);
           await new Promise(r => setTimeout(r, delay));
           continue;
         }
-        if (is503 && !isLastModel) {
-          console.log(`${model} exhausted retries, trying next model...`);
-          break; // try next model
-        }
-        throw err; // non-503 error or all models failed
+
+        console.error(`${model} attempt ${attempt} failed:`, msg);
+        break; // move to next model (if any)
       }
     }
   }
-  throw new Error("All models unavailable. Try again in a few minutes.");
+
+  throw lastError || new Error('All models failed');
 }
 
 export default async (req, context) => {
@@ -81,13 +102,18 @@ export default async (req, context) => {
     });
 
   } catch (error) {
-    console.error("Briefing Error:", error);
-    const is503 = error?.message?.includes('503') || error?.message?.includes('UNAVAILABLE') || error?.message?.includes('All models');
+    console.error("Briefing Error:", error.message);
+
+    let userMessage = "Error loading brief. Please try again.";
+    if (error.message === 'QUOTA_EXCEEDED') {
+      userMessage = "API quota exceeded. Please upgrade your Gemini plan at aistudio.google.com, then add billing to your API key.";
+    } else if (error.message?.includes('503') || error.message?.includes('UNAVAILABLE')) {
+      userMessage = "Gemini is under high demand. Please try again in 1-2 minutes.";
+    }
+
     return new Response(JSON.stringify({
-      error: is503
-        ? "Gemini is under high demand right now. Please try refreshing in 1-2 minutes."
-        : "Error loading brief",
+      error: userMessage,
       details: error.message
-    }), { status: 503 });
+    }), { status: 500 });
   }
 };

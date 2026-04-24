@@ -31,7 +31,7 @@ import { Icon } from 'astro-icon/components';
   <section class="alerts-page" id="main-content" style="display:none;">
 
     <div class="page-header">
-      <h1 class="page-title">Trade Alerts</h1>
+      <h1 style="font-family:Syne,sans-serif;font-weight:800;font-size:3rem;background:linear-gradient(135deg,#998BFF,#5F5CFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;margin-bottom:0.75rem;">Trade Alerts</h1>
       <div class="member-badge">
         <Icon name="lucide:shield-check" />
         Members Access
@@ -149,7 +149,7 @@ import { Icon } from 'astro-icon/components';
               <span class="card-tag" style="color:${accent}; background:${accent}22; border-color:${accent}44;">ALERT</span>
               <span class="card-time">${time}</span>
             </div>
-            <div class="alert-message">${item.message}</div>
+            <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
           </div>`;
       }
 
