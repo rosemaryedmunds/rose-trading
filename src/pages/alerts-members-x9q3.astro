@@ -212,6 +212,15 @@ import { Icon } from 'astro-icon/components';
   }
 
   :global(body) { background: var(--bg); color: var(--text); }
+  :global(h1.page-title) {
+    font-family: 'Syne', sans-serif !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, #998BFF, #5F5CFF) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    color: transparent !important;
+  }
 
   /* ── Auth ─────────────────────────────────────────────────────── */
   .auth-screen {
