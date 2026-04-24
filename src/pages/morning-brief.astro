@@ -1,122 +1,375 @@
-import { GoogleGenAI } from "@google/genai";
+---
+import Layout from '../layouts/Layout.astro';
+---
 
-function extractText(result) {
-  if (typeof result.text === 'string' && result.text.length > 0) return result.text;
-  if (typeof result.text === 'function') return result.text();
-  const part = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (part) return part;
-  if (typeof result?.response?.text === 'function') return result.response.text();
-  if (typeof result?.response?.text === 'string') return result.response.text;
-  throw new Error(`Unrecognized response shape: ${JSON.stringify(Object.keys(result))}`);
-}
+<Layout title="Morning Brief | Rose Trading">
+  <main class="mb-container">
+    <header class="mb-header">
+      <div class="mb-header-left">
+        <h1>Morning Brief</h1>
+        <p id="mb-date" class="mb-date-display"></p>
+      </div>
+      <div class="mb-header-right">
+        <span class="mb-badge">Gemini 2.5 · Live Search</span>
+        <button id="refresh-btn" class="mb-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          Refresh
+        </button>
+      </div>
+    </header>
 
-// Attempt to salvage truncated or slightly malformed JSON
-function repairJSON(raw) {
-  let str = raw.replace(/```json|```/g, '').trim();
+    <div id="loading-state" class="mb-status">
+      <span class="spinner"></span> Scanning markets &amp; schedule...
+    </div>
+    <div id="error-state" class="mb-status error hidden"></div>
 
-  // Extract just the JSON object if there's surrounding text
-  const start = str.indexOf('{');
-  const end = str.lastIndexOf('}');
-  if (start !== -1 && end !== -1) str = str.slice(start, end + 1);
+    <div id="brief-content" class="hidden">
 
-  // Try clean parse first
-  try { return JSON.parse(str); } catch (_) {}
+      <!-- Row 1: Market Tone -->
+      <section class="mb-card tone-card mb-row1">
+        <div class="card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Market Tone &amp; Morning Bias
+        </div>
+        <div class="card-body tone-body">
+          <div class="tone-section">
+            <span class="tone-label">OVERVIEW</span>
+            <p id="tone-text" class="tone-text"></p>
+          </div>
+          <div class="tone-divider"></div>
+          <div class="tone-section">
+            <span class="tone-label bias-label">BIAS &amp; WATCH</span>
+            <p id="bias-text" class="bias-text"></p>
+          </div>
+        </div>
+      </section>
 
-  // Remove trailing commas before ] or }
-  str = str.replace(/,\s*([\]}])/g, '$1');
+      <!-- Row 2: 3 tiles -->
+      <div class="mb-grid3 mb-row2">
 
-  // Try again
-  try { return JSON.parse(str); } catch (_) {}
+        <section class="mb-card card-econ">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            US Economic Calendar
+          </div>
+          <div class="card-body" id="econ-list"></div>
+        </section>
 
-  // If still broken, close any open arrays/objects (truncation recovery)
-  const opens = (str.match(/\[/g) || []).length - (str.match(/\]/g) || []).length;
-  const braces = (str.match(/\{/g) || []).length - (str.match(/\}/g) || []).length;
-  str += ']'.repeat(Math.max(0, opens)) + '}'.repeat(Math.max(0, braces));
+        <section class="mb-card card-gaps">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Pre-Market Earnings Gaps
+          </div>
+          <div class="card-body" id="gaps-container"></div>
+        </section>
 
-  try { return JSON.parse(str); } catch (e) {
-    throw new Error(`JSON parse failed after repair attempts: ${e.message}`);
-  }
-}
+        <section class="mb-card card-trump">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Trump Schedule
+          </div>
+          <div class="card-body" id="trump-list"></div>
+        </section>
 
-async function generateWithRetry(ai, prompt, maxRetries = 2) {
-  let lastError;
-  const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+      </div>
 
-  for (const model of MODELS) {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      <!-- Row 3: Analyst + Catalyst -->
+      <div class="mb-grid2 mb-row3">
+
+        <section class="mb-card card-ratings">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            Analyst Ratings
+          </div>
+          <div class="card-body" id="ratings-list"></div>
+        </section>
+
+        <section class="mb-card card-news">
+          <div class="card-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+            Catalyst News
+          </div>
+          <div class="card-body" id="news-list"></div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <style>
+    :root {
+      --bg-card:    #1C1E2D;
+      --border:     #2d2f45;
+      --accent:     #998BFF;
+      --text:       #E0E0E0;
+      --muted:      #6b6d8a;
+      --green:      #4ade80;
+      --red:        #f87171;
+      --amber:      #f59e0b;
+      --teal:       #14b8a6;
+      --purple:     #8b5cf6;
+      --orange:     #f97316;
+      --blue:       #3b82f6;
+    }
+
+    .mb-container { max-width: 1140px; margin: 0 auto; padding: 2rem 1.25rem 3rem; color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+
+    /* ── Header ── */
+    .mb-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+    .mb-header h1 { font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--accent); }
+    .mb-date-display { font-family: monospace; color: var(--muted); font-size: 0.78rem; margin-top: 0.3rem; }
+    .mb-header-right { display: flex; align-items: center; gap: 0.75rem; }
+    .mb-badge { font-size: 0.68rem; background: rgba(153,139,255,0.08); border: 1px solid rgba(153,139,255,0.3); color: var(--accent); padding: 0.2rem 0.55rem; border-radius: 20px; }
+    .mb-btn { background: var(--accent); border: none; color: #0B0C15; padding: 0.4rem 0.85rem; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.78rem; display: flex; align-items: center; gap: 0.4rem; transition: opacity 0.2s; }
+    .mb-btn:hover { opacity: 0.85; }
+
+    /* ── Layout ── */
+    .mb-row1 { margin-bottom: 1rem; }
+    .mb-row2 { margin-bottom: 1rem; }
+    .mb-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; align-items: stretch; }
+    .mb-grid2 { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; align-items: stretch; }
+
+    /* ── Cards ── */
+    .mb-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+    .tone-card  { border-top: 2px solid rgba(59,130,246,0.4); }
+    .card-econ  { border-top: 2px solid rgba(245,158,11,0.4); }
+    .card-gaps  { border-top: 2px solid rgba(20,184,166,0.4); }
+    .card-trump { border-top: 2px solid rgba(139,92,246,0.4); }
+    .card-ratings { border-top: 2px solid rgba(74,222,128,0.4); }
+    .card-news  { border-top: 2px solid rgba(249,115,22,0.4); }
+
+    .card-header { background: rgba(255,255,255,0.02); padding: 0.6rem 1rem; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.45rem; color: var(--muted); flex-shrink: 0; }
+    .card-body { padding: 0.9rem 1rem; flex: 1; }
+
+    /* ── Tone ── */
+    .tone-body { display: grid; grid-template-columns: 1fr auto 1fr; }
+    .tone-section { display: flex; flex-direction: column; gap: 0.45rem; }
+    .tone-label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); }
+    .bias-label { color: var(--accent) !important; }
+    .tone-text  { font-size: 0.88rem; line-height: 1.7; color: #c8c6e8; margin: 0; }
+    .bias-text  { font-size: 0.88rem; line-height: 1.7; color: #c8c6e8; margin: 0; }
+    .tone-divider { width: 1px; background: var(--border); margin: 0 1.25rem; }
+
+    /* ── Econ ── */
+    .econ-item { display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .econ-item:first-child { padding-top: 0; }
+    .econ-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .econ-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 0.3rem; }
+    .econ-dot.HIGH { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.6); }
+    .econ-dot.MED  { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.5); }
+    .econ-dot.LOW  { background: var(--muted); }
+    .econ-body { flex: 1; min-width: 0; }
+    .econ-name { font-size: 0.82rem; color: var(--text); font-weight: 500; line-height: 1.35; }
+    .econ-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.2rem; }
+    .econ-time     { font-size: 0.69rem; color: var(--muted); font-family: monospace; }
+    .econ-actual   { font-size: 0.69rem; color: var(--green); font-weight: 700; }
+    .econ-forecast { font-size: 0.69rem; color: var(--muted); }
+
+    /* ── Gaps ── */
+    .gaps-section-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.3rem 0 0.35rem; }
+    .gaps-section-label.up   { color: var(--green); }
+    .gaps-section-label.down { color: var(--red); }
+    .gaps-section-label:first-child { padding-top: 0; }
+
+    .gap-card { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding: 0.55rem 0.75rem; border-radius: 8px; margin-bottom: 0.45rem; }
+    .gap-card:last-child { margin-bottom: 0; }
+    .gap-card.up   { background: rgba(74,222,128,0.07); border: 1px solid rgba(74,222,128,0.2); }
+    .gap-card.down { background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.2); }
+    .gap-left { flex: 1; min-width: 0; }
+    .gap-ticker { font-size: 0.85rem; font-weight: 800; font-family: monospace; display: block; }
+    .gap-card.up   .gap-ticker { color: var(--green); }
+    .gap-card.down .gap-ticker { color: var(--red); }
+    .gap-reason { font-size: 0.71rem; color: var(--muted); margin-top: 0.15rem; line-height: 1.35; }
+    .gap-move { font-size: 0.8rem; font-weight: 800; font-family: monospace; white-space: nowrap; flex-shrink: 0; padding-top: 0.1rem; }
+    .gap-card.up   .gap-move { color: var(--green); }
+    .gap-card.down .gap-move { color: var(--red); }
+
+    /* ── Trump ── */
+    .trump-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .trump-item:first-child { padding-top: 0; }
+    .trump-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .trump-time { font-size: 0.69rem; font-weight: 700; color: var(--purple); font-family: monospace; white-space: nowrap; min-width: 72px; padding-top: 0.1rem; }
+    .trump-event { font-size: 0.82rem; color: var(--text); line-height: 1.4; }
+
+    /* ── Analyst Ratings ── */
+    .rating-item { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .rating-item:first-child { padding-top: 0; }
+    .rating-item:last-child  { border-bottom: none; padding-bottom: 0; }
+    .rating-top { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.25rem; }
+    .rbadge { font-size: 0.6rem; font-weight: 800; padding: 0.15rem 0.4rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .rbadge.upgrade   { background: rgba(74,222,128,0.12);  color: var(--green);  border: 1px solid rgba(74,222,128,0.3); }
+    .rbadge.downgrade { background: rgba(248,113,113,0.12); color: var(--red);    border: 1px solid rgba(248,113,113,0.3); }
+    .rbadge.initiated { background: rgba(153,139,255,0.12); color: var(--accent); border: 1px solid rgba(153,139,255,0.3); }
+    .rbadge.neutral   { background: rgba(107,109,138,0.1);  color: var(--muted);  border: 1px solid rgba(107,109,138,0.2); }
+    .rticker { font-size: 0.83rem; font-weight: 800; font-family: monospace; color: var(--accent); }
+    .rdetail { font-size: 0.78rem; color: #a0a0be; line-height: 1.4; }
+
+    /* ── Catalyst News ── */
+    .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .news-card { background: rgba(249,115,22,0.04); border: 1px solid rgba(249,115,22,0.18); border-left: 3px solid var(--orange); border-radius: 8px; padding: 0.65rem 0.8rem; }
+    .news-ticker { font-size: 0.7rem; font-weight: 800; font-family: monospace; color: var(--orange); margin-bottom: 0.2rem; letter-spacing: 0.03em; }
+    .news-body { font-size: 0.78rem; color: #b0afd0; line-height: 1.45; }
+
+    /* ── Misc ── */
+    .empty-note { color: var(--muted); font-size: 0.82rem; }
+    .mb-status { text-align: center; padding: 5rem 2rem; color: var(--muted); font-size: 0.9rem; }
+    .mb-status.error { color: var(--red); }
+    .hidden { display: none; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 900px) {
+      .mb-grid3 { grid-template-columns: repeat(2, 1fr); }
+      .mb-grid2 { grid-template-columns: 1fr; }
+      .news-grid { grid-template-columns: 1fr; }
+      .tone-body { grid-template-columns: 1fr; }
+      .tone-divider { display: none; }
+      .tone-text { margin-bottom: 0.75rem; }
+    }
+    @media (max-width: 580px) {
+      .mb-grid3 { grid-template-columns: 1fr; }
+      .mb-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+    }
+  </style>
+
+  <script>
+    function getBadgeType(t) {
+      t = (t || '').toLowerCase();
+      if (t.includes('upgrade')) return 'upgrade';
+      if (t.includes('downgrade')) return 'downgrade';
+      if (t.includes('initiat')) return 'initiated';
+      if (t.includes('raised') || t.includes('raises') || t.includes('increases')) return 'upgrade';
+      if (t.includes('cut') || t.includes('cuts') || t.includes('lowers')) return 'downgrade';
+      return 'neutral';
+    }
+    function getBadgeLabel(t) {
+      t = (t || '').toLowerCase();
+      if (t.includes('upgrade')) return '↑ Upgrade';
+      if (t.includes('downgrade')) return '↓ Downgrade';
+      if (t.includes('initiat')) return '● Initiated';
+      if (t.includes('raised') || t.includes('raises')) return '↑ PT Raised';
+      if (t.includes('cut') || t.includes('cuts')) return '↓ PT Cut';
+      if (t.includes('maintained') || t.includes('reiterates')) return '= Maintained';
+      return '— Note';
+    }
+    function extractTicker(s) {
+      const m = s.match(/^\$([A-Z]{1,6})/);
+      return m ? m[0] : '';
+    }
+    function stripTicker(s) {
+      return s.replace(/^\$[A-Z]{1,6}\s*[—–\-]+\s*/, '').trim();
+    }
+    function parseNews(s) {
+      const m = s.match(/^(\$[A-Z]{1,6}|[A-Z][A-Za-z &]+?)\s*[—–\-]+\s*(.+)$/s);
+      return m ? { ticker: m[1].trim(), body: m[2].trim() } : { ticker: '', body: s };
+    }
+
+    async function fetchBrief() {
+      const content = document.getElementById('brief-content');
+      const loading = document.getElementById('loading-state');
+      const errorEl = document.getElementById('error-state');
+      loading.classList.remove('hidden');
+      content.classList.add('hidden');
+      errorEl.classList.add('hidden');
+
       try {
-        const result = await ai.models.generateContent({
-          model,
-          contents: prompt,
-          config: {
-            tools: [{ googleSearch: {} }],
-            maxOutputTokens: 1500, // cap output to avoid truncation & speed up
-          },
-        });
-        const text = extractText(result);
-        console.log(`Success with ${model} on attempt ${attempt}`);
-        return text;
-      } catch (err) {
-        lastError = err;
-        const status = err?.status || 0;
-        const msg = err?.message || '';
+        const res = await fetch('/.netlify/functions/morning-brief');
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
 
-        if (status === 429 || msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) {
-          console.error(`Quota exceeded on ${model}, trying next.`);
-          break;
+        // Tone
+        document.getElementById('tone-text').textContent = data.market_tone || '';
+        document.getElementById('bias-text').textContent = data.morning_bias || '';
+
+        // Econ — filter non-US
+        const nonUS = ['ecb','boe','boj','rba','pboc','bank of canada','bank of england','bank of japan','eurozone','germany','german','france','uk ','china cpi','japan','australia'];
+        const econ = (data.econ_calendar || []).filter(e => !nonUS.some(k => (e.event||'').toLowerCase().includes(k)));
+        document.getElementById('econ-list').innerHTML = econ.length
+          ? econ.map(e => `
+            <div class="econ-item">
+              <div class="econ-dot ${e.impact || 'LOW'}"></div>
+              <div class="econ-body">
+                <div class="econ-name">${e.event}</div>
+                <div class="econ-meta">
+                  <span class="econ-time">${e.time}</span>
+                  ${e.actual   ? `<span class="econ-actual">▶ ${e.actual}</span>` : ''}
+                  ${e.forecast ? `<span class="econ-forecast">est ${e.forecast}</span>` : ''}
+                </div>
+              </div>
+            </div>`).join('')
+          : '<p class="empty-note">No major US data today.</p>';
+
+        // Gaps
+        const ups   = data.gaps?.ups   || [];
+        const downs = data.gaps?.downs || [];
+        let gHtml = '';
+        if (ups.length) {
+          gHtml += `<div class="gaps-section-label up">▲ BEATS / GAP UPS</div>`;
+          gHtml += ups.map(g => typeof g === 'object'
+            ? `<div class="gap-card up"><div class="gap-left"><span class="gap-ticker">${g.ticker}</span><div class="gap-reason">${g.reason||''}</div></div><span class="gap-move">${g.move||'↑'}</span></div>`
+            : `<div class="gap-card up"><span class="gap-ticker">${g}</span><span class="gap-move">↑</span></div>`
+          ).join('');
         }
-        const is503 = status === 503 || msg.includes('503') || msg.includes('UNAVAILABLE');
-        if (is503 && attempt < maxRetries) {
-          const delay = attempt * 1500;
-          console.log(`${model} attempt ${attempt} got 503, retrying in ${delay}ms...`);
-          await new Promise(r => setTimeout(r, delay));
-          continue;
+        if (downs.length) {
+          gHtml += `<div class="gaps-section-label down">▼ MISSES / GAP DOWNS</div>`;
+          gHtml += downs.map(g => typeof g === 'object'
+            ? `<div class="gap-card down"><div class="gap-left"><span class="gap-ticker">${g.ticker}</span><div class="gap-reason">${g.reason||''}</div></div><span class="gap-move">${g.move||'↓'}</span></div>`
+            : `<div class="gap-card down"><span class="gap-ticker">${g}</span><span class="gap-move">↓</span></div>`
+          ).join('');
         }
-        console.error(`${model} attempt ${attempt} failed:`, msg);
-        break;
+        document.getElementById('gaps-container').innerHTML = gHtml || '<p class="empty-note">No notable pre-market gaps today.</p>';
+
+        // Trump
+        const sched = data.trump_schedule || [];
+        document.getElementById('trump-list').innerHTML = sched.length
+          ? sched.map(s => `
+            <div class="trump-item">
+              <span class="trump-time">${s.time}</span>
+              <span class="trump-event">${s.event}</span>
+            </div>`).join('')
+          : '<p class="empty-note">No scheduled public events.</p>';
+
+        // Analyst ratings
+        const ratings = data.analyst_actions || [];
+        document.getElementById('ratings-list').innerHTML = ratings.length
+          ? ratings.map(n => {
+              const ticker = extractTicker(n);
+              const detail = ticker ? stripTicker(n) : n;
+              return `<div class="rating-item">
+                <div class="rating-top">
+                  <span class="rbadge ${getBadgeType(n)}">${getBadgeLabel(n)}</span>
+                  ${ticker ? `<span class="rticker">${ticker}</span>` : ''}
+                </div>
+                <div class="rdetail">${detail}</div>
+              </div>`;
+            }).join('')
+          : '<p class="empty-note">No analyst actions today.</p>';
+
+        // Catalyst news
+        const news = data.breaking_news || [];
+        document.getElementById('news-list').innerHTML = news.length
+          ? `<div class="news-grid">${news.map(n => {
+              const { ticker, body } = parseNews(n);
+              return `<div class="news-card">
+                ${ticker ? `<div class="news-ticker">${ticker}</div>` : ''}
+                <div class="news-body">${body}</div>
+              </div>`;
+            }).join('')}</div>`
+          : '<p class="empty-note">No major catalyst news.</p>';
+
+        loading.classList.add('hidden');
+        content.classList.remove('hidden');
+      } catch (err) {
+        loading.classList.add('hidden');
+        errorEl.textContent = `Error loading brief: ${err.message}`;
+        errorEl.classList.remove('hidden');
       }
     }
-  }
-  throw lastError || new Error('All models failed');
-}
 
-export default async (req, context) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric"
-  });
-
-  // Shorter, tighter prompt to reduce response time and token count
-  const prompt = `Search the web and return a pre-market brief for US equity traders for today: ${today}.
-
-Search for: pre-market earnings gaps, Trump public schedule, US economic data releases, analyst upgrades/downgrades, and market-moving news.
-
-Return ONLY this JSON — no markdown, no extra text:
-{"market_tone":"2-3 sentences on pre-market sentiment","morning_bias":"1-2 sentences on what to watch","trump_schedule":[{"time":"HH:MM AM/PM ET","event":"description"}],"gaps":{"ups":[{"ticker":"$SYM","move":"+X%","reason":"brief reason"}],"downs":[{"ticker":"$SYM","move":"-X%","reason":"brief reason"}]},"econ_calendar":[{"time":"HH:MM AM/PM ET","event":"US event name only","impact":"HIGH|MED|LOW","actual":"value or null","forecast":"value or null"}],"analyst_actions":["$TICKER — Firm action Rating PT $XX"],"breaking_news":["$TICKER — one sentence"]}
-
-Rules: US econ events only. $ prefix on tickers. impact = HIGH, MED, or LOW exactly. Empty arrays if no data. Max 5 items per array.`;
-
-  try {
-    const responseText = await generateWithRetry(ai, prompt);
-    const data = repairJSON(responseText);
-
-    return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" }
+    document.getElementById('mb-date').textContent = new Date().toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
-
-  } catch (error) {
-    console.error("Briefing Error:", error.message);
-
-    let userMessage = "Error loading brief. Please try again.";
-    if (error.message?.includes('RESOURCE_EXHAUSTED') || error.message?.includes('429')) {
-      userMessage = "API quota exceeded. Check billing at aistudio.google.com.";
-    } else if (error.message?.includes('503') || error.message?.includes('UNAVAILABLE')) {
-      userMessage = "Gemini is under high demand. Try again in 1-2 minutes.";
-    }
-
-    return new Response(JSON.stringify({ error: userMessage, details: error.message }), {
-      status: 500
-    });
-  }
-};
+    document.getElementById('refresh-btn').addEventListener('click', fetchBrief);
+    fetchBrief();
+  </script>
+</Layout>
