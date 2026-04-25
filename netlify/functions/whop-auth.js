@@ -70,7 +70,7 @@ export default async (req) => {
       return redirectTo(`${siteUrl}/alerts?error=user_failed`);
     }
 
-    // 3. Check membership using user's access token
+    // 3. Check membership — allow both 'active' and 'trialing' statuses
     const accessRes = await fetch(
       `https://api.whop.com/api/v2/me/has_access/plan_HE6PHzR97QEX3`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -78,7 +78,17 @@ export default async (req) => {
     const accessData = await accessRes.json();
     console.log('Access check:', JSON.stringify(accessData));
 
-    const hasAccess = accessData?.has_access === true;
+    // Also try checking membership list as fallback
+    const memberRes = await fetch(
+      `https://api.whop.com/api/v2/memberships?page=1`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const memberData = await memberRes.json();
+    console.log('Memberships:', JSON.stringify(memberData));
+
+    const hasAccess = accessData?.has_access === true ||
+      memberData?.data?.some(m => m.plan_id === 'plan_HE6PHzR97QEX3' && 
+        ['active', 'trialing', 'past_due'].includes(m.status));
 
     if (!hasAccess) {
       return redirectTo('https://whop.com/checkout/plan_HE6PHzR97QEX3');
