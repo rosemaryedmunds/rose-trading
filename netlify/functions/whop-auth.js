@@ -71,8 +71,8 @@ export default async (req) => {
     }
 
     // Anyone who authenticates via Whop OAuth gets access
-    // Since your plan requires payment, authenticated users are paying members
     const hasAccess = true;
+    console.log('Has access:', hasAccess, 'userId:', user.sub);
 
     if (!hasAccess) {
       return redirectTo('https://whop.com/checkout/plan_HE6PHzR97QEX3');
@@ -84,6 +84,8 @@ export default async (req) => {
       email:     user.email || '',
       expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
     })).toString('base64');
+
+    console.log('Setting session cookie, redirecting to members page');
 
     return new Response(null, {
       status: 302,
