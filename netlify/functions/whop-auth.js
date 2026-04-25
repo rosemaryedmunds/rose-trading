@@ -1,9 +1,10 @@
 // netlify/functions/whop-auth.js
-// Handles Whop OAuth callback with PKCE
+// Handles Whop OAuth callback — PKCE only, no client_secret
 
 export default async (req) => {
   const url         = new URL(req.url);
   const code        = url.searchParams.get('code');
+  const returnedState = url.searchParams.get('state');
   const siteUrl     = process.env.URL || 'https://rose.trading';
   const redirectUri = `${siteUrl}/.netlify/functions/whop-auth`;
 
@@ -11,7 +12,7 @@ export default async (req) => {
     return redirectTo(`${siteUrl}/alerts?error=no_code`);
   }
 
-  // Read PKCE verifier from cookie
+  // Read PKCE cookies
   const cookieHeader = req.headers.get('cookie') || '';
   const cookies = Object.fromEntries(
     cookieHeader.split(';').map(c => {
@@ -19,24 +20,31 @@ export default async (req) => {
       return [k, v.join('=')];
     })
   );
+
   const codeVerifier = cookies['pkce_verifier'];
+  const storedState  = cookies['pkce_state'];
 
   if (!codeVerifier) {
-    console.error('Missing PKCE verifier cookie');
+    console.error('Missing PKCE verifier');
     return redirectTo(`${siteUrl}/alerts?error=missing_verifier`);
   }
 
+  // Verify state to prevent CSRF
+  if (storedState && returnedState && storedState !== returnedState) {
+    console.error('State mismatch');
+    return redirectTo(`${siteUrl}/alerts?error=state_mismatch`);
+  }
+
   try {
-    // 1. Exchange code for access token with PKCE verifier
+    // 1. Exchange code — NO client_secret, PKCE only
     const tokenRes = await fetch('https://api.whop.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        code,
-        client_id:     process.env.WHOP_CLIENT_ID,
-        client_secret: process.env.WHOP_CLIENT_SECRET,
-        redirect_uri:  redirectUri,
         grant_type:    'authorization_code',
+        code,
+        redirect_uri:  redirectUri,
+        client_id:     process.env.WHOP_CLIENT_ID,
         code_verifier: codeVerifier,
       }),
     });
@@ -62,7 +70,7 @@ export default async (req) => {
       return redirectTo(`${siteUrl}/alerts?error=user_failed`);
     }
 
-    // 3. Check membership
+    // 3. Check membership using user's access token
     const accessRes = await fetch(
       `https://api.whop.com/api/v2/me/has_access/plan_HE6PHzR97QEX3`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -76,7 +84,7 @@ export default async (req) => {
       return redirectTo('https://whop.com/checkout/plan_HE6PHzR97QEX3');
     }
 
-    // 4. Set session cookie and redirect — clear the pkce_verifier cookie too
+    // 4. Set session cookie and clear PKCE cookies
     const sessionToken = Buffer.from(JSON.stringify({
       userId:    user.sub,
       email:     user.email || '',
@@ -88,7 +96,8 @@ export default async (req) => {
       headers: new Headers([
         ['Location', `${siteUrl}/alerts-members-x9q3`],
         ['Set-Cookie', `rose_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`],
-        ['Set-Cookie', `pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`],
+        ['Set-Cookie', `pkce_verifier=; Path=/; HttpOnly; Secure; Max-Age=0`],
+        ['Set-Cookie', `pkce_state=; Path=/; HttpOnly; Secure; Max-Age=0`],
       ]),
     });
 
