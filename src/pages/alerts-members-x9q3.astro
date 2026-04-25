@@ -31,7 +31,13 @@ import { Icon } from 'astro-icon/components';
   <section class="alerts-page" id="main-content" style="display:none;">
 
     <div class="page-header">
-      <h1 class="page-title">Trade Alerts</h1>
+      <h1 style="font-family:Syne,sans-serif;font-weight:800;font-size:3rem;background:linear-gradient(135deg,#998BFF,#5F5CFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;margin-bottom:0.75rem;">Trade Alerts</h1>
+      <div class="member-badge">
+        <Icon name="lucide:shield-check" />
+        Members Access
+      </div>
+      <p class="page-sub">Real-time SPX alerts and market reviews from Rose.</p>
+
       <div class="alert-cta">
         <button id="enable-alerts-btn" class="enable-btn" onclick="enableNotifications()">
           <Icon name="lucide:bell" />
@@ -53,10 +59,6 @@ import { Icon } from 'astro-icon/components';
           <li><span class="step-num">5</span><span>Open the app from your Home Screen and tap <strong>Enable Trade Alerts</strong></span></li>
         </ol>
       </div>
-    </div>
-
-    <div class="disclaimer-box">
-      <p>⚠️ <strong>Disclaimer:</strong> This content is for informational purposes only and is <strong>not financial advice</strong>. Trade at your own risk. SPX is a highly volatile ticker and options can quickly go to $0. Never trade more than you are willing to lose.</p>
     </div>
 
     <div class="filter-bar">
@@ -147,7 +149,7 @@ import { Icon } from 'astro-icon/components';
               <span class="card-tag" style="color:${accent}; background:${accent}22; border-color:${accent}44;">ALERT</span>
               <span class="card-time">${time}</span>
             </div>
-            <div class="alert-message">${item.message}</div>
+            <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
           </div>`;
       }
 
@@ -186,7 +188,14 @@ import { Icon } from 'astro-icon/components';
     }
     if (window.OneSignal?.Slidedown) {
       window.OneSignal.Slidedown.promptPush()
-        .then(() => { hint.textContent = 'Subscribed! Alerts will come straight to your phone.'; hint.style.color = '#3DDC84'; })
+        .then(() => {
+          hint.textContent = 'Subscribed! Alerts will come straight to your phone.';
+          hint.style.color = '#3DDC84';
+          // Tag user as paid subscriber so they receive alerts
+          if (window.OneSignal.User) {
+            window.OneSignal.User.addTag('subscriber', 'true');
+          }
+        })
         .catch(() => { hint.textContent = 'Notifications may be blocked. Check your browser settings.'; hint.style.color = '#FF5C5C'; });
     } else {
       hint.textContent = 'Still loading... please wait a moment and try again.';
@@ -210,6 +219,27 @@ import { Icon } from 'astro-icon/components';
   }
 
   :global(body) { background: var(--bg); color: var(--text); }
+
+  :global(.page-title) {
+    font-family: 'Syne', sans-serif !important;
+    font-size: 3rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, #998BFF, #5F5CFF) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    color: transparent !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  :global(.alert-message) {
+    font-family: 'Syne', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #E0E0E0 !important;
+    line-height: 1.5 !important;
+    margin-bottom: 0 !important;
+  }
 
   /* ── Auth ─────────────────────────────────────────────────────── */
   .auth-screen {
@@ -238,24 +268,27 @@ import { Icon } from 'astro-icon/components';
   .alerts-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
   .page-header  { text-align: center; margin-bottom: 2.5rem; }
 
-  .member-badge { display: none; }
-  .page-sub { display: none; }
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem; font-weight: 800;
+    background: linear-gradient(135deg, #998BFF, #5F5CFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+  }
 
-  /* ── Disclaimer ───────────────────────────────────────────────── */
-  .disclaimer-box {
-    background: rgba(255, 200, 50, 0.06);
-    border: 1px solid rgba(255, 200, 50, 0.25);
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 1.75rem;
+  .member-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(61,220,132,0.1); border: 1px solid rgba(61,220,132,0.25);
+    color: var(--green); font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em; padding: 0.3rem 0.85rem;
+    border-radius: 100px; margin-bottom: 1rem;
   }
-  .disclaimer-box p {
-    color: #c8b97a;
-    font-size: 0.82rem;
-    line-height: 1.65;
-    margin: 0;
-  }
-  .disclaimer-box strong { color: #e0c97a; }
+  .member-badge [data-icon] { width: 13px; height: 13px; stroke: var(--green); }
+
+  .page-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
 
   /* ── Enable Button ────────────────────────────────────────────── */
   .alert-cta { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
@@ -343,6 +376,16 @@ import { Icon } from 'astro-icon/components';
   .card-time {
     font-size: 0.7rem; color: var(--muted);
     font-family: 'JetBrains Mono', monospace;
+  }
+
+  .alert-message {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem; font-weight: 700;
+    color: var(--text); line-height: 1.5;
+  }
+  .review-message {
+    font-size: 0.92rem; color: #b0b0c0;
+    line-height: 1.75; white-space: pre-wrap;
   }
 
   /* ── Skeleton ─────────────────────────────────────────────────── */
