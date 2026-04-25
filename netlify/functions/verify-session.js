@@ -1,26 +1,22 @@
 // netlify/functions/verify-session.js
-// Called by the members page on load to check if session cookie is valid
-// Returns { valid: true/false }
-// Set ADMIN_BYPASS_KEY in Netlify env vars for owner access
 
 export default async (req) => {
   const cookieHeader = req.headers.get('cookie') || '';
-  const cookies      = Object.fromEntries(
+  const cookies = Object.fromEntries(
     cookieHeader.split(';').map(c => {
       const [k, ...v] = c.trim().split('=');
       return [k, v.join('=')];
     })
   );
 
-  // ── Admin bypass — set ADMIN_BYPASS_KEY in Netlify env vars ──────────────
-  const adminKey     = process.env.ADMIN_BYPASS_KEY;
-  const adminCookie  = cookies['rose_admin'];
+  // Admin bypass
+  const adminKey    = process.env.ADMIN_BYPASS_KEY;
+  const adminCookie = cookies['rose_admin'];
   if (adminKey && adminCookie === adminKey) {
     return json({ valid: true, userId: 'admin' });
   }
 
   const sessionToken = cookies['rose_session'];
-
   if (!sessionToken) {
     return json({ valid: false, reason: 'no_session' });
   }
@@ -28,20 +24,19 @@ export default async (req) => {
   try {
     const session = JSON.parse(Buffer.from(sessionToken, 'base64').toString('utf8'));
 
-    // Check expiry
     if (Date.now() > session.expiresAt) {
       return json({ valid: false, reason: 'expired' });
     }
 
-    // Re-verify membership with Whop (catches cancelled subscriptions)
-    const memberRes = await fetch(
-      `https://api.whop.com/v5/memberships?user_id=${session.userId}&plan_id=plan_HE6PHzR97QEX3&status=active`,
+    // Verify membership using has_access endpoint with API key
+    const accessRes = await fetch(
+      `https://api.whop.com/api/v2/memberships?user_id=${session.userId}&plan_id=plan_HE6PHzR97QEX3&status=active`,
       {
         headers: { Authorization: `Bearer ${process.env.WHOP_API_KEY}` },
       }
     );
-    const memberData = await memberRes.json();
-    const hasAccess  = memberData?.data?.length > 0;
+    const accessData = await accessRes.json();
+    const hasAccess  = accessData?.data?.length > 0;
 
     if (!hasAccess) {
       return json({ valid: false, reason: 'no_subscription' });
@@ -57,7 +52,7 @@ export default async (req) => {
 
 function json(data) {
   return new Response(JSON.stringify(data), {
-    status:  200,
+    status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
 }

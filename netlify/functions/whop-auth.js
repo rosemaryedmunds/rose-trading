@@ -1,24 +1,19 @@
 // netlify/functions/whop-auth.js
 // Handles Whop OAuth callback — verifies the user has an active subscription
-// Environment variables needed:
-//   WHOP_API_KEY       — your Whop API key
-//   WHOP_CLIENT_ID     — from Whop dashboard → OAuth Apps
-//   WHOP_CLIENT_SECRET — from Whop dashboard → OAuth Apps
-//   URL                — your site URL (Netlify sets this automatically)
 
 export default async (req) => {
-  const url    = new URL(req.url);
-  const code   = url.searchParams.get('code');
-  const siteUrl = process.env.URL || 'https://rose.trading';
+  const url      = new URL(req.url);
+  const code     = url.searchParams.get('code');
+  const siteUrl  = process.env.URL || 'https://rose.trading';
   const redirectUri = `${siteUrl}/.netlify/functions/whop-auth`;
 
   if (!code) {
-    return new Response('Missing code', { status: 400 });
+    return redirectTo(`${siteUrl}/alerts?error=no_code`);
   }
 
   try {
     // 1. Exchange code for access token
-    const tokenRes = await fetch('https://api.whop.com/v5/oauth/token', {
+    const tokenRes = await fetch('https://api.whop.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -31,6 +26,8 @@ export default async (req) => {
     });
 
     const tokenData = await tokenRes.json();
+    console.log('Token response:', JSON.stringify(tokenData));
+
     if (!tokenRes.ok || !tokenData.access_token) {
       console.error('Token exchange failed:', tokenData);
       return redirectTo(`${siteUrl}/alerts?error=auth_failed`);
@@ -38,45 +35,47 @@ export default async (req) => {
 
     const accessToken = tokenData.access_token;
 
-    // 2. Get user info
-    const userRes = await fetch('https://api.whop.com/v5/me', {
+    // 2. Get user info using new endpoint
+    const userRes = await fetch('https://api.whop.com/oauth/userinfo', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const user = await userRes.json();
+    console.log('User info:', JSON.stringify(user));
 
-    if (!userRes.ok || !user.id) {
+    if (!userRes.ok || !user.sub) {
       return redirectTo(`${siteUrl}/alerts?error=user_failed`);
     }
 
-    // 3. Check membership using Whop API key (server-side)
-    const memberRes = await fetch(
-      `https://api.whop.com/v5/memberships?user_id=${user.id}&plan_id=plan_HE6PHzR97QEX3&status=active`,
+    const userId = user.sub; // new API uses 'sub' not 'id'
+
+    // 3. Check membership using has_access endpoint
+    const accessRes = await fetch(
+      `https://api.whop.com/api/v2/me/has_access/plan_HE6PHzR97QEX3`,
       {
-        headers: {
-          Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
-    const memberData = await memberRes.json();
-    const hasAccess  = memberData?.data?.length > 0;
+    const accessData = await accessRes.json();
+    console.log('Access check:', JSON.stringify(accessData));
+
+    const hasAccess = accessData?.has_access === true;
 
     if (!hasAccess) {
-      // Not a paying subscriber — send to checkout
-      return redirectTo('https://whop.com/checkout/plan_HE6PHzR97QEX3?error=no_subscription');
+      return redirectTo('https://whop.com/checkout/plan_HE6PHzR97QEX3');
     }
 
-    // 4. Set a signed session cookie and redirect to members page
+    // 4. Set session cookie and redirect to members page
     const sessionToken = Buffer.from(JSON.stringify({
-      userId:    user.id,
-      email:     user.email,
-      expiresAt: Date.now() + 1000 * 60 * 60 * 24, // 24 hours
+      userId,
+      email:     user.email || '',
+      expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
     })).toString('base64');
 
     return new Response(null, {
       status: 302,
       headers: {
-        Location:   `${siteUrl}/alerts-members-x9q3`,
-        'Set-Cookie': `rose_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`,
+        Location:     `${siteUrl}/alerts-members-x9q3`,
+        'Set-Cookie': `rose_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`,
       },
     });
 
