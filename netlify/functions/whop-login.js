@@ -14,7 +14,7 @@ export default async (req) => {
     .update(codeVerifier)
     .digest('base64url');
 
-  const whopAuthUrl = `https://whop.com/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+  const whopAuthUrl = `https://whop.com/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&code_challenge=${codeChallenge}&code_challenge_method=S256&scope=openid%20profile%20email`;
 
   // Store verifier in a short-lived cookie so whop-auth can use it
   return new Response(null, {

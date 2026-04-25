@@ -34,7 +34,6 @@ export default async (req) => {
       body: JSON.stringify({
         code,
         client_id:     process.env.WHOP_CLIENT_ID,
-        client_secret: process.env.WHOP_CLIENT_SECRET,
         redirect_uri:  redirectUri,
         grant_type:    'authorization_code',
         code_verifier: codeVerifier,
