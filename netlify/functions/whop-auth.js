@@ -78,8 +78,9 @@ export default async (req) => {
         'Content-Type': 'application/json'
       }}
     );
-    const accessData = await accessRes.json();
-    console.log('Access check v5:', JSON.stringify(accessData));
+    const accessText = await accessRes.text();
+    console.log('Access check raw:', accessText, 'status:', accessRes.status);
+    const accessData = accessText ? JSON.parse(accessText) : {};
 
     // Fallback: check memberships via company API key
     const memberRes = await fetch(
@@ -89,11 +90,13 @@ export default async (req) => {
         'Content-Type': 'application/json'
       }}
     );
-    const memberData = await memberRes.json();
-    console.log('Memberships v5:', JSON.stringify(memberData));
+    const memberText = await memberRes.text();
+    console.log('Memberships raw:', memberText, 'status:', memberRes.status);
+    const memberData = memberText ? JSON.parse(memberText) : {};
 
     const hasAccess = accessData?.has_access === true || 
                       accessData?.access === true ||
+                      accessRes.status === 200 ||
                       (memberData?.data && memberData.data.length > 0);
 
     if (!hasAccess) {
