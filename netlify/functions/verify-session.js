@@ -1,4 +1,5 @@
 // netlify/functions/verify-session.js
+// Verifies the session cookie set by whop-auth
 
 export default async (req) => {
   const cookieHeader = req.headers.get('cookie') || '';
@@ -24,24 +25,12 @@ export default async (req) => {
   try {
     const session = JSON.parse(Buffer.from(sessionToken, 'base64').toString('utf8'));
 
+    // Check expiry
     if (Date.now() > session.expiresAt) {
       return json({ valid: false, reason: 'expired' });
     }
 
-    // Verify membership using has_access endpoint with API key
-    const accessRes = await fetch(
-      `https://api.whop.com/api/v2/memberships?user_id=${session.userId}&plan_id=plan_HE6PHzR97QEX3&status=active`,
-      {
-        headers: { Authorization: `Bearer ${process.env.WHOP_API_KEY}` },
-      }
-    );
-    const accessData = await accessRes.json();
-    const hasAccess  = accessData?.data?.length > 0;
-
-    if (!hasAccess) {
-      return json({ valid: false, reason: 'no_subscription' });
-    }
-
+    // Session is valid — user authenticated via Whop OAuth
     return json({ valid: true, userId: session.userId });
 
   } catch (err) {

@@ -1,110 +1,96 @@
+
+Rosemary Edmunds <edmunds.rosemary@gmail.com>
+4:00 PM (0 minutes ago)
+to me
+
 // netlify/functions/whop-auth.js
-// Handles Whop OAuth callback — PKCE only, no client_secret
+// Reads PKCE verifier from state parameter (no cookies needed)
 
 export default async (req) => {
-  const url         = new URL(req.url);
-  const code        = url.searchParams.get('code');
-  const returnedState = url.searchParams.get('state');
-  const siteUrl     = process.env.URL || 'https://rose.trading';
-  const redirectUri = `${siteUrl}/.netlify/functions/whop-auth`;
+const url = new URL(req.url);
+const code = url.searchParams.get(‘code’);
+const stateParam = url.searchParams.get(‘state’);
+const siteUrl = process.env.URL || ‘https://rose.trading’;
+const redirectUri = `${siteUrl}/.netlify/functions/whop-auth`;
 
-  if (!code) {
-    return redirectTo(`${siteUrl}/alerts?error=no_code`);
-  }
+if (!code) {
+return redirectTo(`${siteUrl}/alerts?error=no_code`);
+}
 
-  // Read PKCE cookies
-  const cookieHeader = req.headers.get('cookie') || '';
-  const cookies = Object.fromEntries(
-    cookieHeader.split(';').map(c => {
-      const [k, ...v] = c.trim().split('=');
-      return [k, v.join('=')];
-    })
-  );
+// Extract verifier from state
+let codeVerifier;
+try {
+const stateData = JSON.parse(Buffer.from(stateParam, ‘base64url’).toString(‘utf8’));
+codeVerifier = stateData.verifier;
+} catch (err) {
+console.error(‘Failed to parse state:’, err);
+return redirectTo(`${siteUrl}/alerts?error=invalid_state`);
+}
 
-  const codeVerifier = cookies['pkce_verifier'];
-  const storedState  = cookies['pkce_state'];
+if (!codeVerifier) {
+return redirectTo(`${siteUrl}/alerts?error=missing_verifier`);
+}
 
-  if (!codeVerifier) {
-    console.error('Missing PKCE verifier');
-    return redirectTo(`${siteUrl}/alerts?error=missing_verifier`);
-  }
+try {
+// 1. Exchange code with PKCE verifier
+const tokenRes = await fetch(‘https://api.whop.com/oauth/token’, {
+method: ‘POST’,
+headers: { ‘Content-Type’: ‘application/json’ },
+body: JSON.stringify({
+grant_type: ‘authorization_code’,
+code,
+redirect_uri: redirectUri,
+client_id: process.env.WHOP_CLIENT_ID,
+code_verifier: codeVerifier,
+}),
+});
 
-  // Verify state to prevent CSRF
-  if (storedState && returnedState && storedState !== returnedState) {
-    console.error('State mismatch');
-    return redirectTo(`${siteUrl}/alerts?error=state_mismatch`);
-  }
+```
+const tokenData = await tokenRes.json();
+console.log('Token response status:', tokenRes.status);
 
-  try {
-    // 1. Exchange code — NO client_secret, PKCE only
-    const tokenRes = await fetch('https://api.whop.com/oauth/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        grant_type:    'authorization_code',
-        code,
-        redirect_uri:  redirectUri,
-        client_id:     process.env.WHOP_CLIENT_ID,
-        code_verifier: codeVerifier,
-      }),
-    });
+if (!tokenRes.ok || !tokenData.access_token) {
+console.error('Token exchange failed:', JSON.stringify(tokenData));
+return redirectTo(`${siteUrl}/alerts?error=auth_failed`);
+}
 
-    const tokenData = await tokenRes.json();
-    console.log('Token response:', JSON.stringify(tokenData));
+// 2. Get user info
+const userRes = await fetch('https://api.whop.com/oauth/userinfo', {
+headers: { Authorization: `Bearer ${tokenData.access_token}` },
+});
+const user = await userRes.json();
+console.log('User:', user.sub, user.email);
 
-    if (!tokenRes.ok || !tokenData.access_token) {
-      console.error('Token exchange failed:', tokenData);
-      return redirectTo(`${siteUrl}/alerts?error=auth_failed`);
-    }
+if (!user.sub) {
+return redirectTo(`${siteUrl}/alerts?error=user_failed`);
+}
 
-    const accessToken = tokenData.access_token;
+// 3. Set session cookie
+const sessionToken = Buffer.from(JSON.stringify({
+userId: user.sub,
+email: user.email || '',
+expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
+})).toString('base64');
 
-    // 2. Get user info
-    const userRes = await fetch('https://api.whop.com/oauth/userinfo', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const user = await userRes.json();
-    console.log('User info:', JSON.stringify(user));
+console.log('Auth successful, setting session for:', user.email);
 
-    if (!userRes.ok || !user.sub) {
-      return redirectTo(`${siteUrl}/alerts?error=user_failed`);
-    }
+return new Response(null, {
+status: 302,
+headers: {
+Location: `${siteUrl}/alerts-members-x9q3`,
+'Set-Cookie': `rose_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`,
+},
+});
+```
 
-    // Anyone who authenticates via Whop OAuth gets access
-    const hasAccess = true;
-    console.log('Has access:', hasAccess, 'userId:', user.sub);
-
-    if (!hasAccess) {
-      return redirectTo('https://whop.com/checkout/plan_HE6PHzR97QEX3');
-    }
-
-    // 4. Set session cookie and clear PKCE cookies
-    const sessionToken = Buffer.from(JSON.stringify({
-      userId:    user.sub,
-      email:     user.email || '',
-      expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
-    })).toString('base64');
-
-    console.log('Setting session cookie, redirecting to members page');
-
-    return new Response(null, {
-      status: 302,
-      headers: new Headers([
-        ['Location', `${siteUrl}/alerts-members-x9q3`],
-        ['Set-Cookie', `rose_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800`],
-        ['Set-Cookie', `pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`],
-        ['Set-Cookie', `pkce_state=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`],
-      ]),
-    });
-
-  } catch (err) {
-    console.error('Whop auth error:', err);
-    return redirectTo(`${siteUrl}/alerts?error=server_error`);
-  }
+} catch (err) {
+console.error(‘Whop auth error:’, err);
+return redirectTo(`${siteUrl}/alerts?error=server_error`);
+}
 };
 
 function redirectTo(url) {
-  return new Response(null, { status: 302, headers: { Location: url } });
+return new Response(null, { status: 302, headers: { Location: url } });
 }
 
-export const config = { path: '/.netlify/functions/whop-auth' };
+export const config = { path: ‘/.netlify/functions/whop-auth’ };
