@@ -32,8 +32,8 @@ export default async (req) => {
     status: 302,
     headers: new Headers([
       ['Location', whopAuthUrl],
-      ['Set-Cookie', `pkce_verifier=${codeVerifier}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=300`],
-      ['Set-Cookie', `pkce_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=300`],
+      ['Set-Cookie', `pkce_verifier=${codeVerifier}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=300`],
+      ['Set-Cookie', `pkce_state=${state}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=300`],
     ]),
   });
 };

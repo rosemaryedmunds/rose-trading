@@ -89,9 +89,9 @@ export default async (req) => {
       status: 302,
       headers: new Headers([
         ['Location', `${siteUrl}/alerts-members-x9q3`],
-        ['Set-Cookie', `rose_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`],
-        ['Set-Cookie', `pkce_verifier=; Path=/; HttpOnly; Secure; Max-Age=0`],
-        ['Set-Cookie', `pkce_state=; Path=/; HttpOnly; Secure; Max-Age=0`],
+        ['Set-Cookie', `rose_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800`],
+        ['Set-Cookie', `pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`],
+        ['Set-Cookie', `pkce_state=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`],
       ]),
     });
 
