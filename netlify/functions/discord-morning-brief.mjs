@@ -15,7 +15,6 @@ function truncate(str, max = 1024) {
 }
 
 function buildDiscordPayload(brief, dateStr) {
-  // Gaps — handle both object {ticker, move, reason} and legacy plain strings
   const formatGap = (g) => typeof g === 'object'
     ? `**${g.ticker}** ${g.move} — ${g.reason || ''}`
     : g;
@@ -23,7 +22,6 @@ function buildDiscordPayload(brief, dateStr) {
   const gapUps   = brief.gaps?.ups?.map(formatGap).join('\n') || 'None';
   const gapDowns = brief.gaps?.downs?.map(formatGap).join('\n') || 'None';
 
-  // Analyst actions + breaking news separated
   const analystText = brief.analyst_actions?.length
     ? brief.analyst_actions.join('\n')
     : 'No ratings today.';
@@ -103,14 +101,21 @@ function buildDiscordPayload(brief, dateStr) {
   };
 }
 
-export const handler = async () => {
+// ✅ Default export — required for Netlify scheduled functions
+export default async (req, context) => {
   // Skip weekends
   const today = new Date();
   if (today.getDay() === 0 || today.getDay() === 6) {
-    return { statusCode: 200, body: 'Weekend — skipping brief.' };
+    console.log('Weekend — skipping Discord brief.');
+    return new Response('Weekend — skipping brief.', { status: 200 });
   }
 
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  const webhookUrl = process.env.DISCORD_MORNING_BRIEF_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.error('DISCORD_MORNING_BRIEF_WEBHOOK_URL env var is not set.');
+    return new Response('Missing DISCORD_MORNING_BRIEF_WEBHOOK_URL', { status: 500 });
+  }
+
   const dateStr = today.toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
   });
@@ -170,10 +175,11 @@ export const handler = async () => {
       throw new Error(`Discord webhook failed: ${discordRes.status} — ${err}`);
     }
 
-    return { statusCode: 200, body: 'Discord brief sent.' };
+    console.log('Discord brief sent successfully.');
+    return new Response('Discord brief sent.', { status: 200 });
 
   } catch (err) {
     console.error('Discord brief failed:', err.message);
-    return { statusCode: 500, body: err.message };
+    return new Response(err.message, { status: 500 });
   }
 };
