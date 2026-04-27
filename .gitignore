@@ -27,3 +27,6 @@ pnpm-debug.log*
 
 #Ghost Folder
 .claude/
+
+# Local Netlify folder
+.netlify

@@ -8,6 +8,10 @@
   to     = "/.netlify/functions/feed-json"
   status = 200
 
+# Morning brief scheduler — 8:00 AM CT (UTC-5/6), Mon–Fri
+[functions."discord-morning-brief"]
+  schedule = "0 13 * * 1-5"
+
 # Redirect the secret command center URL
 [[redirects]]
   from   = "/rose-command-center-x7k2"
