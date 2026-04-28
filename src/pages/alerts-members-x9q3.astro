@@ -10,21 +10,19 @@ import { Icon } from 'astro-icon/components';
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 </Fragment>
 
-  <!-- Auth gate -->
+  <!-- Password gate -->
   <div id="auth-checking" class="auth-screen">
-    <div class="auth-spinner"></div>
-    <p>Verifying your membership...</p>
-  </div>
-
-  <!-- Auth failed -->
-  <div id="auth-failed" class="auth-screen" style="display:none;">
     <div class="auth-icon">
       <Icon name="lucide:lock" />
     </div>
-    <h2>Access Required</h2>
-    <p>You need an active Rose.Trading subscription to view this page.</p>
-    <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" class="auth-btn">Subscribe for $39.99/mo →</a>
-    <a href="/.netlify/functions/whop-login" class="auth-link">Already subscribed? Sign in</a>
+    <h2>Members Access</h2>
+    <p>Enter your member password to view trade alerts.</p>
+    <div class="pw-wrap">
+      <input id="pw-input" type="password" placeholder="Enter password" class="pw-input" autocomplete="current-password" />
+      <button class="auth-btn" onclick="checkPassword()">Enter →</button>
+    </div>
+    <p id="pw-error" style="display:none; color:#FF5C5C; font-size:0.82rem;">Incorrect password. Check Discord for the current password.</p>
+    <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" class="auth-link" style="margin-top:0.5rem;">Not a member? Subscribe for $39.99/mo</a>
   </div>
 
   <!-- Main content -->
@@ -89,120 +87,36 @@ import { Icon } from 'astro-icon/components';
   let allItems  = [];
   let curFilter = 'all';
 
-  async function checkAuth() {
-    try {
-      const res  = await fetch('/.netlify/functions/verify-session');
-      const data = await res.json();
-      document.getElementById('auth-checking').style.display = 'none';
-      if (data.valid) {
-        document.getElementById('main-content').style.display = 'block';
-        loadFeed();
-        setInterval(loadFeed, 60000);
-      } else {
-        if (data.reason === 'no_session' || data.reason === 'expired') {
-          window.location.href = '/.netlify/functions/whop-login';
-        } else {
-          document.getElementById('auth-failed').style.display = 'flex';
-        }
-      }
-    } catch {
-      document.getElementById('auth-checking').style.display = 'none';
-      document.getElementById('auth-failed').style.display = 'flex';
+  const CORRECT_PW = 'fjsSD-423-r983';
+  const SESSION_KEY = 'rt_member_auth';
+
+  function checkPassword() {
+    const input = document.getElementById('pw-input').value;
+    const error = document.getElementById('pw-error');
+    if (input === CORRECT_PW) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      grantAccess();
+    } else {
+      error.style.display = 'block';
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
     }
   }
 
-  async function loadFeed() {
-    try {
-      const res = await fetch('/feed.json?t=' + Date.now());
-      allItems  = res.ok ? await res.json() : [];
-    } catch { allItems = []; }
-    renderFeed();
+  function grantAccess() {
+    document.getElementById('auth-checking').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    loadFeed();
+    setInterval(loadFeed, 60000);
   }
 
-  function renderFeed() {
-    const feed  = document.getElementById('feed');
-    const empty = document.getElementById('empty-state');
-    const items = curFilter === 'all' ? allItems : allItems.filter(i => i.type === curFilter);
-
-    if (!items.length) {
-      feed.innerHTML = '';
-      empty.style.display = 'block';
-      return;
-    }
-    empty.style.display = 'none';
-
-    feed.innerHTML = items.map(item => {
-      const isAlert = item.type === 'alert';
-      const time = new Date(item.timestamp).toLocaleString('en-US', {
-        timeZone: 'America/Chicago',
-        weekday: 'short', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      }) + ' CT';
-
-      if (isAlert) {
-        const isCall = item.message.includes('CALL');
-        const isPut  = item.message.includes('PUT');
-        const accent = isCall ? '#3DDC84' : isPut ? '#FF5C5C' : '#998BFF';
-        return `
-          <div class="feed-card" style="border-left-color: ${accent};">
-            <div class="card-header">
-              <span class="card-tag" style="color:${accent}; background:${accent}22; border-color:${accent}44;">ALERT</span>
-              <span class="card-time">${time}</span>
-            </div>
-            <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
-          </div>`;
-      }
-
-      const reviewType = item.reviewType || 'NOTE';
-      const label = reviewType === 'PRE-MARKET' ? 'PRE-MARKET' :
-                    reviewType === 'POST-MARKET' ? 'POST-MARKET' : reviewType;
-      return `
-        <div class="feed-card" style="border-left-color: #998BFF;">
-          <div class="card-header">
-            <span class="card-tag" style="color:#998BFF; background:rgba(153,139,255,0.1); border-color:rgba(153,139,255,0.25);">${label}</span>
-            <span class="card-time">${time}</span>
-          </div>
-          <div class="review-message">${item.message}</div>
-        </div>`;
-    }).join('');
-  }
-
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      curFilter = btn.dataset.filter;
-      renderFeed();
-    });
+  document.getElementById('pw-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkPassword();
   });
 
-  function enableNotifications() {
-    const hint  = document.getElementById('notif-hint');
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isPWA = window.navigator.standalone === true;
-    if (isIOS && !isPWA) {
-      hint.textContent = 'Follow the install steps below to enable alerts on iPhone.';
-      hint.style.color = '#998BFF';
-      document.querySelector('.pwa-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      return;
-    }
-    if (window.OneSignal?.Slidedown) {
-      window.OneSignal.Slidedown.promptPush()
-        .then(() => {
-          hint.textContent = 'Subscribed! Alerts will come straight to your phone.';
-          hint.style.color = '#3DDC84';
-          // Tag user as paid subscriber so they receive alerts
-          if (window.OneSignal.User) {
-            window.OneSignal.User.addTag('subscriber', 'true');
-          }
-        })
-        .catch(() => { hint.textContent = 'Notifications may be blocked. Check your browser settings.'; hint.style.color = '#FF5C5C'; });
-    } else {
-      hint.textContent = 'Still loading... please wait a moment and try again.';
-    }
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    grantAccess();
   }
-
-  checkAuth();
 </script>
 
 <style>
@@ -247,6 +161,20 @@ import { Icon } from 'astro-icon/components';
     justify-content: center; min-height: 60vh; text-align: center;
     gap: 1rem; padding: 2rem; color: var(--muted);
   }
+  .pw-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 0.75rem; width: 100%; max-width: 320px;
+  }
+  .pw-input {
+    width: 100%; padding: 0.75rem 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    outline: none; text-align: center; letter-spacing: 0.05em;
+    transition: border-color 0.2s;
+  }
+  .pw-input:focus { border-color: var(--purple); }
+  .pw-input::placeholder { color: var(--muted); letter-spacing: 0; }
+
   .auth-spinner {
     width: 36px; height: 36px; border: 3px solid var(--border);
     border-top-color: var(--purple); border-radius: 50%;
