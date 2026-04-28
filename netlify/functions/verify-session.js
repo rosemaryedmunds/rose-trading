@@ -25,12 +25,27 @@ exports.handler = async (event) => {
   const sessionToken = cookies['rose_session'];
   if (!sessionToken) return json({ valid: false, reason: 'no_session' });
 
+  let session;
   try {
-    const session = JSON.parse(Buffer.from(sessionToken, 'base64').toString('utf8'));
-    if (Date.now() > session.expiresAt) return json({ valid: false, reason: 'expired' });
-    return json({ valid: true, userId: session.userId });
+    // Normalize URL-safe base64 and fix missing padding
+    const normalized = sessionToken.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized + '=='.slice(0, (4 - normalized.length % 4) % 4);
+    session = JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
   } catch (err) {
-    console.error('Session verify error:', err);
-    return json({ valid: false, reason: 'invalid_session' });
+    console.error('Session parse error:', err.message, '| token prefix:', sessionToken.slice(0, 20));
+    // Treat parse failures as expired → frontend redirects to login, not paywall
+    return json({ valid: false, reason: 'expired' });
   }
+
+  // Guard against seconds vs milliseconds bug in expiresAt
+  const expiresAt = session.expiresAt > 1e12 ? session.expiresAt : session.expiresAt * 1000;
+  if (Date.now() > expiresAt) {
+    return json({ valid: false, reason: 'expired' });
+  }
+
+  if (!session.userId) {
+    return json({ valid: false, reason: 'expired' });
+  }
+
+  return json({ valid: true, userId: session.userId });
 };

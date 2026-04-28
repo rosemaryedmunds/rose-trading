@@ -1,11 +1,10 @@
 // netlify/functions/whop-auth.js
 
 exports.handler = async (event) => {
-  const params      = new URLSearchParams(event.rawQuery || '');
-  const code        = params.get('code');
-  const returnedState = params.get('state');
-  const siteUrl     = process.env.URL || 'https://rose.trading';
-  const redirectUri = `${siteUrl}/.netlify/functions/whop-auth`;
+  const params        = new URLSearchParams(event.rawQuery || '');
+  const code          = params.get('code');
+  const siteUrl       = process.env.URL || 'https://rose.trading';
+  const redirectUri   = `${siteUrl}/.netlify/functions/whop-auth`;
 
   const redirect = (url) => ({
     statusCode: 302,
@@ -40,6 +39,7 @@ exports.handler = async (event) => {
         code,
         redirect_uri:  redirectUri,
         client_id:     process.env.WHOP_CLIENT_ID,
+        client_secret: process.env.WHOP_CLIENT_SECRET,
         code_verifier: codeVerifier,
       }),
     });
@@ -62,14 +62,38 @@ exports.handler = async (event) => {
       return redirect(`${siteUrl}/alerts?error=user_failed`);
     }
 
-    // 3. Set session cookie
+    // 3. Check for any active membership under your Whop account
+    const membershipRes = await fetch(
+      `https://api.whop.com/v5/memberships?user_id=${user.sub}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    const membershipData = await membershipRes.json();
+    console.log('Membership check:', JSON.stringify(membershipData));
+
+    // Accept active, trialing (trial period), and past_due (grace period)
+    const validStatuses = ['active', 'trialing', 'past_due'];
+    const hasMembership = membershipData?.data?.some(
+      m => validStatuses.includes(m.status)
+    );
+
+    if (!hasMembership) {
+      console.log('No active membership for user:', user.sub);
+      return redirect(`${siteUrl}/alerts?error=no_membership`);
+    }
+
+    // 4. Issue session cookie (7-day expiry)
     const sessionToken = Buffer.from(JSON.stringify({
       userId:    user.sub,
       email:     user.email || '',
       expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
     })).toString('base64');
 
-    console.log('Setting session, redirecting to members page');
+    console.log('Membership confirmed, granting access for:', user.sub);
 
     return {
       statusCode: 302,
