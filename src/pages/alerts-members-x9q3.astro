@@ -110,10 +110,102 @@ import { Icon } from 'astro-icon/components';
     setInterval(loadFeed, 60000);
   }
 
+  async function loadFeed() {
+    try {
+      const res = await fetch('/feed.json?t=' + Date.now());
+      allItems  = res.ok ? await res.json() : [];
+    } catch { allItems = []; }
+    renderFeed();
+  }
+
+  function renderFeed() {
+    const feed  = document.getElementById('feed');
+    const empty = document.getElementById('empty-state');
+    const items = curFilter === 'all' ? allItems : allItems.filter(i => i.type === curFilter);
+
+    if (!items.length) {
+      feed.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    feed.innerHTML = items.map(item => {
+      const isAlert = item.type === 'alert';
+      const time = new Date(item.timestamp).toLocaleString('en-US', {
+        timeZone: 'America/Chicago',
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      }) + ' CT';
+
+      if (isAlert) {
+        const isCall = item.message.includes('CALL');
+        const isPut  = item.message.includes('PUT');
+        const accent = isCall ? '#3DDC84' : isPut ? '#FF5C5C' : '#998BFF';
+        return `
+          <div class="feed-card" style="border-left-color: ${accent};">
+            <div class="card-header">
+              <span class="card-tag" style="color:${accent}; background:${accent}22; border-color:${accent}44;">ALERT</span>
+              <span class="card-time">${time}</span>
+            </div>
+            <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
+          </div>`;
+      }
+
+      const reviewType = item.reviewType || 'NOTE';
+      const label = reviewType === 'PRE-MARKET' ? 'PRE-MARKET' :
+                    reviewType === 'POST-MARKET' ? 'POST-MARKET' : reviewType;
+      return `
+        <div class="feed-card" style="border-left-color: #998BFF;">
+          <div class="card-header">
+            <span class="card-tag" style="color:#998BFF; background:rgba(153,139,255,0.1); border-color:rgba(153,139,255,0.25);">${label}</span>
+            <span class="card-time">${time}</span>
+          </div>
+          <div class="review-message">${item.message}</div>
+        </div>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      curFilter = btn.dataset.filter;
+      renderFeed();
+    });
+  });
+
+  function enableNotifications() {
+    const hint  = document.getElementById('notif-hint');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isPWA = window.navigator.standalone === true;
+    if (isIOS && !isPWA) {
+      hint.textContent = 'Follow the install steps below to enable alerts on iPhone.';
+      hint.style.color = '#998BFF';
+      document.querySelector('.pwa-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+    if (window.OneSignal?.Slidedown) {
+      window.OneSignal.Slidedown.promptPush()
+        .then(() => {
+          hint.textContent = 'Subscribed! Alerts will come straight to your phone.';
+          hint.style.color = '#3DDC84';
+          if (window.OneSignal.User) {
+            window.OneSignal.User.addTag('subscriber', 'true');
+          }
+        })
+        .catch(() => { hint.textContent = 'Notifications may be blocked. Check your browser settings.'; hint.style.color = '#FF5C5C'; });
+    } else {
+      hint.textContent = 'Still loading... please wait a moment and try again.';
+    }
+  }
+
+  // Enter key on password input
   document.getElementById('pw-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') checkPassword();
   });
 
+  // Auto-grant if already authenticated this session
   if (sessionStorage.getItem(SESSION_KEY) === '1') {
     grantAccess();
   }
