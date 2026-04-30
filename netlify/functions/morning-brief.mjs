@@ -31,7 +31,6 @@ function repairJSON(raw) {
   try { return JSON.parse(str); } catch (_) {}
 
   // Close any unterminated string (truncation mid-string)
-  // Find last unescaped quote position to detect open strings
   let inString = false;
   let lastStringStart = -1;
   for (let i = 0; i < str.length; i++) {
@@ -41,9 +40,7 @@ function repairJSON(raw) {
     }
   }
   if (inString) {
-    // Truncate to last complete value before the open string
     str = str.slice(0, lastStringStart).trimEnd();
-    // Remove trailing comma/colon if any
     str = str.replace(/[,:]$/, '');
   }
 
@@ -68,7 +65,8 @@ async function generateWithRetry(ai, prompt, maxRetries = 2) {
           contents: prompt,
           config: {
             tools: [{ googleSearch: {} }],
-            maxOutputTokens: 8192,
+            maxOutputTokens: 2048,
+            thinkingConfig: { thinkingBudget: 0 },
           },
         });
         const text = extractText(result);
