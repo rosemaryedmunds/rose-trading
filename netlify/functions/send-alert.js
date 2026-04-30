@@ -83,7 +83,7 @@ export default async (req) => {
         username:   'Rose Alerts 🌹',
         embeds: [{
           title:       `${emoji} ${title}`,
-          description: `\`\`\`${message}\`\`\``,
+          description: message,
           color,
           footer:      { text: footer },
           timestamp:   new Date().toISOString(),
