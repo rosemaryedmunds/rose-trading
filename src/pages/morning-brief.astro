@@ -226,6 +226,104 @@ import Layout from '../layouts/Layout.astro';
     .news-top { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
     .news-body { font-size: 0.8rem; color: #a1a1aa; font-family: system-ui, sans-serif; line-height: 1.6; }
 
+    /* ── Tile grid (econ + gaps) ─────────────────── */
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1px;
+      background: #1c1c20;
+      padding: 1px;
+    }
+    .tile-grid > * { background: #0f0f12; }
+
+    /* Econ tiles */
+    .econ-tile {
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      transition: background .12s;
+    }
+    .econ-tile:hover { background: #13131a; }
+    .econ-tile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .econ-time {
+      font-size: 0.58rem;
+      color: #3f3f46;
+      white-space: nowrap;
+      font-family: system-ui, sans-serif;
+    }
+    .econ-event {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #d4d4d8;
+      line-height: 1.35;
+      font-family: system-ui, sans-serif;
+    }
+    .econ-values {
+      display: flex;
+      gap: 0.85rem;
+      margin-top: 0.1rem;
+    }
+    .econ-val-block { display: flex; flex-direction: column; gap: 0.15rem; }
+    .econ-val-label {
+      font-size: 0.52rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #3f3f46;
+    }
+    .econ-val-num {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #71717a;
+      font-family: system-ui, sans-serif;
+    }
+    .actual-block .econ-val-label { color: #16a34a; }
+    .actual-num { color: #4ade80 !important; }
+
+    /* Gap tiles */
+    .gaps-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .gap-tile {
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      border-left: 2px solid transparent;
+      transition: background .12s;
+    }
+    .gap-tile:hover { background: #13131a; }
+    .gap-tile-up  { border-left-color: rgba(74,222,128,0.3); }
+    .gap-tile-dn  { border-left-color: rgba(248,113,113,0.3); }
+    .gap-tile-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .gap-ticker {
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      font-family: system-ui, sans-serif;
+    }
+    .gap-ticker.green { color: #4ade80; }
+    .gap-ticker.red   { color: #f87171; }
+    .gap-move {
+      font-size: 0.82rem;
+      font-weight: 800;
+      font-family: system-ui, sans-serif;
+    }
+    .gap-reason {
+      font-size: 0.7rem;
+      color: #52525b;
+      line-height: 1.45;
+      font-family: system-ui, sans-serif;
+    }
+
     /* Empty */
     .empty-row { padding: 0.85rem 1rem; color: #2d2d32; font-size: 0.75rem; font-family: system-ui, sans-serif; }
 
@@ -290,21 +388,25 @@ import Layout from '../layouts/Layout.astro';
         const nonUS = ['ecb','boe','boj','rba','pboc','bank of canada','bank of england','bank of japan','eurozone','germany','german','france','uk ','china cpi','japan','australia'];
         const econ = (data.econ_calendar||[]).filter(e=>!nonUS.some(k=>(e.event||'').toLowerCase().includes(k)));
         document.getElementById('econ-list').innerHTML = econ.length
-          ? econ.map(e => {
+          ? `<div class="tile-grid">${econ.map(e => {
               const imp = (e.impact||'LOW').toUpperCase();
               const bc = imp==='HIGH'?'badge-high':imp==='MED'?'badge-med':'badge-low';
-              const actualHtml = e.actual
-                ? `<div class="item-right actual">▶ ${e.actual}</div>`
-                : e.forecast ? `<div class="item-right">est ${e.forecast}</div>` : `<div class="item-right">${e.time}</div>`;
-              return `<div class="item-row">
-                <span class="item-badge ${bc}">${imp}</span>
-                <div class="item-main">
-                  <div class="item-title">${e.event}</div>
-                  <div class="item-sub">${e.time}${e.forecast && !e.actual ? '' : e.actual ? ` · est ${e.forecast||'—'}` : ''}</div>
+              const impColor = imp==='HIGH'?'#f87171':imp==='MED'?'#fbbf24':'#52525b';
+              const hasActual = e.actual && e.actual !== 'null' && e.actual !== null;
+              const hasForecast = e.forecast && e.forecast !== 'null' && e.forecast !== null;
+              return `<div class="econ-tile">
+                <div class="econ-tile-top">
+                  <span class="item-badge ${bc}">${imp}</span>
+                  <span class="econ-time">${e.time||''}</span>
                 </div>
-                ${actualHtml}
+                <div class="econ-event">${e.event}</div>
+                <div class="econ-values">
+                  ${hasActual ? `<div class="econ-val-block actual-block"><div class="econ-val-label">ACTUAL</div><div class="econ-val-num actual-num">${e.actual}</div></div>` : ''}
+                  ${hasForecast ? `<div class="econ-val-block"><div class="econ-val-label">FORECAST</div><div class="econ-val-num">${e.forecast}</div></div>` : ''}
+                  ${!hasActual && !hasForecast ? `<div class="econ-val-block"><div class="econ-val-label">TIME</div><div class="econ-val-num">${e.time||'TBD'}</div></div>` : ''}
+                </div>
               </div>`;
-            }).join('')
+            }).join('')}</div>`
           : '<div class="empty-row">No major US economic data today.</div>';
 
         // ── Gaps ──
@@ -312,32 +414,32 @@ import Layout from '../layouts/Layout.astro';
         const downs = data.gaps?.downs||[];
         let gHtml = '';
         if (ups.length) {
-          gHtml += `<div class="sub-divider up">▲ BEATS / GAP UPS</div>`;
+          gHtml += `<div class="sub-divider up">▲ BEATS / GAP UPS</div><div class="tile-grid gaps-grid">`;
           gHtml += ups.map(g => {
             const t = typeof g==='object'?g:{ticker:g,move:'↑',reason:''};
-            return `<div class="item-row">
-              <span class="item-badge badge-up">${t.move||'↑'}</span>
-              <div class="item-main">
-                <div class="item-title green">${t.ticker}</div>
-                <div class="item-sub">${t.reason||''}</div>
+            return `<div class="gap-tile gap-tile-up">
+              <div class="gap-tile-top">
+                <span class="gap-ticker green">${t.ticker}</span>
+                <span class="gap-move move-up">${t.move||'↑'}</span>
               </div>
-              <div class="item-right move-up">${t.move||'↑'}</div>
+              <div class="gap-reason">${t.reason||''}</div>
             </div>`;
           }).join('');
+          gHtml += `</div>`;
         }
         if (downs.length) {
-          gHtml += `<div class="sub-divider dn">▼ MISSES / GAP DOWNS</div>`;
+          gHtml += `<div class="sub-divider dn">▼ MISSES / GAP DOWNS</div><div class="tile-grid gaps-grid">`;
           gHtml += downs.map(g => {
             const t = typeof g==='object'?g:{ticker:g,move:'↓',reason:''};
-            return `<div class="item-row">
-              <span class="item-badge badge-down">${t.move||'↓'}</span>
-              <div class="item-main">
-                <div class="item-title red">${t.ticker}</div>
-                <div class="item-sub">${t.reason||''}</div>
+            return `<div class="gap-tile gap-tile-dn">
+              <div class="gap-tile-top">
+                <span class="gap-ticker red">${t.ticker}</span>
+                <span class="gap-move move-down">${t.move||'↓'}</span>
               </div>
-              <div class="item-right move-down">${t.move||'↓'}</div>
+              <div class="gap-reason">${t.reason||''}</div>
             </div>`;
           }).join('');
+          gHtml += `</div>`;
         }
         document.getElementById('gaps-container').innerHTML = gHtml||'<div class="empty-row">No notable pre-market earnings gaps today.</div>';
 
