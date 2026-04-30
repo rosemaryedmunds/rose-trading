@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const title = reviewType === 'PRE-MARKET' ? 'Pre-Market Review' : 'Post-Market Review';
-      await sendOneSignalPush(title, review.substring(0, 100) + (review.length > 100 ? '...' : ''));
+      await sendOneSignalPush(title, review);
       await saveFeedItem({ type: 'review', reviewType, message: review, timestamp: new Date().toISOString() });
       showStatus('review-status-msg', 'Review posted!', 'success');
       document.getElementById('review-input').value = '';
