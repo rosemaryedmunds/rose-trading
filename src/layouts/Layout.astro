@@ -43,13 +43,16 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
 <script is:inline>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  window.OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "48b95503-4b11-4a91-9806-059e84277551", // ← verify this matches your OneSignal dashboard
-      allowLocalhostAsSecureOrigin: true,
+  // Only initialize OneSignal on the members alerts page
+  if (window.location.pathname.startsWith('/alerts-members-x9q3')) {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "48b95503-4b11-4a91-9806-059e84277551",
+        allowLocalhostAsSecureOrigin: true,
+      });
     });
-  });
+  }
 </script>
 </head>
 <body>
