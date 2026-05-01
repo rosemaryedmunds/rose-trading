@@ -47,11 +47,8 @@ export default async (req) => {
     return new Response(JSON.stringify({ error: data }), { status: 500 });
   }
 
-  // ── Discord webhook ────────────────────────────────────────────────────────
-  const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
-
-  if (discordWebhookUrl) {
-    // Detect message type from title
+  // ── Discord webhook helper ─────────────────────────────────────────────────
+  const buildDiscordBody = (title, message) => {
     const isCall       = message.includes('CALL');
     const isPut        = message.includes('PUT');
     const isAlert      = title === 'SPX Alert';
@@ -76,30 +73,42 @@ export default async (req) => {
       color = 0x5F5CFF; emoji = '📡'; footer = 'rose.trading';
     }
 
-    const discordRes = await fetch(discordWebhookUrl, {
+    return JSON.stringify({
+      username: 'Rose Alerts 🌹',
+      embeds: [{
+        title:       `${emoji} ${title}`,
+        description: message,
+        color,
+        footer:      { text: footer },
+        timestamp:   new Date().toISOString(),
+      }],
+    });
+  };
+
+  // ── Send to Discord webhooks ───────────────────────────────────────────────
+  const discordWebhooks = [
+    { url: process.env.DISCORD_WEBHOOK_URL,      name: 'DISCORD_WEBHOOK_URL' },
+    { url: process.env.DISCORD_ADEX_WEBHOOK_URL, name: 'DISCORD_ADEX_WEBHOOK_URL' },
+  ];
+
+  const discordBody = buildDiscordBody(title, message);
+
+  for (const { url, name } of discordWebhooks) {
+    if (!url) {
+      console.warn(`${name} not set — skipping`);
+      continue;
+    }
+    const discordRes = await fetch(url, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username:   'Rose Alerts 🌹',
-        embeds: [{
-          title:       `${emoji} ${title}`,
-          description: message,
-          color,
-          footer:      { text: footer },
-          timestamp:   new Date().toISOString(),
-        }],
-      }),
+      body:    discordBody,
     });
-
     if (!discordRes.ok) {
-      const discordErr = await discordRes.text();
-      console.error('Discord webhook failed:', discordErr);
-      // Still return success — push already went out
+      const err = await discordRes.text();
+      console.error(`${name} webhook failed:`, err);
     } else {
-      console.log('Discord webhook sent');
+      console.log(`${name} webhook sent`);
     }
-  } else {
-    console.warn('DISCORD_WEBHOOK_URL not set — skipping Discord');
   }
 
   return new Response(JSON.stringify({ success: true, id: data.id }), {
