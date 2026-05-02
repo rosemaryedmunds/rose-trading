@@ -75,7 +75,7 @@ export default async (req) => {
 
     return JSON.stringify({
       username:   'Rose Alerts 🌹',
-      avatar_url: 'https://rose.trading/rose-logo.png',
+      avatar_url: 'https://rose.trading/rose-no-border.png',
       embeds: [{
         title:       `${emoji} ${title}`,
         description: message,

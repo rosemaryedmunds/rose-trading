@@ -10,19 +10,21 @@ import { Icon } from 'astro-icon/components';
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 </Fragment>
 
-  <!-- Password gate -->
+  <!-- Auth checking -->
   <div id="auth-checking" class="auth-screen">
+    <div class="auth-spinner"></div>
+    <p>Verifying your membership...</p>
+  </div>
+
+  <!-- Auth failed -->
+  <div id="auth-failed" class="auth-screen" style="display:none;">
     <div class="auth-icon">
       <Icon name="lucide:lock" />
     </div>
-    <h2>Members Access</h2>
-    <p>Enter your member password to view trade alerts.</p>
-    <div class="pw-wrap">
-      <input id="pw-input" type="password" placeholder="Enter password" class="pw-input" autocomplete="current-password" />
-      <button class="auth-btn" onclick="checkPassword()">Enter →</button>
-    </div>
-    <p id="pw-error" style="display:none; color:#FF5C5C; font-size:0.82rem;">Incorrect password. Check Discord for the current password.</p>
-    <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" class="auth-link" style="margin-top:0.5rem;">Not a member? Subscribe for $39.99/mo</a>
+    <h2>Access Required</h2>
+    <p>You need an active Rose.Trading subscription to view this page.</p>
+    <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" class="auth-btn">Subscribe for $39.99/mo →</a>
+    <a href="/.netlify/functions/whop-login" class="auth-link">Already subscribed? Sign in</a>
   </div>
 
   <!-- Main content -->
@@ -87,27 +89,26 @@ import { Icon } from 'astro-icon/components';
   let allItems  = [];
   let curFilter = 'all';
 
-  const CORRECT_PW = 'fjsSD-423-r983';
-  const SESSION_KEY = 'rt_member_auth';
-
-  function checkPassword() {
-    const input = document.getElementById('pw-input').value;
-    const error = document.getElementById('pw-error');
-    if (input === CORRECT_PW) {
-      sessionStorage.setItem(SESSION_KEY, '1');
-      grantAccess();
-    } else {
-      error.style.display = 'block';
-      document.getElementById('pw-input').value = '';
-      document.getElementById('pw-input').focus();
+  async function checkAuth() {
+    try {
+      const res  = await fetch('/.netlify/functions/verify-session');
+      const data = await res.json();
+      document.getElementById('auth-checking').style.display = 'none';
+      if (data.valid) {
+        document.getElementById('main-content').style.display = 'block';
+        loadFeed();
+        setInterval(loadFeed, 60000);
+      } else {
+        if (data.reason === 'no_membership') {
+          document.getElementById('auth-failed').style.display = 'flex';
+        } else {
+          window.location.href = '/.netlify/functions/whop-login';
+        }
+      }
+    } catch {
+      document.getElementById('auth-checking').style.display = 'none';
+      document.getElementById('auth-failed').style.display = 'flex';
     }
-  }
-
-  function grantAccess() {
-    document.getElementById('auth-checking').style.display = 'none';
-    document.getElementById('main-content').style.display = 'block';
-    loadFeed();
-    setInterval(loadFeed, 60000);
   }
 
   async function loadFeed() {
@@ -200,15 +201,7 @@ import { Icon } from 'astro-icon/components';
     }
   }
 
-  // Enter key on password input
-  document.getElementById('pw-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') checkPassword();
-  });
-
-  // Auto-grant if already authenticated this session
-  if (sessionStorage.getItem(SESSION_KEY) === '1') {
-    grantAccess();
-  }
+  checkAuth();
 </script>
 
 <style>
@@ -253,20 +246,6 @@ import { Icon } from 'astro-icon/components';
     justify-content: center; min-height: 60vh; text-align: center;
     gap: 1rem; padding: 2rem; color: var(--muted);
   }
-  .pw-wrap {
-    display: flex; flex-direction: column; align-items: center; gap: 0.75rem; width: 100%; max-width: 320px;
-  }
-  .pw-input {
-    width: 100%; padding: 0.75rem 1rem;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; color: var(--text); font-size: 1rem;
-    font-family: 'JetBrains Mono', monospace;
-    outline: none; text-align: center; letter-spacing: 0.05em;
-    transition: border-color 0.2s;
-  }
-  .pw-input:focus { border-color: var(--purple); }
-  .pw-input::placeholder { color: var(--muted); letter-spacing: 0; }
-
   .auth-spinner {
     width: 36px; height: 36px; border: 3px solid var(--border);
     border-top-color: var(--purple); border-radius: 50%;
