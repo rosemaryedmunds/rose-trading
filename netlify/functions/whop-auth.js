@@ -14,7 +14,6 @@ exports.handler = async (event) => {
 
   if (!code) return redirect(`${siteUrl}/alerts?error=no_code`);
 
-  // Parse cookies
   const cookieHeader = event.headers?.cookie || '';
   const cookies = Object.fromEntries(
     cookieHeader.split(';').map(c => {
@@ -30,7 +29,6 @@ exports.handler = async (event) => {
   }
 
   try {
-    // 1. Exchange code for token
     const tokenRes = await fetch('https://api.whop.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -50,7 +48,6 @@ exports.handler = async (event) => {
       return redirect(`${siteUrl}/alerts?error=auth_failed`);
     }
 
-    // 2. Get user info
     const userRes = await fetch('https://api.whop.com/oauth/userinfo', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
@@ -61,13 +58,12 @@ exports.handler = async (event) => {
       return redirect(`${siteUrl}/alerts?error=user_failed`);
     }
 
-    // 3. Check access using /me/has_access/:company_id with user's OAuth token
-    const companyId = process.env.WHOP_COMPANY_ID; // biz_xxxxxxxxx from your Whop dashboard URL
+    const companyId = process.env.WHOP_COMPANY_ID;
     const accessRes = await fetch(
-      `https://api.whop.com/api/v5/me/has_access/${companyId}`,
+      `https://api.whop.com/v5/users/${user.sub}/access/${companyId}`,
       {
         headers: {
-          Authorization: `Bearer ${tokenData.access_token}`,
+          Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
           'Content-Type': 'application/json',
         },
       }
@@ -86,7 +82,6 @@ exports.handler = async (event) => {
       return redirect(`${siteUrl}/alerts?error=no_membership`);
     }
 
-    // 4. Issue session cookie (7-day expiry)
     const sessionToken = Buffer.from(JSON.stringify({
       userId:    user.sub,
       email:     user.email || '',
