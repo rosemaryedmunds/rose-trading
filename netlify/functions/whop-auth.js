@@ -64,7 +64,7 @@ exports.handler = async (event) => {
     // 3. Check access using /me/has_access/:company_id with user's OAuth token
     const companyId = process.env.WHOP_COMPANY_ID; // biz_xxxxxxxxx from your Whop dashboard URL
     const accessRes = await fetch(
-      `https://api.whop.com/v5/me/has_access/${companyId}`,
+      `https://api.whop.com/api/v5/me/has_access/${companyId}`,
       {
         headers: {
           Authorization: `Bearer ${tokenData.access_token}`,
