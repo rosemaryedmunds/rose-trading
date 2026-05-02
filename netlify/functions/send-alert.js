@@ -74,7 +74,8 @@ export default async (req) => {
     }
 
     return JSON.stringify({
-      username: 'Rose Alerts 🌹',
+      username:   'Rose Alerts 🌹',
+      avatar_url: 'https://rose.trading/rose-logo.png',
       embeds: [{
         title:       `${emoji} ${title}`,
         description: message,
@@ -98,10 +99,14 @@ export default async (req) => {
       console.warn(`${name} not set — skipping`);
       continue;
     }
+    const body = name === 'DISCORD_ADEX_WEBHOOK_URL'
+      ? JSON.stringify({ ...JSON.parse(discordBody), content: '<@&1316500131633299467>' })
+      : discordBody;
+
     const discordRes = await fetch(url, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    discordBody,
+      body,
     });
     if (!discordRes.ok) {
       const err = await discordRes.text();
