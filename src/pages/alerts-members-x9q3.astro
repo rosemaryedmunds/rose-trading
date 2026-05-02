@@ -32,11 +32,7 @@ import { Icon } from 'astro-icon/components';
 
     <div class="page-header">
       <h1 style="font-family:Syne,sans-serif;font-weight:800;font-size:3rem;background:linear-gradient(135deg,#998BFF,#5F5CFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;margin-bottom:0.75rem;">Trade Alerts</h1>
-      <div class="member-badge">
-        <Icon name="lucide:shield-check" />
-        Members Access
-      </div>
-      <p class="page-sub">Real-time SPX alerts and market reviews from Rose.</p>
+      <p class="disclaimer">I am not a financial advisor. Nothing shared in this community is financial advice. All content is for educational purposes only. Never trade with money you cannot afford to lose. Past performance does not guarantee future results. You are 100% responsible for your own trading decisions.</p>
 
       <div class="alert-cta">
         <button id="enable-alerts-btn" class="enable-btn" onclick="enableNotifications()">
@@ -246,6 +242,19 @@ import { Icon } from 'astro-icon/components';
     justify-content: center; min-height: 60vh; text-align: center;
     gap: 1rem; padding: 2rem; color: var(--muted);
   }
+  .disclaimer {
+    font-size: 0.78rem;
+    color: var(--muted);
+    max-width: 560px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.6;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+  }
+
   .auth-spinner {
     width: 36px; height: 36px; border: 3px solid var(--border);
     border-top-color: var(--purple); border-radius: 50%;
