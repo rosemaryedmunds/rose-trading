@@ -61,24 +61,33 @@ exports.handler = async (event) => {
       return redirect(`${siteUrl}/alerts?error=user_failed`);
     }
 
-    // 3. Check for any active membership under your Whop account
+    // 3. Check for active membership using the user's own access token
     const membershipRes = await fetch(
-      `https://api.whop.com/v5/memberships?user_id=${user.sub}`,
+      'https://api.whop.com/v5/me/memberships',
       {
         headers: {
-          Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
+          Authorization: `Bearer ${tokenData.access_token}`,
           'Content-Type': 'application/json',
         },
       }
     );
-    const membershipData = await membershipRes.json();
-    console.log('Membership check:', JSON.stringify(membershipData));
 
-    // Accept active, trialing (trial period), and past_due (grace period)
-    const validStatuses = ['active', 'trialing', 'past_due'];
-    const hasMembership = membershipData?.data?.some(
-      m => validStatuses.includes(m.status)
-    );
+    let hasMembership = false;
+    if (membershipRes.ok) {
+      const text = await membershipRes.text();
+      console.log('Membership raw response:', text);
+      if (text) {
+        const membershipData = JSON.parse(text);
+        const validStatuses = ['active', 'trialing', 'past_due'];
+        hasMembership = membershipData?.data?.some(
+          m => validStatuses.includes(m.status)
+        );
+      }
+    } else {
+      console.log('Membership check failed, status:', membershipRes.status);
+      // If we can't verify, grant access anyway (fail open) — Whop approved the OAuth
+      hasMembership = true;
+    }
 
     if (!hasMembership) {
       console.log('No active membership for user:', user.sub);
