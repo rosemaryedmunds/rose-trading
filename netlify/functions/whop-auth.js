@@ -61,9 +61,10 @@ exports.handler = async (event) => {
       return redirect(`${siteUrl}/alerts?error=user_failed`);
     }
 
-    // 3. Check for active membership using the user's own access token
-    const membershipRes = await fetch(
-      'https://api.whop.com/v5/me/memberships',
+    // 3. Check access using /me/has_access/:company_id with user's OAuth token
+    const companyId = process.env.WHOP_COMPANY_ID; // biz_xxxxxxxxx from your Whop dashboard URL
+    const accessRes = await fetch(
+      `https://api.whop.com/v5/me/has_access/${companyId}`,
       {
         headers: {
           Authorization: `Bearer ${tokenData.access_token}`,
@@ -71,22 +72,13 @@ exports.handler = async (event) => {
         },
       }
     );
+    const accessText = await accessRes.text();
+    console.log('Access check response:', accessRes.status, accessText);
 
     let hasMembership = false;
-    if (membershipRes.ok) {
-      const text = await membershipRes.text();
-      console.log('Membership raw response:', text);
-      if (text) {
-        const membershipData = JSON.parse(text);
-        const validStatuses = ['active', 'trialing', 'past_due'];
-        hasMembership = membershipData?.data?.some(
-          m => validStatuses.includes(m.status)
-        );
-      }
-    } else {
-      console.log('Membership check failed, status:', membershipRes.status);
-      // If we can't verify, grant access anyway (fail open) — Whop approved the OAuth
-      hasMembership = true;
+    if (accessRes.ok && accessText) {
+      const accessData = JSON.parse(accessText);
+      hasMembership = accessData?.has_access === true;
     }
 
     if (!hasMembership) {
