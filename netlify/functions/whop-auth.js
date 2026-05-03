@@ -1,115 +1,108 @@
 // netlify/functions/whop-auth.js
 
 exports.handler = async (event) => {
-  const params        = new URLSearchParams(event.rawQuery || '');
-  const code          = params.get('code');
-  const siteUrl       = process.env.URL || 'https://rose.trading';
-  const redirectUri   = `${siteUrl}/.netlify/functions/whop-auth`;
+  var params = new URLSearchParams(event.rawQuery || '');
+  var code = params.get('code');
+  var siteUrl = process.env.URL || 'https://rose.trading';
+  var redirectUri = siteUrl + '/.netlify/functions/whop-auth';
 
-  const redirect = (url) => ({
-    statusCode: 302,
-    headers: { Location: url },
-    body: '',
+  function redirect(url) {
+    return { statusCode: 302, headers: { Location: url }, body: '' };
+  }
+
+  if (!code) return redirect(siteUrl + '/alerts?error=no_code');
+
+  var cookieHeader = (event.headers && event.headers.cookie) ? event.headers.cookie : '';
+  var cookies = {};
+  cookieHeader.split(';').forEach(function(c) {
+    var parts = c.trim().split('=');
+    var k = parts[0].trim();
+    var v = parts.slice(1).join('=');
+    cookies[k] = v;
   });
 
-  if (!code) return redirect(`${siteUrl}/alerts?error=no_code`);
-
-  // Parse cookies
-  const cookieHeader = event.headers?.cookie || '';
-  const cookies = Object.fromEntries(
-    cookieHeader.split(';').map(c => {
-      const [k, ...v] = c.trim().split('=');
-      return [k.trim(), v.join('=')];
-    })
-  );
-
-  const codeVerifier = cookies['pkce_verifier'];
+  var codeVerifier = cookies['pkce_verifier'];
   if (!codeVerifier) {
     console.error('Missing PKCE verifier');
-    return redirect(`${siteUrl}/alerts?error=missing_verifier`);
+    return redirect(siteUrl + '/alerts?error=missing_verifier');
   }
 
   try {
-    // 1. Exchange code for token
-    const tokenRes = await fetch('https://api.whop.com/oauth/token', {
+    var tokenRes = await fetch('https://api.whop.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        grant_type:    'authorization_code',
-        code,
-        redirect_uri:  redirectUri,
-        client_id:     process.env.WHOP_CLIENT_ID,
-        client_secret: process.env.WHOP_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirectUri,
+        client_id: process.env.WHOP_CLIENT_ID,
         code_verifier: codeVerifier,
       }),
     });
 
-    const tokenData = await tokenRes.json();
+    var tokenData = await tokenRes.json();
     console.log('Token response:', JSON.stringify(tokenData));
 
     if (!tokenRes.ok || !tokenData.access_token) {
-      return redirect(`${siteUrl}/alerts?error=auth_failed`);
+      return redirect(siteUrl + '/alerts?error=auth_failed');
     }
 
-    // 2. Get user info
-    const userRes = await fetch('https://api.whop.com/oauth/userinfo', {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    var userRes = await fetch('https://api.whop.com/oauth/userinfo', {
+      headers: { Authorization: 'Bearer ' + tokenData.access_token },
     });
-    const user = await userRes.json();
+    var user = await userRes.json();
     console.log('User info:', JSON.stringify(user));
 
     if (!userRes.ok || !user.sub) {
-      return redirect(`${siteUrl}/alerts?error=user_failed`);
+      return redirect(siteUrl + '/alerts?error=user_failed');
     }
 
-    // 3. Check for any active membership under your Whop account
-    const membershipRes = await fetch(
-      `https://api.whop.com/v5/memberships?user_id=${user.sub}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.WHOP_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    var companyId = process.env.WHOP_COMPANY_ID;
+
+    var resA = await fetch(
+      'https://api.whop.com/v5/me/has_access/' + companyId,
+      { headers: { Authorization: 'Bearer ' + tokenData.access_token } }
     );
-    const membershipData = await membershipRes.json();
-    console.log('Membership check:', JSON.stringify(membershipData));
+    var textA = await resA.text();
+    console.log('A user-token /me/has_access:', resA.status, textA);
 
-    // Accept active, trialing (trial period), and past_due (grace period)
-    const validStatuses = ['active', 'trialing', 'past_due'];
-    const hasMembership = membershipData?.data?.some(
-      m => validStatuses.includes(m.status)
+    var resB = await fetch(
+      'https://api.whop.com/v5/users/' + user.sub + '/access/' + companyId,
+      { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
     );
+    var textB = await resB.text();
+    console.log('B app-key /v5/users/access:', resB.status, textB);
 
-    if (!hasMembership) {
-      console.log('No active membership for user:', user.sub);
-      return redirect(`${siteUrl}/alerts?error=no_membership`);
-    }
+    var resC = await fetch(
+      'https://api.whop.com/api/v5/users/' + user.sub + '/access/' + companyId,
+      { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
+    );
+    var textC = await resC.text();
+    console.log('C app-key /api/v5/users/access:', resC.status, textC);
 
-    // 4. Issue session cookie (7-day expiry)
-    const sessionToken = Buffer.from(JSON.stringify({
-      userId:    user.sub,
-      email:     user.email || '',
+    console.log('Granting access for log inspection:', user.sub);
+
+    var sessionToken = Buffer.from(JSON.stringify({
+      userId: user.sub,
+      email: user.email || '',
       expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
     })).toString('base64');
-
-    console.log('Membership confirmed, granting access for:', user.sub);
 
     return {
       statusCode: 302,
       multiValueHeaders: {
         'Set-Cookie': [
-          `rose_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800`,
-          `pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`,
-          `pkce_state=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`,
+          'rose_session=' + sessionToken + '; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800',
+          'pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0',
+          'pkce_state=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0',
         ],
-        Location: [`${siteUrl}/alerts-members-x9q3`],
+        Location: [siteUrl + '/alerts-members-x9q3'],
       },
       body: '',
     };
 
   } catch (err) {
     console.error('Whop auth error:', err);
-    return redirect(`${siteUrl}/alerts?error=server_error`);
+    return redirect(siteUrl + '/alerts?error=server_error');
   }
 };
