@@ -41,8 +41,6 @@ exports.handler = async (event) => {
     });
 
     var tokenData = await tokenRes.json();
-    console.log('Token response status:', tokenRes.status);
-
     if (!tokenRes.ok || !tokenData.access_token) {
       return redirect(siteUrl + '/alerts?error=auth_failed');
     }
@@ -57,28 +55,50 @@ exports.handler = async (event) => {
       return redirect(siteUrl + '/alerts?error=user_failed');
     }
 
-    // Check via company memberships endpoint
+    // Get all active memberships and filter by this user
     var memberRes = await fetch(
-      'https://api.whop.com/v5/company/memberships?user_id=' + user.sub + '&status=active',
+      'https://api.whop.com/v5/company/memberships?status=active',
       { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
     );
     var memberText = await memberRes.text();
-    console.log('Company membership check:', memberRes.status, memberText);
+    console.log('Membership check status:', memberRes.status);
 
     var hasMembership = false;
     if (memberRes.ok && memberText) {
       var memberData = JSON.parse(memberText);
-      if (memberData && memberData.data && memberData.data.length > 0) {
-        hasMembership = true;
+      if (memberData && memberData.data) {
+        var validStatuses = ['active', 'trialing', 'past_due'];
+        hasMembership = memberData.data.some(function(m) {
+          return m.user_id === user.sub && validStatuses.indexOf(m.status) !== -1;
+        });
+        // If not on first page, check all pages
+        if (!hasMembership && memberData.pagination && memberData.pagination.total_pages > 1) {
+          var totalPages = memberData.pagination.total_pages;
+          for (var page = 2; page <= totalPages; page++) {
+            var pageRes = await fetch(
+              'https://api.whop.com/v5/company/memberships?status=active&page=' + page,
+              { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
+            );
+            var pageText = await pageRes.text();
+            if (pageRes.ok && pageText) {
+              var pageData = JSON.parse(pageText);
+              if (pageData && pageData.data) {
+                hasMembership = pageData.data.some(function(m) {
+                  return m.user_id === user.sub && validStatuses.indexOf(m.status) !== -1;
+                });
+                if (hasMembership) break;
+              }
+            }
+          }
+        }
       }
     }
 
+    console.log('Has membership:', hasMembership, 'for user:', user.sub);
+
     if (!hasMembership) {
-      console.log('No active membership for user:', user.sub);
       return redirect(siteUrl + '/alerts?error=no_membership');
     }
-
-    console.log('Membership confirmed for:', user.sub);
 
     var sessionToken = Buffer.from(JSON.stringify({
       userId: user.sub,
