@@ -57,22 +57,24 @@ exports.handler = async (event) => {
       return redirect(siteUrl + '/alerts?error=user_failed');
     }
 
-    // Check membership via /v5/app/members filtered by user_id
+    // Check via company memberships endpoint
     var memberRes = await fetch(
-      'https://api.whop.com/v5/app/members?user_id=' + user.sub,
+      'https://api.whop.com/v5/company/memberships?user_id=' + user.sub + '&status=active',
       { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
     );
     var memberText = await memberRes.text();
-    console.log('Member check:', memberRes.status, memberText);
+    console.log('Company membership check:', memberRes.status, memberText);
 
     var hasMembership = false;
     if (memberRes.ok && memberText) {
       var memberData = JSON.parse(memberText);
-      hasMembership = memberData && memberData.data && memberData.data.length > 0;
+      if (memberData && memberData.data && memberData.data.length > 0) {
+        hasMembership = true;
+      }
     }
 
     if (!hasMembership) {
-      console.log('No membership found for user:', user.sub);
+      console.log('No active membership for user:', user.sub);
       return redirect(siteUrl + '/alerts?error=no_membership');
     }
 
