@@ -41,7 +41,7 @@ exports.handler = async (event) => {
     });
 
     var tokenData = await tokenRes.json();
-    console.log('Token response:', JSON.stringify(tokenData));
+    console.log('Token response status:', tokenRes.status);
 
     if (!tokenRes.ok || !tokenData.access_token) {
       return redirect(siteUrl + '/alerts?error=auth_failed');
@@ -51,36 +51,32 @@ exports.handler = async (event) => {
       headers: { Authorization: 'Bearer ' + tokenData.access_token },
     });
     var user = await userRes.json();
-    console.log('User info:', JSON.stringify(user));
+    console.log('User sub:', user.sub);
 
     if (!userRes.ok || !user.sub) {
       return redirect(siteUrl + '/alerts?error=user_failed');
     }
 
-    var companyId = process.env.WHOP_COMPANY_ID;
-
-    var resA = await fetch(
-      'https://api.whop.com/v5/me/has_access/' + companyId,
-      { headers: { Authorization: 'Bearer ' + tokenData.access_token } }
-    );
-    var textA = await resA.text();
-    console.log('A user-token /me/has_access:', resA.status, textA);
-
-    var resB = await fetch(
-      'https://api.whop.com/v5/users/' + user.sub + '/access/' + companyId,
+    // Check membership via /v5/app/members filtered by user_id
+    var memberRes = await fetch(
+      'https://api.whop.com/v5/app/members?user_id=' + user.sub,
       { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
     );
-    var textB = await resB.text();
-    console.log('B app-key /v5/users/access:', resB.status, textB);
+    var memberText = await memberRes.text();
+    console.log('Member check:', memberRes.status, memberText);
 
-    var resC = await fetch(
-      'https://api.whop.com/api/v5/users/' + user.sub + '/access/' + companyId,
-      { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
-    );
-    var textC = await resC.text();
-    console.log('C app-key /api/v5/users/access:', resC.status, textC);
+    var hasMembership = false;
+    if (memberRes.ok && memberText) {
+      var memberData = JSON.parse(memberText);
+      hasMembership = memberData && memberData.data && memberData.data.length > 0;
+    }
 
-    console.log('Granting access for log inspection:', user.sub);
+    if (!hasMembership) {
+      console.log('No membership found for user:', user.sub);
+      return redirect(siteUrl + '/alerts?error=no_membership');
+    }
+
+    console.log('Membership confirmed for:', user.sub);
 
     var sessionToken = Buffer.from(JSON.stringify({
       userId: user.sub,
