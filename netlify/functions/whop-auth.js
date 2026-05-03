@@ -55,43 +55,50 @@ exports.handler = async (event) => {
       return redirect(siteUrl + '/alerts?error=user_failed');
     }
 
-    // Get all active memberships and filter by this user
-    var memberRes = await fetch(
-      'https://api.whop.com/v5/company/memberships?status=active',
-      { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
-    );
-    var memberText = await memberRes.text();
-    console.log('Membership check status:', memberRes.status);
+    // Owner bypass
+    if (user.sub === process.env.WHOP_OWNER_ID) {
+      console.log('Owner access granted');
+      var ownerToken = Buffer.from(JSON.stringify({
+        userId: user.sub,
+        email: user.email || '',
+        expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
+      })).toString('base64');
+      return {
+        statusCode: 302,
+        multiValueHeaders: {
+          'Set-Cookie': [
+            'rose_session=' + ownerToken + '; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800',
+            'pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0',
+            'pkce_state=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0',
+          ],
+          Location: [siteUrl + '/alerts-members-x9q3'],
+        },
+        body: '',
+      };
+    }
 
+    // Check membership across all pages
     var hasMembership = false;
-    if (memberRes.ok && memberText) {
-      var memberData = JSON.parse(memberText);
-      if (memberData && memberData.data) {
-        var validStatuses = ['active', 'trialing', 'past_due'];
-        hasMembership = memberData.data.some(function(m) {
-          return m.user_id === user.sub && validStatuses.indexOf(m.status) !== -1;
-        });
-        // If not on first page, check all pages
-        if (!hasMembership && memberData.pagination && memberData.pagination.total_pages > 1) {
-          var totalPages = memberData.pagination.total_pages;
-          for (var page = 2; page <= totalPages; page++) {
-            var pageRes = await fetch(
-              'https://api.whop.com/v5/company/memberships?status=active&page=' + page,
-              { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
-            );
-            var pageText = await pageRes.text();
-            if (pageRes.ok && pageText) {
-              var pageData = JSON.parse(pageText);
-              if (pageData && pageData.data) {
-                hasMembership = pageData.data.some(function(m) {
-                  return m.user_id === user.sub && validStatuses.indexOf(m.status) !== -1;
-                });
-                if (hasMembership) break;
-              }
-            }
-          }
+    var validStatuses = ['active', 'trialing', 'past_due'];
+    var page = 1;
+    var totalPages = 1;
+
+    while (page <= totalPages && !hasMembership) {
+      var memberRes = await fetch(
+        'https://api.whop.com/v5/company/memberships?status=active&page=' + page,
+        { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
+      );
+      var memberText = await memberRes.text();
+      if (memberRes.ok && memberText) {
+        var memberData = JSON.parse(memberText);
+        if (memberData && memberData.data) {
+          hasMembership = memberData.data.some(function(m) {
+            return m.user_id === user.sub && validStatuses.indexOf(m.status) !== -1;
+          });
+          totalPages = memberData.pagination ? memberData.pagination.total_pages : 1;
         }
       }
+      page++;
     }
 
     console.log('Has membership:', hasMembership, 'for user:', user.sub);
