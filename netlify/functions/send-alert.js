@@ -122,15 +122,6 @@ export async function handler(event) {
 
   // ── Save to feed (members page) ────────────────────────────────────────
   try {
-    const { getStore } = await import('@netlify/blobs');
-    const store = getStore('feed');
-
-    let items = [];
-    try {
-      const existing = await store.get('items', { type: 'json' });
-      if (existing) items = existing;
-    } catch { items = []; }
-
     const feedItem = {
       type:      title === 'SPX Alert' ? 'alert' : (title.toLowerCase().includes('review') ? 'review' : 'note'),
       title,
@@ -140,10 +131,12 @@ export async function handler(event) {
       timestamp: new Date().toISOString(),
     };
 
-    items.unshift(feedItem);
-    if (items.length > 100) items = items.slice(0, 100);
-
-    await store.set('items', JSON.stringify(items));
+    const siteUrl = process.env.URL || 'https://rose.trading';
+    await fetch(`${siteUrl}/.netlify/functions/save-feed`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(feedItem),
+    });
   } catch (err) {
     console.error('Feed save error:', err);
   }
