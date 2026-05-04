@@ -1,54 +1,35 @@
-// netlify/functions/send-alert.js
-// Sends a push notification via OneSignal REST API v1
-// Uses newer API key format with 'Key' prefix instead of 'Basic'
-
-export default async (req) => {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+export async function handler(event) {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const { title, message } = await req.json();
+  const { title, message, imageUrl } = JSON.parse(event.body);
 
-  if (!title || !message) {
-    return new Response('Missing title or message', { status: 400 });
-  }
-
-  const appId      = process.env.ONESIGNAL_APP_ID;
-  const restApiKey = process.env.ONESIGNAL_REST_API_KEY;
-
-  if (!appId || !restApiKey) {
-    console.error('Missing env vars: ONESIGNAL_APP_ID or ONESIGNAL_REST_API_KEY');
-    return new Response(JSON.stringify({ error: 'Missing env vars' }), { status: 500 });
-  }
-
-  const payload = {
-    app_id:            appId,
-    included_segments: ['All'],
-    headings:          { en: title },
-    contents:          { en: message },
-  };
-
-  console.log('Sending to OneSignal:', JSON.stringify(payload));
-
-  // Try 'Key' prefix first (newer API keys), fall back handled by logging
-  const res = await fetch('https://onesignal.com/api/v1/notifications', {
-    method:  'POST',
+  // ── OneSignal push ──────────────────────────────────────────────────────
+  const pushRes = await fetch('https://onesignal.com/api/v1/notifications', {
+    method: 'POST',
     headers: {
-      'Content-Type':  'application/json',
-      'Authorization': `Key ${restApiKey}`,
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${process.env.ONESIGNAL_REST_API_KEY}`,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      app_id:             process.env.ONESIGNAL_APP_ID,
+      included_segments:  ['All'],
+      headings:           { en: title },
+      contents:           { en: message },
+    }),
   });
 
-  const data = await res.json();
-  console.log('OneSignal response:', JSON.stringify(data));
-
-  if (!res.ok) {
-    return new Response(JSON.stringify({ error: data }), { status: 500 });
+  if (!pushRes.ok) {
+    const err = await pushRes.text();
+    console.error('OneSignal error:', err);
+    return { statusCode: 500, body: 'OneSignal send failed' };
   }
 
-  // ── Discord webhook helper ─────────────────────────────────────────────────
-  const buildDiscordBody = (title, message) => {
+  // ── Discord webhook ─────────────────────────────────────────────────────
+  const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
+
+  if (discordWebhookUrl) {
     const isCall       = message.includes('CALL');
     const isPut        = message.includes('PUT');
     const isAlert      = title === 'SPX Alert';
@@ -73,53 +54,37 @@ export default async (req) => {
       color = 0x5F5CFF; emoji = '📡'; footer = 'rose.trading';
     }
 
-    return JSON.stringify({
-      username:   'Rose Alerts 🌹',
-      avatar_url: 'https://rose.trading/rose-no-border.png',
-      embeds: [{
-        title:       `${emoji} ${title}`,
-        description: message,
-        color,
-        footer:      { text: footer },
-        timestamp:   new Date().toISOString(),
-      }],
-    });
-  };
+    // Build embed — add image if URL was provided
+    const embed = {
+      title:       `${emoji} ${title}`,
+      description: `\`\`\`${message}\`\`\``,
+      color,
+      footer:      { text: `${footer} | ${new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })} CT` },
+      timestamp:   new Date().toISOString(),
+    };
 
-  // ── Send to Discord webhooks ───────────────────────────────────────────────
-  const discordWebhooks = [
-    { url: process.env.DISCORD_WEBHOOK_URL,      name: 'DISCORD_WEBHOOK_URL' },
-    { url: process.env.DISCORD_ADEX_WEBHOOK_URL, name: 'DISCORD_ADEX_WEBHOOK_URL' },
-  ];
-
-  const discordBody = buildDiscordBody(title, message);
-
-  for (const { url, name } of discordWebhooks) {
-    if (!url) {
-      console.warn(`${name} not set — skipping`);
-      continue;
+    // Attach image if provided
+    if (imageUrl && imageUrl.trim()) {
+      embed.image = { url: imageUrl.trim() };
     }
-    const body = name === 'DISCORD_ADEX_WEBHOOK_URL'
-      ? JSON.stringify({ ...JSON.parse(discordBody), content: '<@&1316500131633299467>' })
-      : discordBody;
 
-    const discordRes = await fetch(url, {
+    const discordRes = await fetch(discordWebhookUrl, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body,
+      body: JSON.stringify({
+        username: 'Rose Alerts 🌹',
+        embeds:   [embed],
+      }),
     });
+
     if (!discordRes.ok) {
       const err = await discordRes.text();
-      console.error(`${name} webhook failed:`, err);
-    } else {
-      console.log(`${name} webhook sent`);
+      console.error('Discord error:', err);
+      // Don't fail the whole request if Discord fails
     }
+  } else {
+    console.warn('DISCORD_WEBHOOK_URL not set — skipping Discord');
   }
 
-  return new Response(JSON.stringify({ success: true, id: data.id }), {
-    status:  200,
-    headers: { 'Content-Type': 'application/json' },
-  });
-};
-
-export const config = { path: '/.netlify/functions/send-alert' };
+  return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+}

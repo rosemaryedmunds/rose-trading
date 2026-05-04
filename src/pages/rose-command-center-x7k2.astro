@@ -1,246 +1,409 @@
 ---
-// Private page — keep this URL secret!
-// Deploy at: /rose-command-center-x7k2
+// rose-command-center-x7k2.astro — private command center
 ---
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Command Center</title>
-  <meta name="robots" content="noindex, nofollow" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <title>Rose Command Center</title>
+  <style>
+    :root {
+      --bg:       #0B0C15;
+      --card:     #1C1E2D;
+      --purple:   #998BFF;
+      --blue:     #5F5CFF;
+      --text:     #E0E0E0;
+      --muted:    #888;
+      --green:    #3DDC84;
+      --red:      #FF5C5C;
+      --border:   #2a2d3e;
+      --input-bg: #13141f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--purple);
+      font-size: 1.1rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: .7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Panel ─────────────────────────────────────────────── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--purple);
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Labels ────────────────────────────────────────────── */
+    label {
+      display: block;
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .35rem;
+      margin-top: .85rem;
+    }
+
+    label:first-of-type { margin-top: 0; }
+
+    /* ── Inputs ────────────────────────────────────────────── */
+    textarea, input[type="text"], input[type="url"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .85rem;
+      padding: .65rem .75rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+      font-family: inherit;
+    }
+
+    textarea:focus, input[type="text"]:focus, input[type="url"]:focus {
+      border-color: var(--blue);
+    }
+
+    textarea { min-height: 80px; }
+
+    /* image url field — monospace hint */
+    .url-field {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: .78rem;
+    }
+
+    .url-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: .85rem;
+      margin-bottom: .35rem;
+    }
+    .url-label-row span {
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .url-optional {
+      font-size: .65rem;
+      color: #555;
+      font-style: italic;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* ── Chips ─────────────────────────────────────────────── */
+    .chip-row {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: .35rem .75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .chip:hover { border-color: var(--blue); color: var(--text); }
+    .chip-green.active { background: var(--green); border-color: var(--green); color: #000; }
+    .chip-red.active   { background: var(--red);   border-color: var(--red);   color: #fff; }
+    .chip-blue.active  { background: #3DDC84;      border-color: #3DDC84;      color: #000; }
+    .chip-purple.active { background: var(--purple); border-color: var(--purple); color: #000; }
+
+    /* ── Buttons ───────────────────────────────────────────── */
+    .btn {
+      width: 100%;
+      margin-top: .9rem;
+      padding: .75rem;
+      border-radius: 10px;
+      border: none;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:hover  { opacity: .9; }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .btn-primary   { background: var(--blue);   color: #fff; }
+    .btn-secondary { background: var(--purple); color: #000; }
+    .btn-ghost     { background: #2a2d3e;       color: var(--text); }
+
+    /* ── Divider ────────────────────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin: 1rem 0;
+    }
+    .divider span {
+      font-size: .65rem;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      white-space: nowrap;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Status messages ────────────────────────────────────── */
+    .status {
+      font-size: .75rem;
+      margin-top: .5rem;
+      min-height: 1.1rem;
+      text-align: center;
+      border-radius: 6px;
+      padding: .3rem .5rem;
+    }
+    .status.success { color: var(--green); }
+    .status.error   { color: var(--red);   }
+    .status.warn    { color: #f0c060;      }
+  </style>
 </head>
 <body>
 
-<div class="terminal">
-  <div class="top-bar">
-    <div class="top-bar-left">
-      <span class="dot red"></span>
-      <span class="dot yellow"></span>
-      <span class="dot green"></span>
+<h1>🌹 Rose Command Center</h1>
+
+<div class="grid">
+
+  <!-- ── LEFT: SPX ALERT ───────────────────────────────────── -->
+  <div class="panel">
+    <div class="panel-title">⚡ SPX Alert</div>
+
+    <label>Direction</label>
+    <div class="chip-row" id="direction-chips">
+      <button class="chip chip-green" data-val="CALL">📈 CALL</button>
+      <button class="chip chip-red"   data-val="PUT">📉 PUT</button>
     </div>
-    <span class="top-bar-title">ROSE // COMMAND CENTER</span>
-    <span class="top-bar-time" id="clock"></span>
+
+    <label>Action</label>
+    <div class="chip-row" id="action-chips">
+      <button class="chip chip-blue"   data-val="🚀 ENTRY">🚀 ENTRY</button>
+      <button class="chip chip-blue"   data-val="✅ EXIT">✅ EXIT</button>
+      <button class="chip chip-red"    data-val="🛑 STOP HIT">🛑 STOP HIT</button>
+      <button class="chip chip-purple" data-val="👀 WATCHING">👀 WATCHING</button>
+    </div>
+
+    <label>Strike / Expiry / Price</label>
+    <input type="text" id="alert-detail" placeholder="e.g. 5400 5/3 @ $2.50" />
+
+    <button class="btn btn-primary" id="alert-btn">
+      ✈️ Send Alert
+    </button>
+    <div class="status" id="alert-status"></div>
   </div>
 
-  <div class="panel-grid">
+  <!-- ── RIGHT: MARKET REVIEW ──────────────────────────────── -->
+  <div class="panel">
+    <div class="panel-title">📋 Market Review</div>
 
-    <!-- LEFT: Quick Alert Fire -->
-    <div class="panel">
-      <h2 class="panel-title"><i data-lucide="zap"></i> FIRE ALERT</h2>
+    <!-- Adhoc Note -->
+    <label>Adhoc Note</label>
+    <textarea id="adhoc-input" placeholder="Send a quick note to subscribers e.g. market is choppy, sitting out..."></textarea>
 
-      <div class="section-label">CALL / PUT</div>
-      <div class="chip-grid" id="direction-chips">
-        <button class="chip chip-green" data-value="CALL 🟢">CALL 🟢</button>
-        <button class="chip chip-red" data-value="PUT 🔴">PUT 🔴</button>
-      </div>
+    <div class="url-label-row">
+      <span>Chart URL</span>
+      <span class="url-optional">optional</span>
+    </div>
+    <input type="url" id="adhoc-image-url" class="url-field" placeholder="https://..." />
 
-      <div class="section-label">ACTION</div>
-      <div class="chip-grid" id="action-chips">
-        <button class="chip chip-green" data-value="🚀 ENTRY">🚀 ENTRY</button>
-        <button class="chip chip-blue" data-value="✅ EXIT">✅ EXIT</button>
-        <button class="chip chip-red" data-value="❌ STOP HIT">❌ STOP HIT</button>
-        <button class="chip" data-value="👀 WATCHING">👀 WATCHING</button>
-      </div>
+    <button class="btn btn-ghost" id="adhoc-btn">
+      💬 Send Note
+    </button>
+    <div class="status" id="adhoc-status"></div>
 
-      <div class="input-row three-col">
-        <div class="input-col">
-          <div class="section-label">STRIKE PRICE</div>
-          <input class="text-input" id="strike-input" type="number" placeholder="e.g. 5400" />
-        </div>
-        <div class="input-col">
-          <div class="section-label">EXPIRY</div>
-          <input class="text-input" id="expiry-input" type="date" />
-        </div>
-        <div class="input-col">
-          <div class="section-label">PREMIUM PAID</div>
-          <input class="text-input" id="premium-input" type="number" step="0.01" placeholder="e.g. 1.55" />
-        </div>
-      </div>
+    <div class="divider"><span>Market Review</span></div>
 
-      <div class="section-label">SPX PRICE (optional)</div>
-      <input class="text-input" id="price-input" type="number" placeholder="e.g. 5420" />
-
-      <div class="section-label">NOTE (optional)</div>
-      <textarea class="text-input" id="note-input" rows="2" placeholder="e.g. waiting for confirmation candle..."></textarea>
-
-      <div class="preview-box" id="preview-box">
-        <span class="preview-label">PREVIEW</span>
-        <span id="preview-text">Select setup, call/put & action above</span>
-      </div>
-
-      <button class="fire-btn" id="fire-btn">
-        <i data-lucide="send"></i> SEND ALERT
-      </button>
-      <div class="status-msg" id="status-msg"></div>
+    <label>Type</label>
+    <div class="chip-row" id="review-type-chips">
+      <button class="chip chip-purple" data-val="Pre-Market Review">PRE-MARKET</button>
+      <button class="chip chip-purple" data-val="Post-Market Review">POST-MARKET</button>
     </div>
 
-    <!-- RIGHT: Pre/Post Market Review + History -->
-    <div class="panel">
-      <h2 class="panel-title"><i data-lucide="file-text"></i> MARKET REVIEW</h2>
+    <label>Review</label>
+    <textarea id="review-input" placeholder="Write your pre or post market thoughts here...
 
-      <div class="section-label">ADHOC NOTE</div>
-      <textarea class="text-input" id="adhoc-input" rows="3" placeholder="Send a quick note to subscribers e.g. market is choppy, sitting out..."></textarea>
-      <button class="fire-btn adhoc-btn" id="adhoc-btn">
-        <i data-lucide="message-square"></i> SEND NOTE
-      </button>
-      <div class="status-msg" id="adhoc-status-msg"></div>
+What are you watching? Key levels? Bias? How did the day go?" style="min-height:110px;"></textarea>
 
-      <div class="feed-divider" style="margin-top:0.5rem"><span>MARKET REVIEW</span></div>
-
-      <div class="section-label">TYPE</div>
-      <div class="chip-grid" id="review-type-chips">
-        <button class="chip" data-value="PRE-MARKET">PRE-MARKET</button>
-        <button class="chip" data-value="POST-MARKET">POST-MARKET</button>
-      </div>
-
-      <div class="section-label">REVIEW</div>
-      <textarea class="text-input" id="review-input" rows="7"
-        placeholder="Write your pre or post market thoughts here...&#10;&#10;What are you watching? Key levels? Bias? How did the day go?"></textarea>
-
-      <button class="fire-btn secondary-btn" id="review-btn">
-        <i data-lucide="edit-3"></i> POST REVIEW
-      </button>
-      <div class="status-msg" id="review-status-msg"></div>
-
-      <!-- Feed Preview -->
-      <div class="feed-divider">
-        <span>RECENT ACTIVITY</span>
-      </div>
-      <div class="feed-preview" id="feed-preview">
-        <div class="feed-loading">Loading feed...</div>
-      </div>
+    <div class="url-label-row">
+      <span>Chart URL</span>
+      <span class="url-optional">optional</span>
     </div>
+    <input type="url" id="review-image-url" class="url-field" placeholder="https://..." />
 
+    <button class="btn btn-secondary" id="review-btn">
+      ✏️ Post Review
+    </button>
+    <div class="status" id="review-status"></div>
   </div>
+
 </div>
 
-<script is:inline>
-document.addEventListener('DOMContentLoaded', () => {
-
-  // ── Lucide icons ──────────────────────────────────────────────────────────
-  if (window.lucide) window.lucide.createIcons();
-
-  // ── Clock ─────────────────────────────────────────────────────────────────
-  function updateClock() {
-    document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {
-      timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', second: '2-digit'
-    }) + ' CT';
-  }
-  setInterval(updateClock, 1000);
-  updateClock();
-
-  // ── State ─────────────────────────────────────────────────────────────────
-  const state = { direction: null, action: null };
-  let reviewType = null;
-
-  // ── Default expiry to today ───────────────────────────────────────────────
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }); // YYYY-MM-DD
-  document.getElementById('expiry-input').value = today;
-
-  // ── Chip selection helper ─────────────────────────────────────────────────
-  function bindChips(groupId, stateKey, callback) {
+<script>
+  // ── Chip helper ───────────────────────────────────────────
+  function makeChips(groupId, single = true) {
     const group = document.getElementById(groupId);
-    if (!group) return;
-    group.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', (e) => {
-        e.preventDefault();
-        group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        if (stateKey) state[stateKey] = chip.dataset.value;
-        if (callback) callback(chip.dataset.value);
-        updatePreview();
+    let selected = null;
+    group.querySelectorAll('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (single) {
+          group.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+        }
+        btn.classList.toggle('active');
+        selected = btn.classList.contains('active') ? btn.dataset.val : null;
       });
     });
+    return { get: () => selected };
   }
 
-  bindChips('direction-chips', 'direction');
-  bindChips('action-chips',    'action');
-  bindChips('review-type-chips', null, (val) => { reviewType = val; });
+  const directionChips  = makeChips('direction-chips');
+  const actionChips     = makeChips('action-chips');
+  const reviewTypeChips = makeChips('review-type-chips');
 
-  // ── Live preview ──────────────────────────────────────────────────────────
-  ['strike-input','expiry-input','premium-input','price-input','note-input'].forEach(id => {
-    document.getElementById(id).addEventListener('input', updatePreview);
-  });
-
-  function updatePreview() {
-    const strike = document.getElementById('strike-input').value;
-    const expiry = document.getElementById('expiry-input').value;
-    const price  = document.getElementById('price-input').value;
-    const note   = document.getElementById('note-input').value;
-
-    const premium = document.getElementById('premium-input').value;
-    const parts = [];
-    if (state.action)    parts.push(state.action);
-    parts.push('| SPX');
-    if (state.direction) parts.push(state.direction);
-    if (strike)          parts.push(strike);
-    if (expiry) {
-      const [y, m, d] = expiry.split('-');
-      parts.push(`${parseInt(m)}/${parseInt(d)}`);
-    }
-    if (premium)      parts.push(`@ $${parseFloat(premium).toFixed(2)}`);
-    if (price)        parts.push('| SPX @', price);
-    if (note)         parts.push('|', note);
-
-    const text = parts.length > 1 ? parts.join(' ') : 'Select call/put & action above';
-    document.getElementById('preview-text').textContent = text;
+  // ── Status helper ─────────────────────────────────────────
+  function showStatus(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent  = msg;
+    el.className    = `status ${type}`;
+    if (type === 'success') setTimeout(() => { el.textContent = ''; el.className = 'status'; }, 3000);
   }
 
-  // ── Fire Alert ────────────────────────────────────────────────────────────
-  document.getElementById('fire-btn').addEventListener('click', async () => {
-    if (!state.direction || !state.action) {
-      showStatus('status-msg', 'Please select call/put and action.', 'warn');
+  // ── Send to Netlify function ──────────────────────────────
+  async function sendAlert(payload) {
+    const res = await fetch('/.netlify/functions/send-alert', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
+  // ── SPX Alert ────────────────────────────────────────────
+  document.getElementById('alert-btn').addEventListener('click', async () => {
+    const direction = directionChips.get();
+    const action    = actionChips.get();
+    const detail    = document.getElementById('alert-detail').value.trim();
+
+    if (!direction || !action) {
+      showStatus('alert-status', 'Select direction + action.', 'warn');
       return;
     }
 
-    const strike = document.getElementById('strike-input').value;
-    const expiry = document.getElementById('expiry-input').value;
-    const price  = document.getElementById('price-input').value;
-    const note   = document.getElementById('note-input').value;
-
-    // Build message — action first, no setup
-    const premium = document.getElementById('premium-input').value;
-    const parts = [state.action, '| SPX', state.direction];
-    if (strike) parts.push(strike);
-    if (expiry) {
-      const [y, m, d] = expiry.split('-');
-      parts.push(`${parseInt(m)}/${parseInt(d)}`);
-    }
-    if (premium) parts.push(`@ $${parseFloat(premium).toFixed(2)}`);
-    if (price) parts.push('| SPX @', price);
-    if (note)  parts.push('|', note);
-    const message = parts.join(' ');
-
-    const btn = document.getElementById('fire-btn');
+    const message = `${action} | SPX ${direction} ${direction === 'CALL' ? '🟢' : '🔴'} ${detail}`.trim();
+    const btn = document.getElementById('alert-btn');
     btn.disabled = true;
-    btn.innerHTML = '<i data-lucide="loader-2"></i> Sending...';
-    if (window.lucide) window.lucide.createIcons();
 
     try {
-      await sendOneSignalPush('SPX Alert', message);
-      await saveFeedItem({ type: 'alert', message, timestamp: new Date().toISOString() });
-      showStatus('status-msg', 'Alert sent!', 'success');
-      resetAlertForm();
-      loadFeed();
+      await sendAlert({ title: 'SPX Alert', message });
+      showStatus('alert-status', '✅ Alert sent!', 'success');
+      document.getElementById('alert-detail').value = '';
     } catch (err) {
-      showStatus('status-msg', 'Error: ' + err.message, 'error');
+      showStatus('alert-status', '❌ ' + err.message, 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<i data-lucide="send"></i> SEND ALERT';
-      if (window.lucide) window.lucide.createIcons();
     }
   });
 
-  // ── Post Review ───────────────────────────────────────────────────────────
+  // ── Adhoc Note ───────────────────────────────────────────
+  document.getElementById('adhoc-btn').addEventListener('click', async () => {
+    const note     = document.getElementById('adhoc-input').value.trim();
+    const imageUrl = document.getElementById('adhoc-image-url').value.trim();
+
+    if (!note) {
+      showStatus('adhoc-status', 'Write a note first.', 'warn');
+      return;
+    }
+
+    const btn = document.getElementById('adhoc-btn');
+    btn.disabled = true;
+
+    try {
+      await sendAlert({ title: '📝📝 Note from Rose', message: note, imageUrl: imageUrl || null });
+      showStatus('adhoc-status', '✅ Note sent!', 'success');
+      document.getElementById('adhoc-input').value    = '';
+      document.getElementById('adhoc-image-url').value = '';
+    } catch (err) {
+      showStatus('adhoc-status', '❌ ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ── Market Review ─────────────────────────────────────────
   document.getElementById('review-btn').addEventListener('click', async () => {
-    const review = document.getElementById('review-input').value.trim();
-    if (!reviewType || !review) {
-      showStatus('review-status-msg', 'Select type and write your review.', 'warn');
+    const reviewType = reviewTypeChips.get();
+    const review     = document.getElementById('review-input').value.trim();
+    const imageUrl   = document.getElementById('review-image-url').value.trim();
+
+    if (!reviewType) {
+      showStatus('review-status', 'Select Pre or Post market.', 'warn');
+      return;
+    }
+    if (!review) {
+      showStatus('review-status', 'Write your review first.', 'warn');
       return;
     }
 
@@ -248,258 +411,17 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
 
     try {
-      const title = reviewType === 'PRE-MARKET' ? 'Pre-Market Review' : 'Post-Market Review';
-      await sendOneSignalPush(title, review);
-      await saveFeedItem({ type: 'review', reviewType, message: review, timestamp: new Date().toISOString() });
-      showStatus('review-status-msg', 'Review posted!', 'success');
-      document.getElementById('review-input').value = '';
-      document.getElementById('review-type-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      reviewType = null;
-      loadFeed();
+      await sendAlert({ title: reviewType, message: review, imageUrl: imageUrl || null });
+      showStatus('review-status', '✅ Review posted!', 'success');
+      document.getElementById('review-input').value    = '';
+      document.getElementById('review-image-url').value = '';
     } catch (err) {
-      showStatus('review-status-msg', 'Error: ' + err.message, 'error');
+      showStatus('review-status', '❌ ' + err.message, 'error');
     } finally {
       btn.disabled = false;
     }
   });
-
-  // ── Adhoc Note ───────────────────────────────────────────────────────────
-  document.getElementById('adhoc-btn').addEventListener('click', async () => {
-    const note = document.getElementById('adhoc-input').value.trim();
-    if (!note) {
-      showStatus('adhoc-status-msg', 'Write a note first.', 'warn');
-      return;
-    }
-    const btn = document.getElementById('adhoc-btn');
-    btn.disabled = true;
-    try {
-      await sendOneSignalPush('📝 Note from Rose', note);
-      await saveFeedItem({ type: 'review', reviewType: 'NOTE 📝', message: note, timestamp: new Date().toISOString() });
-      showStatus('adhoc-status-msg', 'Note sent!', 'success');
-      document.getElementById('adhoc-input').value = '';
-      loadFeed();
-    } catch (err) {
-      showStatus('adhoc-status-msg', 'Error: ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-    }
-  });
-
-  // ── OneSignal API ─────────────────────────────────────────────────────────
-  async function sendOneSignalPush(title, message) {
-    const res = await fetch('/.netlify/functions/send-alert', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, message })
-    });
-    if (!res.ok) throw new Error('Push failed');
-  }
-
-  // ── Netlify Feed Storage ──────────────────────────────────────────────────
-  async function saveFeedItem(item) {
-    const res = await fetch('/.netlify/functions/save-feed', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    });
-    if (!res.ok) throw new Error('Save failed');
-  }
-
-  async function loadFeed() {
-    try {
-      const res = await fetch('/feed.json?t=' + Date.now());
-      const items = res.ok ? await res.json() : [];
-      renderFeedPreview(items.slice(0, 5));
-    } catch {
-      document.getElementById('feed-preview').innerHTML = '<div class="feed-loading">Could not load feed.</div>';
-    }
-  }
-
-  function renderFeedPreview(items) {
-    const el = document.getElementById('feed-preview');
-    if (!items.length) { el.innerHTML = '<div class="feed-loading">No activity yet.</div>'; return; }
-    el.innerHTML = items.map(item => {
-      const time = new Date(item.timestamp).toLocaleString('en-US', {
-        timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-      });
-      const isAlert = item.type === 'alert';
-      return `
-        <div class="feed-item ${isAlert ? 'feed-alert' : 'feed-review'}">
-          <div class="feed-item-header">
-            <span class="feed-tag">${isAlert ? 'ALERT' : item.reviewType || 'REVIEW'}</span>
-            <span class="feed-time">${time} CT</span>
-          </div>
-          <div class="feed-item-msg">${item.message}</div>
-        </div>`;
-    }).join('');
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  function showStatus(id, msg, type) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.className = 'status-msg status-' + type;
-    setTimeout(() => { el.textContent = ''; el.className = 'status-msg'; }, 4000);
-  }
-
-  function resetAlertForm() {
-    document.getElementById('direction-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    document.getElementById('action-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    state.direction = null; state.action = null;
-    document.getElementById('strike-input').value = '';
-    document.getElementById('premium-input').value = '';
-    document.getElementById('price-input').value = '';
-    document.getElementById('note-input').value = '';
-    // Reset expiry to today
-    document.getElementById('expiry-input').value = today;
-    document.getElementById('preview-text').textContent = 'Select setup, call/put & action above';
-  }
-
-  // ── Init ──────────────────────────────────────────────────────────────────
-  loadFeed();
-
-}); // end DOMContentLoaded
 </script>
-
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:      #0B0C15;
-    --surface: #1C1E2D;
-    --border:  rgba(153,139,255,0.15);
-    --purple:  #998BFF;
-    --blue:    #5F5CFF;
-    --green:   #3DDC84;
-    --red:     #FF5C5C;
-    --text:    #E0E0E0;
-    --muted:   #666;
-    --mono:    'JetBrains Mono', monospace;
-    --display: 'Syne', sans-serif;
-  }
-
-  body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
-
-  .terminal { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
-
-  /* Top Bar */
-  .top-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px 12px 0 0; padding: 0.75rem 1.25rem; margin-bottom: 2px;
-  }
-  .top-bar-left { display: flex; gap: 6px; align-items: center; }
-  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-  .dot.red    { background: #FF5F57; }
-  .dot.yellow { background: #FFBD2E; }
-  .dot.green  { background: #28C840; }
-  .top-bar-title { font-family: var(--display); font-size: 0.85rem; letter-spacing: 0.15em; color: var(--purple); }
-  .top-bar-time  { font-size: 0.75rem; color: var(--muted); }
-
-  /* Panel Grid */
-  .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-  .panel {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 1.75rem; display: flex; flex-direction: column; gap: 0.75rem;
-  }
-  .panel:first-child { border-radius: 0 0 0 12px; }
-  .panel:last-child  { border-radius: 0 0 12px 0; }
-
-  .panel-title {
-    font-family: var(--display); font-size: 1rem; letter-spacing: 0.1em;
-    color: var(--purple); display: flex; align-items: center; gap: 0.5rem;
-    padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); margin-bottom: 0.25rem;
-  }
-  .panel-title svg { width: 16px; height: 16px; stroke: var(--purple); }
-
-  .section-label { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted); margin-top: 0.25rem; }
-
-  /* Chips */
-  .chip-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .chip {
-    background: transparent; border: 1px solid var(--border); color: var(--text);
-    font-family: var(--mono); font-size: 0.75rem; padding: 0.35rem 0.75rem;
-    border-radius: 6px; cursor: pointer; transition: all 0.15s;
-  }
-  .chip:hover              { border-color: var(--purple); color: var(--purple); }
-  .chip.active             { background: var(--blue);  border-color: var(--blue);  color: #fff; }
-  .chip-green.active       { background: var(--green); border-color: var(--green); color: #000; }
-  .chip-red.active         { background: var(--red);   border-color: var(--red);   color: #fff; }
-  .chip-blue.active        { background: #3DDC84;      border-color: #3DDC84;      color: #000; }
-
-  /* Input row */
-  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-  .input-row.three-col { grid-template-columns: 1fr 1fr 1fr; }
-  .input-col { display: flex; flex-direction: column; gap: 0.4rem; }
-
-  /* Inputs */
-  .text-input {
-    width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text); font-family: var(--mono);
-    font-size: 0.85rem; padding: 0.6rem 0.85rem; resize: vertical; transition: border-color 0.15s;
-  }
-  .text-input:focus       { outline: none; border-color: var(--purple); }
-  .text-input::placeholder { color: var(--muted); }
-
-  /* Date input styling */
-  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
-
-  /* Preview */
-  .preview-box {
-    background: rgba(95,92,255,0.08); border: 1px dashed rgba(95,92,255,0.3);
-    border-radius: 8px; padding: 0.85rem 1rem; display: flex; flex-direction: column; gap: 0.3rem;
-  }
-  .preview-label { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--blue); }
-  #preview-text  { font-size: 0.9rem; color: var(--text); line-height: 1.4; }
-
-  /* Buttons */
-  .fire-btn {
-    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-    width: 100%; padding: 0.85rem; background: var(--blue); color: #fff; border: none;
-    border-radius: 8px; font-family: var(--display); font-size: 0.95rem; font-weight: 700;
-    letter-spacing: 0.08em; cursor: pointer; transition: opacity 0.15s, transform 0.1s; margin-top: 0.25rem;
-  }
-  .fire-btn:hover    { opacity: 0.9; }
-  .fire-btn:active   { transform: scale(0.98); }
-  .fire-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .fire-btn svg      { width: 16px; height: 16px; stroke: #fff; }
-  .secondary-btn { background: var(--purple); }
-  .adhoc-btn     { background: #3a3a5c; margin-top: 0; }
-  .adhoc-btn:hover { background: #4a4a7c; opacity: 1; }
-
-  /* Status */
-  .status-msg     { font-size: 0.8rem; text-align: center; min-height: 1.2em; }
-  .status-success { color: var(--green); }
-  .status-warn    { color: #FFBD2E; }
-  .status-error   { color: var(--red); }
-
-  /* Feed */
-  .feed-divider {
-    display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem;
-    font-size: 0.6rem; letter-spacing: 0.2em; color: var(--muted);
-  }
-  .feed-divider::before,
-  .feed-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-  .feed-preview  { display: flex; flex-direction: column; gap: 0.6rem; }
-  .feed-loading  { font-size: 0.8rem; color: var(--muted); text-align: center; padding: 1rem; }
-
-  .feed-item { border-radius: 8px; padding: 0.75rem 0.9rem; border-left: 3px solid transparent; }
-  .feed-alert  { background: rgba(255,92,92,0.06);  border-color: var(--red); }
-  .feed-review { background: rgba(153,139,255,0.06); border-color: var(--purple); }
-
-  .feed-item-header { display: flex; justify-content: space-between; margin-bottom: 0.35rem; }
-  .feed-tag  { font-size: 0.65rem; letter-spacing: 0.15em; color: var(--purple); }
-  .feed-time { font-size: 0.65rem; color: var(--muted); }
-  .feed-item-msg { font-size: 0.8rem; color: var(--text); line-height: 1.5; }
-
-  @media (max-width: 768px) {
-    .panel-grid { grid-template-columns: 1fr; }
-    .panel:first-child { border-radius: 0; }
-    .panel:last-child  { border-radius: 0 0 12px 12px; }
-    .input-row { grid-template-columns: 1fr; }
-  }
-</style>
 
 </body>
 </html>
