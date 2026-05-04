@@ -1,90 +1,469 @@
-export async function handler(event) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
-
-  const { title, message, imageUrl } = JSON.parse(event.body);
-
-  // ── OneSignal push ──────────────────────────────────────────────────────
-  const pushRes = await fetch('https://onesignal.com/api/v1/notifications', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${process.env.ONESIGNAL_REST_API_KEY}`,
-    },
-    body: JSON.stringify({
-      app_id:             process.env.ONESIGNAL_APP_ID,
-      included_segments:  ['All'],
-      headings:           { en: title },
-      contents:           { en: message },
-    }),
-  });
-
-  if (!pushRes.ok) {
-    const err = await pushRes.text();
-    console.error('OneSignal error:', err);
-    return { statusCode: 500, body: 'OneSignal send failed' };
-  }
-
-  // ── Discord webhook ─────────────────────────────────────────────────────
-  const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
-
-  if (discordWebhookUrl) {
-    const isCall       = message.includes('CALL');
-    const isPut        = message.includes('PUT');
-    const isAlert      = title === 'SPX Alert';
-    const isPreMarket  = title === 'Pre-Market Review';
-    const isPostMarket = title === 'Post-Market Review';
-    const isNote       = title.includes('Note from Rose');
-
-    let color, emoji, footer;
-    if (isAlert && isCall) {
-      color = 0x3DDC84; emoji = '🟢'; footer = 'SPX Options Alert';
-    } else if (isAlert && isPut) {
-      color = 0xFF5C5C; emoji = '🔴'; footer = 'SPX Options Alert';
-    } else if (isAlert) {
-      color = 0x5F5CFF; emoji = '⚡'; footer = 'SPX Options Alert';
-    } else if (isPreMarket) {
-      color = 0x998BFF; emoji = '🌅'; footer = 'Pre-Market Review';
-    } else if (isPostMarket) {
-      color = 0x5F5CFF; emoji = '🌙'; footer = 'Post-Market Review';
-    } else if (isNote) {
-      color = 0x3a3a5c; emoji = '📝'; footer = 'Note from Rose';
-    } else {
-      color = 0x5F5CFF; emoji = '📡'; footer = 'rose.trading';
+---
+// rose-command-center-x7k2.astro — private command center
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rose Command Center</title>
+  <style>
+    :root {
+      --bg:       #0B0C15;
+      --card:     #1C1E2D;
+      --purple:   #998BFF;
+      --blue:     #5F5CFF;
+      --text:     #E0E0E0;
+      --muted:    #888;
+      --green:    #3DDC84;
+      --red:      #FF5C5C;
+      --border:   #2a2d3e;
+      --input-bg: #13141f;
     }
 
-    // Build embed — add image if URL was provided
-    const embed = {
-      title:       `${emoji} ${title}`,
-      description: `\`\`\`${message}\`\`\``,
-      color,
-      footer:      { text: `${footer} | ${new Date().toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })} CT` },
-      timestamp:   new Date().toISOString(),
-    };
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    // Attach image if provided
-    if (imageUrl && imageUrl.trim()) {
-      embed.image = { url: imageUrl.trim() };
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding: 1rem;
     }
 
-    const discordRes = await fetch(discordWebhookUrl, {
+    h1 {
+      text-align: center;
+      color: var(--purple);
+      font-size: 1.1rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: .7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Panel ─────────────────────────────────────────────── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--purple);
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Labels ────────────────────────────────────────────── */
+    label {
+      display: block;
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .35rem;
+      margin-top: .85rem;
+    }
+
+    label:first-of-type { margin-top: 0; }
+
+    /* ── Inputs ────────────────────────────────────────────── */
+    textarea, input[type="text"], input[type="url"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .85rem;
+      padding: .65rem .75rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+      font-family: inherit;
+    }
+
+    textarea:focus, input[type="text"]:focus, input[type="url"]:focus {
+      border-color: var(--blue);
+    }
+
+    textarea { min-height: 80px; }
+
+    /* image url field — monospace hint */
+    .url-field {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: .78rem;
+    }
+
+    .url-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: .85rem;
+      margin-bottom: .35rem;
+    }
+    .url-label-row span {
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .url-optional {
+      font-size: .65rem;
+      color: #555;
+      font-style: italic;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* ── Chips ─────────────────────────────────────────────── */
+    .chip-row {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: .35rem .75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .chip:hover { border-color: var(--blue); color: var(--text); }
+    .chip-green.active { background: var(--green); border-color: var(--green); color: #000; }
+    .chip-red.active   { background: var(--red);   border-color: var(--red);   color: #fff; }
+    .chip-blue.active  { background: #3DDC84;      border-color: #3DDC84;      color: #000; }
+    .chip-purple.active { background: var(--purple); border-color: var(--purple); color: #000; }
+
+    /* ── Input row (3 col) ─────────────────────────────────── */
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .5rem;
+    }
+    .input-col { display: flex; flex-direction: column; }
+    .input-col label { margin-top: 0 !important; }
+
+    /* ── Buttons ───────────────────────────────────────────── */
+    .btn {
+      width: 100%;
+      margin-top: .9rem;
+      padding: .75rem;
+      border-radius: 10px;
+      border: none;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:hover  { opacity: .9; }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .btn-primary   { background: var(--blue);   color: #fff; }
+    .btn-secondary { background: var(--purple); color: #000; }
+    .btn-ghost     { background: #2a2d3e;       color: var(--text); }
+
+    /* ── Divider ────────────────────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin: 1rem 0;
+    }
+    .divider span {
+      font-size: .65rem;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      white-space: nowrap;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Status messages ────────────────────────────────────── */
+    .status {
+      font-size: .75rem;
+      margin-top: .5rem;
+      min-height: 1.1rem;
+      text-align: center;
+      border-radius: 6px;
+      padding: .3rem .5rem;
+    }
+    .status.success { color: var(--green); }
+    .status.error   { color: var(--red);   }
+    .status.warn    { color: #f0c060;      }
+  </style>
+</head>
+<body>
+
+<h1>🌹 Rose Command Center</h1>
+
+<div class="grid">
+
+  <!-- ── LEFT: SPX ALERT ───────────────────────────────────── -->
+  <div class="panel">
+    <div class="panel-title">⚡ SPX Alert</div>
+
+    <label>Direction</label>
+    <div class="chip-row" id="direction-chips">
+      <button class="chip chip-green" data-val="CALL">📈 CALL</button>
+      <button class="chip chip-red"   data-val="PUT">📉 PUT</button>
+    </div>
+
+    <label>Action</label>
+    <div class="chip-row" id="action-chips">
+      <button class="chip chip-blue"   data-val="🚀 ENTRY">🚀 ENTRY</button>
+      <button class="chip chip-blue"   data-val="✅ EXIT">✅ EXIT</button>
+      <button class="chip chip-red"    data-val="🛑 STOP HIT">🛑 STOP HIT</button>
+      <button class="chip chip-purple" data-val="👀 WATCHING">👀 WATCHING</button>
+    </div>
+
+    <div class="input-row">
+      <div class="input-col">
+        <label style="margin-top:.85rem;">Strike</label>
+        <input type="number" id="alert-strike" placeholder="5400" />
+      </div>
+      <div class="input-col">
+        <label style="margin-top:.85rem;">Expiry</label>
+        <input type="date" id="alert-expiry" />
+      </div>
+      <div class="input-col">
+        <label style="margin-top:.85rem;">Price Paid</label>
+        <input type="number" id="alert-price" step="0.01" placeholder="2.50" />
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="alert-btn">
+      ✈️ Send Alert
+    </button>
+    <div class="status" id="alert-status"></div>
+  </div>
+
+  <!-- ── RIGHT: MARKET REVIEW ──────────────────────────────── -->
+  <div class="panel">
+    <div class="panel-title">📋 Market Review</div>
+
+    <!-- Adhoc Note -->
+    <label>Adhoc Note</label>
+    <textarea id="adhoc-input" placeholder="Send a quick note to subscribers e.g. market is choppy, sitting out..."></textarea>
+
+    <div class="url-label-row">
+      <span>Chart URL</span>
+      <span class="url-optional">optional</span>
+    </div>
+    <input type="url" id="adhoc-image-url" class="url-field" placeholder="https://..." />
+
+    <button class="btn btn-ghost" id="adhoc-btn">
+      💬 Send Note
+    </button>
+    <div class="status" id="adhoc-status"></div>
+
+    <div class="divider"><span>Market Review</span></div>
+
+    <label>Type</label>
+    <div class="chip-row" id="review-type-chips">
+      <button class="chip chip-purple" data-val="Pre-Market Review">PRE-MARKET</button>
+      <button class="chip chip-purple" data-val="Post-Market Review">POST-MARKET</button>
+    </div>
+
+    <label>Review</label>
+    <textarea id="review-input" placeholder="Write your pre or post market thoughts here...
+
+What are you watching? Key levels? Bias? How did the day go?" style="min-height:110px;"></textarea>
+
+    <div class="url-label-row">
+      <span>Chart URL</span>
+      <span class="url-optional">optional</span>
+    </div>
+    <input type="url" id="review-image-url" class="url-field" placeholder="https://..." />
+
+    <button class="btn btn-secondary" id="review-btn">
+      ✏️ Post Review
+    </button>
+    <div class="status" id="review-status"></div>
+  </div>
+
+</div>
+
+<script>
+  // ── Chip helper ───────────────────────────────────────────
+  function makeChips(groupId, single = true) {
+    const group = document.getElementById(groupId);
+    let selected = null;
+    group.querySelectorAll('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (single) {
+          group.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+        }
+        btn.classList.toggle('active');
+        selected = btn.classList.contains('active') ? btn.dataset.val : null;
+      });
+    });
+    return { get: () => selected };
+  }
+
+  const directionChips  = makeChips('direction-chips');
+  const actionChips     = makeChips('action-chips');
+  const reviewTypeChips = makeChips('review-type-chips');
+
+  // ── Status helper ─────────────────────────────────────────
+  function showStatus(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent  = msg;
+    el.className    = `status ${type}`;
+    if (type === 'success') setTimeout(() => { el.textContent = ''; el.className = 'status'; }, 3000);
+  }
+
+  // ── Send to Netlify function ──────────────────────────────
+  async function sendAlert(payload) {
+    const res = await fetch('/.netlify/functions/send-alert', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: 'Rose Alerts 🌹',
-        embeds:   [embed],
-      }),
+      body:    JSON.stringify(payload),
     });
-
-    if (!discordRes.ok) {
-      const err = await discordRes.text();
-      console.error('Discord error:', err);
-      // Don't fail the whole request if Discord fails
-    }
-  } else {
-    console.warn('DISCORD_WEBHOOK_URL not set — skipping Discord');
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
   }
 
-  return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-}
+  // ── Set expiry default to today ───────────────────────────
+  const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  document.getElementById('alert-expiry').value = todayStr;
+
+  // ── SPX Alert ────────────────────────────────────────────
+  document.getElementById('alert-btn').addEventListener('click', async () => {
+    const direction = directionChips.get();
+    const action    = actionChips.get();
+    const strike    = document.getElementById('alert-strike').value.trim();
+    const expiryRaw = document.getElementById('alert-expiry').value;
+    const price     = document.getElementById('alert-price').value.trim();
+
+    if (!direction || !action) {
+      showStatus('alert-status', 'Select direction + action.', 'warn');
+      return;
+    }
+
+    // Format expiry as M/D (e.g. 5/4)
+    let expiryStr = '';
+    if (expiryRaw) {
+      const [y, m, d] = expiryRaw.split('-');
+      expiryStr = `${parseInt(m)}/${parseInt(d)}`;
+    }
+
+    // Build message: e.g. "🚀 ENTRY | SPX CALL 🟢 5400 5/4 @ $2.50"
+    const dirEmoji = direction === 'CALL' ? '🟢' : '🔴';
+    let message = `${action} | SPX ${direction} ${dirEmoji}`;
+    if (strike)     message += ` ${strike}`;
+    if (expiryStr)  message += ` ${expiryStr}`;
+    if (price)      message += ` @ $${parseFloat(price).toFixed(2)}`;
+
+    const btn = document.getElementById('alert-btn');
+    btn.disabled = true;
+
+    try {
+      await sendAlert({ title: 'SPX Alert', message });
+      showStatus('alert-status', '✅ Alert sent!', 'success');
+      document.getElementById('alert-strike').value = '';
+      document.getElementById('alert-price').value  = '';
+      document.getElementById('alert-expiry').value = todayStr;
+    } catch (err) {
+      showStatus('alert-status', '❌ ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ── Adhoc Note ───────────────────────────────────────────
+  document.getElementById('adhoc-btn').addEventListener('click', async () => {
+    const note     = document.getElementById('adhoc-input').value.trim();
+    const imageUrl = document.getElementById('adhoc-image-url').value.trim();
+
+    if (!note) {
+      showStatus('adhoc-status', 'Write a note first.', 'warn');
+      return;
+    }
+
+    const btn = document.getElementById('adhoc-btn');
+    btn.disabled = true;
+
+    try {
+      await sendAlert({ title: '📝📝 Note from Rose', message: note, imageUrl: imageUrl || null });
+      showStatus('adhoc-status', '✅ Note sent!', 'success');
+      document.getElementById('adhoc-input').value    = '';
+      document.getElementById('adhoc-image-url').value = '';
+    } catch (err) {
+      showStatus('adhoc-status', '❌ ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ── Market Review ─────────────────────────────────────────
+  document.getElementById('review-btn').addEventListener('click', async () => {
+    const reviewType = reviewTypeChips.get();
+    const review     = document.getElementById('review-input').value.trim();
+    const imageUrl   = document.getElementById('review-image-url').value.trim();
+
+    if (!reviewType) {
+      showStatus('review-status', 'Select Pre or Post market.', 'warn');
+      return;
+    }
+    if (!review) {
+      showStatus('review-status', 'Write your review first.', 'warn');
+      return;
+    }
+
+    const btn = document.getElementById('review-btn');
+    btn.disabled = true;
+
+    try {
+      await sendAlert({ title: reviewType, message: review, imageUrl: imageUrl || null });
+      showStatus('review-status', '✅ Review posted!', 'success');
+      document.getElementById('review-input').value    = '';
+      document.getElementById('review-image-url').value = '';
+    } catch (err) {
+      showStatus('review-status', '❌ ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
