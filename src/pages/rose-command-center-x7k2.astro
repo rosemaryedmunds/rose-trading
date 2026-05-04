@@ -6,7 +6,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rose Command Center</title>
+  <title>Command Center</title>
   <style>
     :root {
       --bg:       #0B0C15;
@@ -14,11 +14,11 @@
       --purple:   #998BFF;
       --blue:     #5F5CFF;
       --text:     #E0E0E0;
-      --muted:    #888;
+      --muted:    #666;
       --green:    #3DDC84;
       --red:      #FF5C5C;
       --border:   #2a2d3e;
-      --input-bg: #13141f;
+      --input-bg: #0e0f1a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,37 +28,33 @@
       color: var(--text);
       font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
-      padding: 1rem;
+      padding: 1.25rem 1rem 3rem;
     }
 
     h1 {
       text-align: center;
       color: var(--purple);
-      font-size: 1.1rem;
-      letter-spacing: .15em;
+      font-size: .95rem;
+      letter-spacing: .18em;
       text-transform: uppercase;
       margin-bottom: 1.5rem;
-      opacity: .7;
+      opacity: .6;
     }
 
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
-      max-width: 960px;
+      max-width: 980px;
       margin: 0 auto;
     }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
 
-    @media (max-width: 700px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-
-    /* ── Panel ─────────────────────────────────────────────── */
     .panel {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.2rem;
+      border-radius: 14px;
+      padding: 1.25rem;
     }
 
     .panel-title {
@@ -66,127 +62,115 @@
       align-items: center;
       gap: .5rem;
       color: var(--purple);
-      font-size: .75rem;
+      font-size: .72rem;
       font-weight: 700;
-      letter-spacing: .12em;
+      letter-spacing: .14em;
       text-transform: uppercase;
-      margin-bottom: 1rem;
-      padding-bottom: .75rem;
+      margin-bottom: 1.1rem;
+      padding-bottom: .8rem;
       border-bottom: 1px solid var(--border);
     }
 
-    /* ── Labels ────────────────────────────────────────────── */
-    label {
-      display: block;
-      font-size: .7rem;
-      color: var(--muted);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      margin-bottom: .35rem;
-      margin-top: .85rem;
-    }
-
-    label:first-of-type { margin-top: 0; }
-
-    /* ── Inputs ────────────────────────────────────────────── */
-    textarea, input[type="text"], input[type="url"] {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: .85rem;
-      padding: .65rem .75rem;
-      resize: vertical;
-      outline: none;
-      transition: border-color .2s;
-      font-family: inherit;
-    }
-
-    textarea:focus, input[type="text"]:focus, input[type="url"]:focus {
-      border-color: var(--blue);
-    }
-
-    textarea { min-height: 80px; }
-
-    /* image url field — monospace hint */
-    .url-field {
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: .78rem;
-    }
-
-    .url-label-row {
+    .field-label {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: .85rem;
+      margin-top: .9rem;
       margin-bottom: .35rem;
     }
-    .url-label-row span {
-      font-size: .7rem;
+    .field-label span {
+      font-size: .68rem;
       color: var(--muted);
-      letter-spacing: .08em;
+      letter-spacing: .09em;
       text-transform: uppercase;
     }
-    .url-optional {
-      font-size: .65rem;
-      color: #555;
+    .field-label .opt {
+      font-size: .62rem;
+      color: #3a3a55;
       font-style: italic;
       text-transform: none;
       letter-spacing: 0;
     }
 
-    /* ── Chips ─────────────────────────────────────────────── */
-    .chip-row {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
+    textarea,
+    input[type="text"],
+    input[type="url"],
+    input[type="number"],
+    input[type="date"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .84rem;
+      padding: .6rem .75rem;
+      outline: none;
+      transition: border-color .2s;
+      font-family: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    textarea:focus,
+    input[type="text"]:focus,
+    input[type="url"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus {
+      border-color: var(--blue);
     }
 
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+      cursor: pointer;
+    }
+
+    .url-field { font-family: 'SF Mono', 'Fira Code', monospace; font-size: .76rem; }
+
+    .url-warn {
+      font-size: .66rem;
+      color: #e0a030;
+      margin-top: .22rem;
+      display: none;
+    }
+    .url-warn.visible { display: block; }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: .5rem;
+      margin-top: .9rem;
+    }
+    .input-col { display: flex; flex-direction: column; gap: .3rem; }
+    .input-col .field-label { margin-top: 0; }
+
+    .chip-row { display: flex; gap: .45rem; flex-wrap: wrap; }
+
     .chip {
-      padding: .35rem .75rem;
+      padding: .32rem .7rem;
       border-radius: 6px;
       border: 1px solid var(--border);
       background: transparent;
       color: var(--muted);
-      font-size: .75rem;
+      font-size: .73rem;
       font-weight: 600;
       cursor: pointer;
       transition: all .15s;
+      white-space: nowrap;
     }
-
     .chip:hover { border-color: var(--blue); color: var(--text); }
-    .chip-green.active { background: var(--green); border-color: var(--green); color: #000; }
-    .chip-red.active   { background: var(--red);   border-color: var(--red);   color: #fff; }
-    .chip-blue.active  { background: #3DDC84;      border-color: #3DDC84;      color: #000; }
+    .chip-green.active  { background: var(--green);  border-color: var(--green);  color: #000; }
+    .chip-red.active    { background: var(--red);    border-color: var(--red);    color: #fff; }
+    .chip-blue.active   { background: var(--green);  border-color: var(--green);  color: #000; }
     .chip-purple.active { background: var(--purple); border-color: var(--purple); color: #000; }
 
-    /* url warning */
-    .url-warning {
-      font-size: .68rem;
-      color: #f0c060;
-      margin-top: .25rem;
-      display: none;
-    }
-    .url-warning.visible { display: block; }
-
-    /* ── Input row (3 col) ─────────────────────────────────── */
-    .input-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: .5rem;
-    }
-    .input-col { display: flex; flex-direction: column; }
-    .input-col label { margin-top: 0 !important; }
-
-    /* ── Buttons ───────────────────────────────────────────── */
     .btn {
       width: 100%;
       margin-top: .9rem;
-      padding: .75rem;
+      padding: .72rem;
       border-radius: 10px;
       border: none;
-      font-size: .8rem;
+      font-size: .78rem;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
@@ -197,52 +181,126 @@
       gap: .4rem;
       transition: opacity .15s, transform .1s;
     }
-    .btn:hover  { opacity: .9; }
-    .btn:active { transform: scale(.98); }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
-
+    .btn:hover   { opacity: .88; }
+    .btn:active  { transform: scale(.98); }
+    .btn:disabled { opacity: .35; cursor: not-allowed; }
     .btn-primary   { background: var(--blue);   color: #fff; }
     .btn-secondary { background: var(--purple); color: #000; }
-    .btn-ghost     { background: #2a2d3e;       color: var(--text); }
+    .btn-ghost     { background: #1e2030; color: var(--text); border: 1px solid var(--border); }
 
-    /* ── Divider ────────────────────────────────────────────── */
     .divider {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      margin: 1rem 0;
+      display: flex; align-items: center; gap: .5rem; margin: 1.1rem 0;
     }
-    .divider span {
-      font-size: .65rem;
-      color: #444;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      white-space: nowrap;
+    .divider span { font-size: .62rem; color: #333; text-transform: uppercase; letter-spacing: .1em; white-space: nowrap; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Discord-style preview card ─────────────────────────── */
+    .discord-preview {
+      background: #2b2d31;
+      border-left: 4px solid var(--purple);
+      border-radius: 0 8px 8px 0;
+      padding: .8rem 1rem;
+      margin-top: .4rem;
     }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
+    .discord-preview.green { border-left-color: var(--green); }
+    .discord-preview.red   { border-left-color: var(--red); }
+    .preview-title {
+      font-weight: 700;
+      font-size: .85rem;
+      color: #fff;
+      margin-bottom: .4rem;
+    }
+    .preview-body {
+      background: #1e1f22;
+      border-radius: 4px;
+      padding: .5rem .65rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: .75rem;
+      color: #c9d1d9;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.55;
+    }
+    .preview-footer {
+      font-size: .64rem;
+      color: #4a4c5e;
+      margin-top: .35rem;
     }
 
-    /* ── Status messages ────────────────────────────────────── */
     .status {
-      font-size: .75rem;
-      margin-top: .5rem;
-      min-height: 1.1rem;
+      font-size: .74rem;
+      margin-top: .45rem;
+      min-height: 1rem;
       text-align: center;
       border-radius: 6px;
-      padding: .3rem .5rem;
+      padding: .25rem .5rem;
     }
     .status.success { color: var(--green); }
-    .status.error   { color: var(--red);   }
-    .status.warn    { color: #f0c060;      }
+    .status.error   { color: var(--red); }
+    .status.warn    { color: #e0a030; }
+
+    /* ── Modal ──────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.8);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.4rem;
+      max-width: 460px;
+      width: 100%;
+    }
+    .modal-title {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--purple);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-section-label {
+      font-size: .65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: .3rem;
+    }
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .6rem;
+      margin-top: 1rem;
+    }
+    .btn-cancel, .btn-confirm {
+      padding: .65rem;
+      border-radius: 8px;
+      border: none;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-cancel  { background: #1e2030; color: var(--muted); border: 1px solid var(--border); }
+    .btn-confirm { background: var(--blue); color: #fff; }
+    .btn-cancel:hover, .btn-confirm:hover { opacity: .85; }
+    .btn-confirm:disabled { opacity: .4; cursor: not-allowed; }
   </style>
 </head>
 <body>
 
-<h1>🌹 Rose Command Center</h1>
+<h1>Command Center</h1>
 
 <div class="grid">
 
@@ -250,13 +308,13 @@
   <div class="panel">
     <div class="panel-title">⚡ SPX Alert</div>
 
-    <label>Direction</label>
+    <div class="field-label" style="margin-top:0"><span>Direction</span></div>
     <div class="chip-row" id="direction-chips">
       <button class="chip chip-green" data-val="CALL">📈 CALL</button>
       <button class="chip chip-red"   data-val="PUT">📉 PUT</button>
     </div>
 
-    <label>Action</label>
+    <div class="field-label"><span>Action</span></div>
     <div class="chip-row" id="action-chips">
       <button class="chip chip-blue"   data-val="🚀 ENTRY">🚀 ENTRY</button>
       <button class="chip chip-blue"   data-val="✅ EXIT">✅ EXIT</button>
@@ -266,22 +324,27 @@
 
     <div class="input-row">
       <div class="input-col">
-        <label style="margin-top:.85rem;">Strike</label>
+        <div class="field-label"><span>Strike</span></div>
         <input type="number" id="alert-strike" placeholder="5400" />
       </div>
       <div class="input-col">
-        <label style="margin-top:.85rem;">Expiry</label>
+        <div class="field-label"><span>Expiry</span></div>
         <input type="date" id="alert-expiry" />
       </div>
       <div class="input-col">
-        <label style="margin-top:.85rem;">Price Paid</label>
+        <div class="field-label"><span>Price Paid</span></div>
         <input type="number" id="alert-price" step="0.01" placeholder="2.50" />
       </div>
     </div>
 
-    <button class="btn btn-primary" id="alert-btn">
-      ✈️ Send Alert
-    </button>
+    <div class="field-label"><span>Notes</span><span class="opt">optional</span></div>
+    <input type="text" id="alert-notes" placeholder="e.g. tight stop at 5380, targeting 5450..." />
+
+    <div class="field-label"><span>Chart URL</span><span class="opt">optional</span></div>
+    <input type="url" id="alert-image-url" class="url-field" placeholder="https://...image.png" />
+    <div class="url-warn" id="alert-url-warn">⚠️ Must end in .png / .jpg / .gif — TradingView links won't embed</div>
+
+    <button class="btn btn-primary" id="alert-preview-btn">✈️ Preview & Send</button>
     <div class="status" id="alert-status"></div>
   </div>
 
@@ -289,62 +352,71 @@
   <div class="panel">
     <div class="panel-title">📋 Market Review</div>
 
-    <!-- Adhoc Note -->
-    <label>Adhoc Note</label>
+    <div class="field-label" style="margin-top:0"><span>Adhoc Note</span></div>
     <textarea id="adhoc-input" placeholder="Send a quick note to subscribers e.g. market is choppy, sitting out..."></textarea>
 
-    <div class="url-label-row">
-      <span>Chart URL</span>
-      <span class="url-optional">optional</span>
-    </div>
-    <input type="url" id="adhoc-image-url" class="url-field" placeholder="https://..." />
-    <div class="url-warning" id="adhoc-url-warn">⚠️ Must be a direct image link ending in .png, .jpg, or .gif — TradingView links won't embed</div>
+    <div class="field-label"><span>Chart URL</span><span class="opt">optional</span></div>
+    <input type="url" id="adhoc-image-url" class="url-field" placeholder="https://...image.png" />
+    <div class="url-warn" id="adhoc-url-warn">⚠️ Must end in .png / .jpg / .gif — TradingView links won't embed</div>
 
-    <button class="btn btn-ghost" id="adhoc-btn">
-      💬 Send Note
-    </button>
+    <button class="btn btn-ghost" id="adhoc-preview-btn">💬 Preview & Send Note</button>
     <div class="status" id="adhoc-status"></div>
 
     <div class="divider"><span>Market Review</span></div>
 
-    <label>Type</label>
+    <div class="field-label"><span>Type</span></div>
     <div class="chip-row" id="review-type-chips">
-      <button class="chip chip-purple" data-val="Pre-Market Review">PRE-MARKET</button>
-      <button class="chip chip-purple" data-val="Post-Market Review">POST-MARKET</button>
+      <button class="chip chip-purple" data-val="Pre-Market Review">🌅 Pre-Market</button>
+      <button class="chip chip-purple" data-val="Post-Market Review">🌙 Post-Market</button>
     </div>
 
-    <label>Review</label>
+    <div class="field-label"><span>Review</span></div>
     <textarea id="review-input" placeholder="Write your pre or post market thoughts here...
 
 What are you watching? Key levels? Bias? How did the day go?" style="min-height:110px;"></textarea>
 
-    <div class="url-label-row">
-      <span>Chart URL</span>
-      <span class="url-optional">optional</span>
-    </div>
-    <input type="url" id="review-image-url" class="url-field" placeholder="https://..." />
-    <div class="url-warning" id="review-url-warn">⚠️ Must be a direct image link ending in .png, .jpg, or .gif — TradingView links won't embed</div>
+    <div class="field-label"><span>Chart URL</span><span class="opt">optional</span></div>
+    <input type="url" id="review-image-url" class="url-field" placeholder="https://...image.png" />
+    <div class="url-warn" id="review-url-warn">⚠️ Must end in .png / .jpg / .gif — TradingView links won't embed</div>
 
-    <button class="btn btn-secondary" id="review-btn">
-      ✏️ Post Review
-    </button>
+    <button class="btn btn-secondary" id="review-preview-btn">✏️ Preview & Post Review</button>
     <div class="status" id="review-status"></div>
   </div>
 
 </div>
 
+<!-- ── Preview Modal ──────────────────────────────────────── -->
+<div class="modal-overlay" id="preview-modal">
+  <div class="modal">
+    <div class="modal-title">📡 Preview — Discord</div>
+    <div class="preview-section-label">What subscribers will see</div>
+    <div class="discord-preview" id="modal-card">
+      <div class="preview-title"  id="modal-title"></div>
+      <div class="preview-body"   id="modal-body"></div>
+      <div class="preview-footer" id="modal-footer"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel"  id="modal-cancel">✕ Cancel</button>
+      <button class="btn-confirm" id="modal-confirm">✈️ Send</button>
+    </div>
+    <div class="status" id="modal-status"></div>
+  </div>
+</div>
+
 <script is:inline>
   // ── Chip helper ───────────────────────────────────────────
-  function makeChips(groupId, single = true) {
+  function makeChips(groupId) {
     const group = document.getElementById(groupId);
     let selected = null;
     group.querySelectorAll('.chip').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (single) {
-          group.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+        group.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+        if (selected !== btn.dataset.val) {
+          btn.classList.add('active');
+          selected = btn.dataset.val;
+        } else {
+          selected = null;
         }
-        btn.classList.toggle('active');
-        selected = btn.classList.contains('active') ? btn.dataset.val : null;
       });
     });
     return { get: () => selected };
@@ -354,15 +426,30 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
   const actionChips     = makeChips('action-chips');
   const reviewTypeChips = makeChips('review-type-chips');
 
-  // ── Status helper ─────────────────────────────────────────
+  // ── Status ────────────────────────────────────────────────
   function showStatus(id, msg, type) {
     const el = document.getElementById(id);
-    el.textContent  = msg;
-    el.className    = `status ${type}`;
-    if (type === 'success') setTimeout(() => { el.textContent = ''; el.className = 'status'; }, 3000);
+    el.textContent = msg;
+    el.className   = 'status ' + type;
+    if (type === 'success') setTimeout(() => { el.textContent = ''; el.className = 'status'; }, 3500);
   }
 
-  // ── Send to Netlify function ──────────────────────────────
+  // ── URL validator ─────────────────────────────────────────
+  function isImageUrl(url) {
+    return /\.(png|jpg|jpeg|gif|webp)(\?.*)?$/i.test(url);
+  }
+  ['alert','adhoc','review'].forEach(id => {
+    document.getElementById(id + '-image-url').addEventListener('input', function() {
+      document.getElementById(id + '-url-warn')
+        .classList.toggle('visible', this.value.length > 0 && !isImageUrl(this.value));
+    });
+  });
+
+  // ── Expiry default ────────────────────────────────────────
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  document.getElementById('alert-expiry').value = todayStr;
+
+  // ── Send function ─────────────────────────────────────────
   async function sendAlert(payload) {
     const res = await fetch('/.netlify/functions/send-alert', {
       method:  'POST',
@@ -373,120 +460,139 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     return res.json();
   }
 
-  // ── Image URL validator ───────────────────────────────────
-  function isDirectImageUrl(url) {
-    return /\.(png|jpg|jpeg|gif|webp)(\?.*)?$/i.test(url);
-  }
-  function watchUrlField(inputId, warnId) {
-    document.getElementById(inputId).addEventListener('input', function() {
-      const warn = document.getElementById(warnId);
-      const val = this.value.trim();
-      warn.classList.toggle('visible', val.length > 0 && !isDirectImageUrl(val));
-    });
-  }
-  watchUrlField('adhoc-image-url', 'adhoc-url-warn');
-  watchUrlField('review-image-url', 'review-url-warn');
+  // ── Modal ─────────────────────────────────────────────────
+  let _payload = null, _statusId = null, _onSuccess = null;
 
-  // ── Set expiry default to today ───────────────────────────
-  const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
-  document.getElementById('alert-expiry').value = todayStr;
+  function openPreview(payload, title, body, accent, statusId, onSuccess) {
+    _payload   = payload;
+    _statusId  = statusId;
+    _onSuccess = onSuccess;
 
-  // ── SPX Alert ────────────────────────────────────────────
-  document.getElementById('alert-btn').addEventListener('click', async () => {
+    const card = document.getElementById('modal-card');
+    card.className = 'discord-preview ' + (accent || '');
+    document.getElementById('modal-title').textContent  = title;
+    document.getElementById('modal-body').textContent   = body;
+    document.getElementById('modal-footer').textContent =
+      new Date().toLocaleString('en-US', {
+        month:'short', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true
+      }) + ' CT';
+
+    document.getElementById('modal-status').textContent = '';
+    document.getElementById('modal-status').className   = 'status';
+    document.getElementById('preview-modal').classList.add('open');
+  }
+
+  document.getElementById('modal-cancel').addEventListener('click', () =>
+    document.getElementById('preview-modal').classList.remove('open')
+  );
+  document.getElementById('preview-modal').addEventListener('click', e => {
+    if (e.target.id === 'preview-modal')
+      document.getElementById('preview-modal').classList.remove('open');
+  });
+
+  document.getElementById('modal-confirm').addEventListener('click', async () => {
+    const btn = document.getElementById('modal-confirm');
+    btn.disabled    = true;
+    btn.textContent = 'Sending...';
+    try {
+      await sendAlert(_payload);
+      document.getElementById('preview-modal').classList.remove('open');
+      showStatus(_statusId, '✅ Sent!', 'success');
+      if (_onSuccess) _onSuccess();
+    } catch (err) {
+      showStatus('modal-status', '❌ ' + err.message, 'error');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = '✈️ Send';
+    }
+  });
+
+  // ── SPX Alert ─────────────────────────────────────────────
+  document.getElementById('alert-preview-btn').addEventListener('click', () => {
     const direction = directionChips.get();
     const action    = actionChips.get();
     const strike    = document.getElementById('alert-strike').value.trim();
     const expiryRaw = document.getElementById('alert-expiry').value;
     const price     = document.getElementById('alert-price').value.trim();
+    const notes     = document.getElementById('alert-notes').value.trim();
+    const imageUrl  = document.getElementById('alert-image-url').value.trim();
 
     if (!direction || !action) {
-      showStatus('alert-status', 'Select direction + action.', 'warn');
+      showStatus('alert-status', 'Select direction + action first.', 'warn');
       return;
     }
 
-    // Format expiry as M/D (e.g. 5/4)
     let expiryStr = '';
     if (expiryRaw) {
-      const [y, m, d] = expiryRaw.split('-');
-      expiryStr = `${parseInt(m)}/${parseInt(d)}`;
+      const parts = expiryRaw.split('-');
+      expiryStr = parseInt(parts[1]) + '/' + parseInt(parts[2]);
     }
 
-    // Build message: e.g. "🚀 ENTRY | SPX CALL 🟢 5400 5/4 @ $2.50"
     const dirEmoji = direction === 'CALL' ? '🟢' : '🔴';
-    let message = `${action} | SPX ${direction} ${dirEmoji}`;
-    if (strike)     message += ` ${strike}`;
-    if (expiryStr)  message += ` ${expiryStr}`;
-    if (price)      message += ` @ $${parseFloat(price).toFixed(2)}`;
+    let message = action + ' | SPX ' + direction + ' ' + dirEmoji;
+    if (strike)    message += ' ' + strike;
+    if (expiryStr) message += ' ' + expiryStr;
+    if (price)     message += ' @ $' + parseFloat(price).toFixed(2);
 
-    const btn = document.getElementById('alert-btn');
-    btn.disabled = true;
+    const previewBody = notes ? message + '\n\n📌 ' + notes : message;
 
-    try {
-      await sendAlert({ title: 'SPX Alert', message });
-      showStatus('alert-status', '✅ Alert sent!', 'success');
-      document.getElementById('alert-strike').value = '';
-      document.getElementById('alert-price').value  = '';
-      document.getElementById('alert-expiry').value = todayStr;
-    } catch (err) {
-      showStatus('alert-status', '❌ ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-    }
+    openPreview(
+      { title: 'SPX Alert', message, notes: notes || null, imageUrl: imageUrl || null },
+      dirEmoji + ' SPX Alert',
+      previewBody,
+      direction === 'CALL' ? 'green' : 'red',
+      'alert-status',
+      () => {
+        ['alert-strike','alert-price','alert-notes','alert-image-url'].forEach(id =>
+          document.getElementById(id).value = ''
+        );
+        document.getElementById('alert-expiry').value = todayStr;
+      }
+    );
   });
 
-  // ── Adhoc Note ───────────────────────────────────────────
-  document.getElementById('adhoc-btn').addEventListener('click', async () => {
+  // ── Adhoc Note ────────────────────────────────────────────
+  document.getElementById('adhoc-preview-btn').addEventListener('click', () => {
     const note     = document.getElementById('adhoc-input').value.trim();
     const imageUrl = document.getElementById('adhoc-image-url').value.trim();
 
-    if (!note) {
-      showStatus('adhoc-status', 'Write a note first.', 'warn');
-      return;
-    }
+    if (!note) { showStatus('adhoc-status', 'Write a note first.', 'warn'); return; }
 
-    const btn = document.getElementById('adhoc-btn');
-    btn.disabled = true;
-
-    try {
-      await sendAlert({ title: '📝📝 Note from Rose', message: note, imageUrl: imageUrl || null });
-      showStatus('adhoc-status', '✅ Note sent!', 'success');
-      document.getElementById('adhoc-input').value    = '';
-      document.getElementById('adhoc-image-url').value = '';
-    } catch (err) {
-      showStatus('adhoc-status', '❌ ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-    }
+    openPreview(
+      { title: '📝📝 Note from Rose', message: note, imageUrl: imageUrl || null },
+      '📝 Note from Rose',
+      note,
+      '',
+      'adhoc-status',
+      () => {
+        document.getElementById('adhoc-input').value     = '';
+        document.getElementById('adhoc-image-url').value = '';
+      }
+    );
   });
 
   // ── Market Review ─────────────────────────────────────────
-  document.getElementById('review-btn').addEventListener('click', async () => {
+  document.getElementById('review-preview-btn').addEventListener('click', () => {
     const reviewType = reviewTypeChips.get();
     const review     = document.getElementById('review-input').value.trim();
     const imageUrl   = document.getElementById('review-image-url').value.trim();
 
-    if (!reviewType) {
-      showStatus('review-status', 'Select Pre or Post market.', 'warn');
-      return;
-    }
-    if (!review) {
-      showStatus('review-status', 'Write your review first.', 'warn');
-      return;
-    }
+    if (!reviewType) { showStatus('review-status', 'Select Pre or Post market.', 'warn'); return; }
+    if (!review)     { showStatus('review-status', 'Write your review first.', 'warn'); return; }
 
-    const btn = document.getElementById('review-btn');
-    btn.disabled = true;
+    const emoji = reviewType.includes('Post') ? '🌙' : '🌅';
 
-    try {
-      await sendAlert({ title: reviewType, message: review, imageUrl: imageUrl || null });
-      showStatus('review-status', '✅ Review posted!', 'success');
-      document.getElementById('review-input').value    = '';
-      document.getElementById('review-image-url').value = '';
-    } catch (err) {
-      showStatus('review-status', '❌ ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-    }
+    openPreview(
+      { title: reviewType, message: review, imageUrl: imageUrl || null },
+      emoji + ' ' + reviewType,
+      review,
+      'green',
+      'review-status',
+      () => {
+        document.getElementById('review-input').value     = '';
+        document.getElementById('review-image-url').value = '';
+      }
+    );
   });
 </script>
 
