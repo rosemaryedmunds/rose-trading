@@ -80,7 +80,24 @@ export async function handler(event) {
     if (!discordRes.ok) {
       const err = await discordRes.text();
       console.error('Discord error:', err);
-      // Don't fail the whole request if Discord fails
+    }
+
+    // ── Second webhook (ADEX) ─────────────────────────────────
+    const adexWebhookUrl = process.env.DISCORD_ADEX_WEBHOOK_URL;
+    if (adexWebhookUrl) {
+      const adexRes = await fetch(adexWebhookUrl, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content:  '<@&1316500131633299467>',
+          username: 'Rose Alerts 🌹',
+          embeds:   [embed],
+        }),
+      });
+      if (!adexRes.ok) {
+        const err = await adexRes.text();
+        console.error('Discord ADEX error:', err);
+      }
     }
   } else {
     console.warn('DISCORD_WEBHOOK_URL not set — skipping Discord');

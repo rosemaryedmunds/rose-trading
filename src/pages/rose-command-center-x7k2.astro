@@ -161,6 +161,15 @@
     .chip-blue.active  { background: #3DDC84;      border-color: #3DDC84;      color: #000; }
     .chip-purple.active { background: var(--purple); border-color: var(--purple); color: #000; }
 
+    /* url warning */
+    .url-warning {
+      font-size: .68rem;
+      color: #f0c060;
+      margin-top: .25rem;
+      display: none;
+    }
+    .url-warning.visible { display: block; }
+
     /* ── Input row (3 col) ─────────────────────────────────── */
     .input-row {
       display: grid;
@@ -289,6 +298,7 @@
       <span class="url-optional">optional</span>
     </div>
     <input type="url" id="adhoc-image-url" class="url-field" placeholder="https://..." />
+    <div class="url-warning" id="adhoc-url-warn">⚠️ Must be a direct image link ending in .png, .jpg, or .gif — TradingView links won't embed</div>
 
     <button class="btn btn-ghost" id="adhoc-btn">
       💬 Send Note
@@ -313,6 +323,7 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
       <span class="url-optional">optional</span>
     </div>
     <input type="url" id="review-image-url" class="url-field" placeholder="https://..." />
+    <div class="url-warning" id="review-url-warn">⚠️ Must be a direct image link ending in .png, .jpg, or .gif — TradingView links won't embed</div>
 
     <button class="btn btn-secondary" id="review-btn">
       ✏️ Post Review
@@ -361,6 +372,20 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   }
+
+  // ── Image URL validator ───────────────────────────────────
+  function isDirectImageUrl(url) {
+    return /\.(png|jpg|jpeg|gif|webp)(\?.*)?$/i.test(url);
+  }
+  function watchUrlField(inputId, warnId) {
+    document.getElementById(inputId).addEventListener('input', function() {
+      const warn = document.getElementById(warnId);
+      const val = this.value.trim();
+      warn.classList.toggle('visible', val.length > 0 && !isDirectImageUrl(val));
+    });
+  }
+  watchUrlField('adhoc-image-url', 'adhoc-url-warn');
+  watchUrlField('review-image-url', 'review-url-warn');
 
   // ── Set expiry default to today ───────────────────────────
   const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
