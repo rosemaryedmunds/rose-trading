@@ -63,13 +63,12 @@ export async function handler(event) {
     description += `\n\n📌 ${notes.trim()}`;
   }
 
-  const avatarUrl = 'https://rose.trading/rose-logo.png';
+  const avatarUrl = 'https://rose.trading/rose-no-border.png';
 
   const embed = {
     title:       `${emoji} ${title}`,
-    description: `\`\`\`${description}\`\`\``,
+    description: isAlert ? `\`\`\`${description}\`\`\`` : description,
     color,
-    thumbnail: { url: avatarUrl },
     footer: {
       text:     `${footer} | ${ctTime} CT`,
       icon_url: avatarUrl,
