@@ -78,14 +78,15 @@ exports.handler = async (event) => {
     }
 
     // Check membership across all pages
+    // NOTE: 'completed' covers free/comp "Joined" memberships shown in Whop dashboard
     var hasMembership = false;
-    var validStatuses = ['active', 'trialing', 'past_due'];
+    var validStatuses = ['active', 'trialing', 'past_due', 'completed'];
     var page = 1;
     var totalPages = 1;
 
     while (page <= totalPages && !hasMembership) {
       var memberRes = await fetch(
-        'https://api.whop.com/v5/company/memberships?status=active&page=' + page,
+        'https://api.whop.com/v5/company/memberships?page=' + page,  // removed status=active filter so all statuses are returned
         { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
       );
       var memberText = await memberRes.text();
