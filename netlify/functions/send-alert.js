@@ -3,7 +3,7 @@ export async function handler(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const { title, message, notes, imageUrl } = JSON.parse(event.body);
+  const { title, message, notes, imageUrl, ticker, swingOnly } = JSON.parse(event.body);
 
   // ── OneSignal push ──────────────────────────────────────────────────────
   try {
@@ -30,12 +30,18 @@ export async function handler(event) {
   const isCall       = message.includes('CALL');
   const isPut        = message.includes('PUT');
   const isAlert      = title === 'SPX Alert';
+  const isSwing      = title === 'Swing Alert';
   const isPreMarket  = title === 'Pre-Market Review';
   const isPostMarket = title === 'Post-Market Review';
   const isNote       = title.includes('Note from Rose');
 
   let color, emoji, footer;
-  if (isAlert && isCall) {
+  if (isSwing) {
+    const isLong = message.includes('LONG');
+    color = isLong ? 0x3DDC84 : 0xFF5C5C;
+    emoji = isLong ? '📈' : '📉';
+    footer = ticker ? `Swing Alert — ${ticker}` : 'Swing Alert';
+  } else if (isAlert && isCall) {
     color = 0x3DDC84; emoji = '🟢'; footer = 'SPX Options Alert';
   } else if (isAlert && isPut) {
     color = 0xFF5C5C; emoji = '🔴'; footer = 'SPX Options Alert';
@@ -65,9 +71,13 @@ export async function handler(event) {
 
   const avatarUrl = 'https://rose.trading/rose-no-border.png';
 
+  const embedTitle = isSwing && ticker
+    ? `${emoji} Swing Alert — ${ticker}`
+    : `${emoji} ${title}`;
+
   const embed = {
-    title:       `${emoji} ${title}`,
-    description: isAlert ? `\`\`\`${description}\`\`\`` : description,
+    title:       embedTitle,
+    description: (isAlert || isSwing) ? `\`\`\`${description}\`\`\`` : description,
     color,
     footer: {
       text:     `${footer} | ${ctTime} CT`,
@@ -99,9 +109,9 @@ export async function handler(event) {
     }
   }
 
-  // ── ADEX Discord webhook ────────────────────────────────────────────────
+  // ── ADEX Discord webhook (SPX alerts only, not swing) ──────────────────
   const adexWebhookUrl = process.env.DISCORD_ADEX_WEBHOOK_URL;
-  if (adexWebhookUrl) {
+  if (adexWebhookUrl && !swingOnly) {
     try {
       const res = await fetch(adexWebhookUrl, {
         method:  'POST',

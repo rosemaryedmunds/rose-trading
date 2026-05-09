@@ -348,6 +348,57 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
 
 </div>
 
+  <!-- ── SWING ALERT (full-width) ─────────────────────────── -->
+  <div class="panel" style="grid-column: 1 / -1;">
+    <div class="panel-title">📊 Swing Alert</div>
+
+    <div style="display:grid; grid-template-columns:1fr 2fr; gap:1rem;">
+
+      <!-- Left col: ticker + chart url -->
+      <div>
+        <div class="field-label" style="margin-top:0"><span>Ticker</span></div>
+        <input type="text" id="swing-ticker" placeholder="AAPL, NVDA, SPY..." style="text-transform:uppercase;" />
+
+        <div class="field-label"><span>Chart URL</span><span class="opt">optional</span></div>
+        <input type="url" id="swing-image-url" class="url-field" placeholder="https://...image.png" />
+        <div class="url-warn" id="swing-url-warn">⚠️ Must end in .png / .jpg / .gif</div>
+
+        <div class="field-label"><span>Notes</span><span class="opt">optional</span></div>
+        <input type="text" id="swing-notes" placeholder="e.g. stop below 200 EMA, target $180..." />
+      </div>
+
+      <!-- Right col: direction, action, preview -->
+      <div>
+        <div class="field-label" style="margin-top:0"><span>Direction</span></div>
+        <div class="chip-row" id="swing-direction-chips">
+          <button class="chip chip-green" data-val="LONG">📈 LONG</button>
+          <button class="chip chip-red"   data-val="SHORT">📉 SHORT</button>
+        </div>
+
+        <div class="field-label"><span>Action</span></div>
+        <div class="chip-row" id="swing-action-chips">
+          <button class="chip chip-blue"   data-val="🚀 ENTRY">🚀 ENTRY</button>
+          <button class="chip chip-blue"   data-val="✅ EXIT">✅ EXIT</button>
+          <button class="chip chip-red"    data-val="🛑 STOP HIT">🛑 STOP HIT</button>
+          <button class="chip chip-purple" data-val="👀 WATCHING">👀 WATCHING</button>
+        </div>
+
+        <!-- Live preview -->
+        <div class="live-preview" id="swing-live-preview" style="margin-top:.9rem;">
+          <div class="lp-label">Preview</div>
+          <div class="lp-title" id="swing-lp-title">📊 Swing Alert</div>
+          <div class="lp-body empty" id="swing-lp-body">Select ticker + direction + action to preview...</div>
+          <div class="lp-footer" id="swing-lp-footer"></div>
+        </div>
+
+        <button class="btn btn-primary" id="swing-btn" style="background:#3DDC84;color:#000;">📊 Send Swing Alert</button>
+        <div class="status" id="swing-status"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <script is:inline>
   // ── Chip helper ───────────────────────────────────────────
   function makeChips(groupId, onChange) {
@@ -380,7 +431,7 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
   function isImageUrl(url) {
     return /\.(png|jpg|jpeg|gif|webp)(\?.*)?$/i.test(url);
   }
-  ['alert','adhoc','review'].forEach(id => {
+  ['alert','adhoc','review','swing'].forEach(id => {
     document.getElementById(id + '-image-url').addEventListener('input', function() {
       document.getElementById(id + '-url-warn')
         .classList.toggle('visible', this.value.length > 0 && !isImageUrl(this.value));
@@ -550,6 +601,102 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     } finally {
       btn.disabled    = false;
       btn.textContent = '✏️ Post Review';
+    }
+  });
+  // ── Swing Alert chips ─────────────────────────────────────
+  const swingDirectionChips = makeChips('swing-direction-chips', updateSwingPreview);
+  const swingActionChips    = makeChips('swing-action-chips',    updateSwingPreview);
+
+  ['swing-ticker','swing-notes'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateSwingPreview);
+  });
+
+  // Auto-uppercase ticker
+  document.getElementById('swing-ticker').addEventListener('input', function() {
+    const pos = this.selectionStart;
+    this.value = this.value.toUpperCase();
+    this.setSelectionRange(pos, pos);
+  });
+
+  // ── Build swing alert message ─────────────────────────────
+  function buildSwingMessage() {
+    const ticker    = document.getElementById('swing-ticker').value.trim().toUpperCase();
+    const direction = swingDirectionChips.get();
+    const action    = swingActionChips.get();
+    const notes     = document.getElementById('swing-notes').value.trim();
+
+    if (!direction || !action) return null;
+
+    const dirEmoji = direction === 'LONG' ? '🟢' : '🔴';
+    let msg = action + ' | ' + (ticker || 'TICKER') + ' ' + direction + ' ' + dirEmoji;
+    if (notes) msg += '\n\n📌 ' + notes;
+
+    return { message: msg, direction, dirEmoji, ticker, notes };
+  }
+
+  // ── Update swing preview ──────────────────────────────────
+  function updateSwingPreview() {
+    const result  = buildSwingMessage();
+    const preview = document.getElementById('swing-live-preview');
+    const lpTitle = document.getElementById('swing-lp-title');
+    const lpBody  = document.getElementById('swing-lp-body');
+    const lpFoot  = document.getElementById('swing-lp-footer');
+
+    if (!result) {
+      preview.className   = 'live-preview';
+      lpTitle.textContent = '📊 Swing Alert';
+      lpBody.textContent  = 'Select ticker + direction + action to preview...';
+      lpBody.className    = 'lp-body empty';
+      lpFoot.textContent  = '';
+      return;
+    }
+
+    const accent = result.direction === 'LONG' ? 'green' : 'red';
+    preview.className   = 'live-preview ' + accent;
+    lpTitle.textContent = result.dirEmoji + ' Swing Alert' + (result.ticker ? ' — ' + result.ticker : '');
+    lpBody.textContent  = result.message;
+    lpBody.className    = 'lp-body';
+    lpFoot.textContent  = new Date().toLocaleString('en-US', {
+      month:'short', day:'numeric', hour:'numeric', minute:'2-digit', hour12:true
+    }) + ' CT';
+  }
+
+  // ── Send Swing Alert ──────────────────────────────────────
+  document.getElementById('swing-btn').addEventListener('click', async () => {
+    const result   = buildSwingMessage();
+    const imageUrl = document.getElementById('swing-image-url').value.trim();
+    const ticker   = document.getElementById('swing-ticker').value.trim().toUpperCase();
+
+    if (!ticker)  { showStatus('swing-status', 'Enter a ticker first.', 'warn'); return; }
+    if (!result)  { showStatus('swing-status', 'Select direction + action first.', 'warn'); return; }
+
+    const btn = document.getElementById('swing-btn');
+    btn.disabled    = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const notes   = document.getElementById('swing-notes').value.trim();
+      const baseMsg = result.message.split('\n\n📌')[0];
+      await sendAlert({
+        title:    'Swing Alert',
+        message:  baseMsg,
+        notes:    notes || null,
+        imageUrl: imageUrl || null,
+        ticker,
+        swingOnly: true,
+      });
+      showStatus('swing-status', '✅ Swing alert sent!', 'success');
+      ['swing-ticker','swing-notes','swing-image-url'].forEach(id =>
+        document.getElementById(id).value = ''
+      );
+      document.getElementById('swing-direction-chips').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+      document.getElementById('swing-action-chips').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+      updateSwingPreview();
+    } catch (err) {
+      showStatus('swing-status', '❌ ' + err.message, 'error');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = '📊 Send Swing Alert';
     }
   });
 </script>
