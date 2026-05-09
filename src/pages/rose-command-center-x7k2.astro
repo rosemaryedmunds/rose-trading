@@ -43,12 +43,13 @@
 
     .grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 1rem;
-      max-width: 980px;
+      max-width: 1400px;
       margin: 0 auto;
     }
-    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
 
     /* ── Panel ─────────────────────────────────────────────── */
     .panel {
@@ -348,68 +349,59 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
 
 </div>
 
-  <!-- ── SWING ALERT (full-width) ─────────────────────────── -->
-  <div class="panel" style="grid-column: 1 / -1;">
+  <!-- ── SWING ALERT ──────────────────────────────────────── -->
+  <div class="panel">
     <div class="panel-title">📊 Swing Alert</div>
 
-    <div style="display:grid; grid-template-columns:1fr 2fr; gap:1rem;">
+    <div class="field-label" style="margin-top:0"><span>Ticker</span></div>
+    <input type="text" id="swing-ticker" placeholder="AAPL, NVDA, SPY..." style="text-transform:uppercase;" />
 
-      <!-- Left col: ticker, strike/expiry/price, notes, chart url -->
-      <div>
-        <div class="field-label" style="margin-top:0"><span>Ticker</span></div>
-        <input type="text" id="swing-ticker" placeholder="AAPL, NVDA, SPY..." style="text-transform:uppercase;" />
+    <div class="field-label"><span>Direction</span></div>
+    <div class="chip-row" id="swing-direction-chips">
+      <button class="chip chip-green" data-val="CALL">📈 CALL</button>
+      <button class="chip chip-red"   data-val="PUT">📉 PUT</button>
+    </div>
 
-        <div class="input-row" style="margin-top:.7rem;">
-          <div class="input-col">
-            <div class="field-label"><span>Strike</span></div>
-            <input type="number" id="swing-strike" placeholder="150" />
-          </div>
-          <div class="input-col">
-            <div class="field-label"><span>Expiry</span></div>
-            <input type="date" id="swing-expiry" />
-          </div>
-          <div class="input-col">
-            <div class="field-label"><span>Price Paid</span></div>
-            <input type="number" id="swing-price" step="0.01" placeholder="2.50" />
-          </div>
-        </div>
+    <div class="field-label"><span>Action</span></div>
+    <div class="chip-row" id="swing-action-chips">
+      <button class="chip chip-blue"   data-val="🚀 ENTRY">🚀 ENTRY</button>
+      <button class="chip chip-blue"   data-val="✅ EXIT">✅ EXIT</button>
+      <button class="chip chip-red"    data-val="🛑 STOP HIT">🛑 STOP HIT</button>
+      <button class="chip chip-purple" data-val="👀 WATCHING">👀 WATCHING</button>
+    </div>
 
-        <div class="field-label"><span>Notes</span><span class="opt">optional</span></div>
-        <input type="text" id="swing-notes" placeholder="e.g. stop below 200 EMA, target $180..." />
-
-        <div class="field-label"><span>Chart URL</span><span class="opt">optional</span></div>
-        <input type="url" id="swing-image-url" class="url-field" placeholder="https://...image.png" />
-        <div class="url-warn" id="swing-url-warn">⚠️ Must end in .png / .jpg / .gif</div>
+    <div class="input-row">
+      <div class="input-col">
+        <div class="field-label"><span>Strike</span></div>
+        <input type="number" id="swing-strike" placeholder="150" />
       </div>
-
-      <!-- Right col: direction, action, preview -->
-      <div>
-        <div class="field-label" style="margin-top:0"><span>Direction</span></div>
-        <div class="chip-row" id="swing-direction-chips">
-          <button class="chip chip-green" data-val="CALL">📈 CALL</button>
-          <button class="chip chip-red"   data-val="PUT">📉 PUT</button>
-        </div>
-
-        <div class="field-label"><span>Action</span></div>
-        <div class="chip-row" id="swing-action-chips">
-          <button class="chip chip-blue"   data-val="🚀 ENTRY">🚀 ENTRY</button>
-          <button class="chip chip-blue"   data-val="✅ EXIT">✅ EXIT</button>
-          <button class="chip chip-red"    data-val="🛑 STOP HIT">🛑 STOP HIT</button>
-          <button class="chip chip-purple" data-val="👀 WATCHING">👀 WATCHING</button>
-        </div>
-
-        <!-- Live preview -->
-        <div class="live-preview" id="swing-live-preview" style="margin-top:.9rem;">
-          <div class="lp-label">Preview</div>
-          <div class="lp-title" id="swing-lp-title">📊 Swing Alert</div>
-          <div class="lp-body empty" id="swing-lp-body">Select ticker + direction + action to preview...</div>
-          <div class="lp-footer" id="swing-lp-footer"></div>
-        </div>
-
-        <button class="btn btn-primary" id="swing-btn" style="background:#3DDC84;color:#000;">📊 Send Swing Alert</button>
-        <div class="status" id="swing-status"></div>
+      <div class="input-col">
+        <div class="field-label"><span>Expiry</span></div>
+        <input type="date" id="swing-expiry" />
+      </div>
+      <div class="input-col">
+        <div class="field-label"><span>Price Paid</span></div>
+        <input type="number" id="swing-price" step="0.01" placeholder="2.50" />
       </div>
     </div>
+
+    <div class="field-label"><span>Notes</span><span class="opt">optional</span></div>
+    <input type="text" id="swing-notes" placeholder="e.g. stop below 200 EMA, target $180..." />
+
+    <div class="field-label"><span>Chart URL</span><span class="opt">optional</span></div>
+    <input type="url" id="swing-image-url" class="url-field" placeholder="https://...image.png" />
+    <div class="url-warn" id="swing-url-warn">⚠️ Must end in .png / .jpg / .gif</div>
+
+    <!-- Live preview -->
+    <div class="live-preview" id="swing-live-preview">
+      <div class="lp-label">Preview</div>
+      <div class="lp-title" id="swing-lp-title">📊 Swing Alert</div>
+      <div class="lp-body empty" id="swing-lp-body">Select ticker + direction + action to preview...</div>
+      <div class="lp-footer" id="swing-lp-footer"></div>
+    </div>
+
+    <button class="btn btn-primary" id="swing-btn" style="background:#3DDC84;color:#000;">📊 Send Swing Alert</button>
+    <div class="status" id="swing-status"></div>
   </div>
 
 </div>
