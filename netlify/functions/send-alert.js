@@ -90,9 +90,9 @@ export async function handler(event) {
     embed.image = { url: imageUrl.trim() };
   }
 
-  // ── Primary Discord webhook ─────────────────────────────────────────────
+  // ── Primary Discord webhook (not used for swing alerts) ────────────────
   const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
-  if (discordWebhookUrl) {
+  if (discordWebhookUrl && !swingOnly) {
     try {
       const res = await fetch(discordWebhookUrl, {
         method:  'POST',
@@ -106,6 +106,25 @@ export async function handler(event) {
       if (!res.ok) console.error('Discord primary error:', await res.text());
     } catch (err) {
       console.error('Discord primary exception:', err);
+    }
+  }
+
+  // ── Swing Discord webhook ───────────────────────────────────────────────
+  const swingWebhookUrl = process.env.DISCORD_SWING_WEBHOOK_URL;
+  if (swingWebhookUrl && swingOnly) {
+    try {
+      const res = await fetch(swingWebhookUrl, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username:   'Rose Alerts 🌹',
+          avatar_url: avatarUrl,
+          embeds:     [embed],
+        }),
+      });
+      if (!res.ok) console.error('Discord swing error:', await res.text());
+    } catch (err) {
+      console.error('Discord swing exception:', err);
     }
   }
 
