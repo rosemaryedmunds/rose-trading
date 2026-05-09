@@ -354,25 +354,40 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
 
     <div style="display:grid; grid-template-columns:1fr 2fr; gap:1rem;">
 
-      <!-- Left col: ticker + chart url -->
+      <!-- Left col: ticker, strike/expiry/price, notes, chart url -->
       <div>
         <div class="field-label" style="margin-top:0"><span>Ticker</span></div>
         <input type="text" id="swing-ticker" placeholder="AAPL, NVDA, SPY..." style="text-transform:uppercase;" />
 
-        <div class="field-label"><span>Chart URL</span><span class="opt">optional</span></div>
-        <input type="url" id="swing-image-url" class="url-field" placeholder="https://...image.png" />
-        <div class="url-warn" id="swing-url-warn">⚠️ Must end in .png / .jpg / .gif</div>
+        <div class="input-row" style="margin-top:.7rem;">
+          <div class="input-col">
+            <div class="field-label"><span>Strike</span></div>
+            <input type="number" id="swing-strike" placeholder="150" />
+          </div>
+          <div class="input-col">
+            <div class="field-label"><span>Expiry</span></div>
+            <input type="date" id="swing-expiry" />
+          </div>
+          <div class="input-col">
+            <div class="field-label"><span>Price Paid</span></div>
+            <input type="number" id="swing-price" step="0.01" placeholder="2.50" />
+          </div>
+        </div>
 
         <div class="field-label"><span>Notes</span><span class="opt">optional</span></div>
         <input type="text" id="swing-notes" placeholder="e.g. stop below 200 EMA, target $180..." />
+
+        <div class="field-label"><span>Chart URL</span><span class="opt">optional</span></div>
+        <input type="url" id="swing-image-url" class="url-field" placeholder="https://...image.png" />
+        <div class="url-warn" id="swing-url-warn">⚠️ Must end in .png / .jpg / .gif</div>
       </div>
 
       <!-- Right col: direction, action, preview -->
       <div>
         <div class="field-label" style="margin-top:0"><span>Direction</span></div>
         <div class="chip-row" id="swing-direction-chips">
-          <button class="chip chip-green" data-val="LONG">📈 LONG</button>
-          <button class="chip chip-red"   data-val="SHORT">📉 SHORT</button>
+          <button class="chip chip-green" data-val="CALL">📈 CALL</button>
+          <button class="chip chip-red"   data-val="PUT">📉 PUT</button>
         </div>
 
         <div class="field-label"><span>Action</span></div>
@@ -607,9 +622,13 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
   const swingDirectionChips = makeChips('swing-direction-chips', updateSwingPreview);
   const swingActionChips    = makeChips('swing-action-chips',    updateSwingPreview);
 
-  ['swing-ticker','swing-notes'].forEach(id => {
+  // Set today as default expiry for swing
+  document.getElementById('swing-expiry').value = todayStr;
+
+  ['swing-ticker','swing-strike','swing-price','swing-notes'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateSwingPreview);
   });
+  document.getElementById('swing-expiry').addEventListener('change', updateSwingPreview);
 
   // Auto-uppercase ticker
   document.getElementById('swing-ticker').addEventListener('input', function() {
@@ -623,13 +642,25 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     const ticker    = document.getElementById('swing-ticker').value.trim().toUpperCase();
     const direction = swingDirectionChips.get();
     const action    = swingActionChips.get();
+    const strike    = document.getElementById('swing-strike').value.trim();
+    const expiryRaw = document.getElementById('swing-expiry').value;
+    const price     = document.getElementById('swing-price').value.trim();
     const notes     = document.getElementById('swing-notes').value.trim();
 
     if (!direction || !action) return null;
 
-    const dirEmoji = direction === 'LONG' ? '🟢' : '🔴';
+    let expiryStr = '';
+    if (expiryRaw) {
+      const p = expiryRaw.split('-');
+      expiryStr = parseInt(p[1]) + '/' + parseInt(p[2]);
+    }
+
+    const dirEmoji = direction === 'CALL' ? '🟢' : '🔴';
     let msg = action + ' | ' + (ticker || 'TICKER') + ' ' + direction + ' ' + dirEmoji;
-    if (notes) msg += '\n\n📌 ' + notes;
+    if (strike)    msg += ' ' + strike;
+    if (expiryStr) msg += ' ' + expiryStr;
+    if (price)     msg += ' @ $' + parseFloat(price).toFixed(2);
+    if (notes)     msg += '\n\n📌 ' + notes;
 
     return { message: msg, direction, dirEmoji, ticker, notes };
   }
@@ -651,7 +682,7 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
       return;
     }
 
-    const accent = result.direction === 'LONG' ? 'green' : 'red';
+    const accent = result.direction === 'CALL' ? 'green' : 'red';
     preview.className   = 'live-preview ' + accent;
     lpTitle.textContent = result.dirEmoji + ' Swing Alert' + (result.ticker ? ' — ' + result.ticker : '');
     lpBody.textContent  = result.message;
@@ -686,9 +717,10 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
         swingOnly: true,
       });
       showStatus('swing-status', '✅ Swing alert sent!', 'success');
-      ['swing-ticker','swing-notes','swing-image-url'].forEach(id =>
+      ['swing-ticker','swing-strike','swing-price','swing-notes','swing-image-url'].forEach(id =>
         document.getElementById(id).value = ''
       );
+      document.getElementById('swing-expiry').value = todayStr;
       document.getElementById('swing-direction-chips').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
       document.getElementById('swing-action-chips').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
       updateSwingPreview();

@@ -37,9 +37,8 @@ export async function handler(event) {
 
   let color, emoji, footer;
   if (isSwing) {
-    const isLong = message.includes('LONG');
-    color = isLong ? 0x3DDC84 : 0xFF5C5C;
-    emoji = isLong ? '📈' : '📉';
+    color = isCall ? 0x3DDC84 : 0xFF5C5C;
+    emoji = isCall ? '🟢' : '🔴';
     footer = ticker ? `Swing Alert — ${ticker}` : 'Swing Alert';
   } else if (isAlert && isCall) {
     color = 0x3DDC84; emoji = '🟢'; footer = 'SPX Options Alert';
