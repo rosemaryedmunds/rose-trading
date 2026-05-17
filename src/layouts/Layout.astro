@@ -69,8 +69,12 @@ const { title, description = "Your guide to options trading" } = Astro.props;
           <a href="/">Home</a>
           <a href="/about">About</a>
           <a href="/morning-brief">Morning Brief</a>
-          <div class="nav-dropdown">
-            <button class="nav-dropdown-btn">Learning ▾</button>
+          <div class="nav-dropdown" id="learning-dropdown">
+            <button class="nav-dropdown-btn" aria-label="Learning menu" aria-expanded="false" onclick="toggleLearningMenu(this)">
+              <span class="ham-line ham-top"></span>
+              <span class="ham-line ham-mid"></span>
+              <span class="ham-line ham-bot"></span>
+            </button>
             <div class="nav-dropdown-menu">
               <a href="/course">Course</a>
               <a href="/guides">Guides</a>
@@ -107,21 +111,49 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   .nav-dropdown-btn {
     background: none;
     border: none;
-    color: var(--accent-primary);
-    font: inherit;
-    font-size: inherit;
     cursor: pointer;
-    padding: 0;
+    padding: 4px 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
     transition: color 0.2s;
   }
-  .nav-dropdown-btn:hover { color: var(--accent-secondary); }
 
+  /* ── Hamburger lines ── */
+  .ham-line {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--accent-primary);
+    border-radius: 2px;
+    transform-origin: center;
+    transition: transform 0.25s ease, opacity 0.25s ease, background 0.2s;
+  }
+  .nav-dropdown-btn:hover .ham-line {
+    background: var(--accent-secondary);
+  }
+
+  /* ── X state (open class on the wrapper) ── */
+  .nav-dropdown.open .ham-top {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .nav-dropdown.open .ham-mid {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  .nav-dropdown.open .ham-bot {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* ── Dropdown menu ── */
   .nav-dropdown-menu {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
     position: absolute;
     top: calc(100% + 0.75rem);
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(-6px);
     background: var(--bg-secondary, #1C1E2D);
     border: 1px solid rgba(153,139,255,0.2);
     border-radius: 10px;
@@ -129,13 +161,15 @@ const { title, description = "Your guide to options trading" } = Astro.props;
     min-width: 140px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     z-index: 100;
-    flex-direction: column;
-    gap: 0.1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
-  .nav-dropdown:hover .nav-dropdown-menu,
-  .nav-dropdown-menu:hover {
-    display: flex;
+  .nav-dropdown.open .nav-dropdown-menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
   }
 
   .nav-dropdown-menu a {
@@ -153,3 +187,21 @@ const { title, description = "Your guide to options trading" } = Astro.props;
     color: var(--accent-primary);
   }
 </style>
+
+<script is:inline>
+  function toggleLearningMenu(btn) {
+    const dropdown = document.getElementById('learning-dropdown');
+    const isOpen = dropdown.classList.toggle('open');
+    btn.setAttribute('aria-expanded', isOpen);
+  }
+
+  // Close when clicking outside
+  document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('learning-dropdown');
+    if (dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('open');
+      const btn = dropdown.querySelector('.nav-dropdown-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
