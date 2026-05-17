@@ -68,12 +68,13 @@ const { title, description = "Your guide to options trading" } = Astro.props;
         <div style="display: flex; gap: 2rem;">
           <a href="/">Home</a>
           <a href="/about">About</a>
-          <a href="/morning-brief">Morning Brief</a>
+          <a href="/news">News</a>
           <div class="nav-dropdown" id="learning-dropdown">
             <button class="nav-dropdown-btn" aria-label="Learning menu" aria-expanded="false" onclick="toggleLearningMenu(this)">
               <span class="ham-line ham-top"></span>
               <span class="ham-line ham-mid"></span>
               <span class="ham-line ham-bot"></span>
+              <span class="ham-label">Learning</span>
             </button>
             <div class="nav-dropdown-menu">
               <a href="/course">Course</a>
@@ -131,6 +132,21 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   }
   .nav-dropdown-btn:hover .ham-line {
     background: var(--accent-secondary);
+  }
+
+  .ham-label {
+    font-size: 0.65rem;
+    font-family: inherit;
+    color: var(--accent-primary);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    transition: opacity 0.2s ease, color 0.2s;
+  }
+  .nav-dropdown-btn:hover .ham-label {
+    color: var(--accent-secondary);
+  }
+  .nav-dropdown.open .ham-label {
+    opacity: 0;
   }
 
   /* ── X state (open class on the wrapper) ── */
