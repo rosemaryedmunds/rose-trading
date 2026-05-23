@@ -31,7 +31,305 @@ import { Icon } from 'astro-icon/components';
     </div>
   </section>
 
-  <section class="section" id="journaling" style="background: var(--bg-secondary);">
+  <!-- ─── TRADING PROCESS ─── -->
+  <section class="section" id="trading-process" style="background: var(--bg-secondary);">
+    <div class="container">
+      <h2>Daily Trading Process (EST)</h2>
+      <p class="section-intro">A disciplined schedule keeps you focused and prevents impulsive decisions.</p>
+      <div class="process-timeline">
+        <div class="process-item">
+          <div class="process-time">8:30 AM</div>
+          <div class="process-content">
+            <h4>Market Analysis & Prep</h4>
+            <p>Mark up ES/SPX overnight and pre-market levels. Prep your broker platform.</p>
+          </div>
+        </div>
+        <div class="process-item">
+          <div class="process-time">8:45 – 9:30 AM</div>
+          <div class="process-content">
+            <h4>Opening Trade Plan</h4>
+            <p>Mark up your opening trade plan. Only take a pre-market or open trade if the setup is <strong>very clear</strong>.</p>
+          </div>
+        </div>
+        <div class="process-item">
+          <div class="process-time">9:40 AM</div>
+          <div class="process-content">
+            <h4>Mark the 10-Min OR</h4>
+            <p>Mark the high and low of the first 10-minute candle. <span class="rule-tag">Rule:</span> Do NOT trade the first 30 minutes if the golden gate is not open.</p>
+          </div>
+        </div>
+        <div class="process-item">
+          <div class="process-time">9:40 AM – 12:30 PM</div>
+          <div class="process-content">
+            <h4>Morning Session</h4>
+            <p>Trade <strong>clear playbook setups only</strong>. Be patient for every single one.</p>
+          </div>
+        </div>
+        <div class="process-item">
+          <div class="process-time">12:30 – 3:00 PM</div>
+          <div class="process-content">
+            <h4>Midday Break</h4>
+            <p>Step away from the charts. Protect your mental capital.</p>
+          </div>
+        </div>
+        <div class="process-item">
+          <div class="process-time">3:00 – 4:00 PM</div>
+          <div class="process-content">
+            <h4>Afternoon Session</h4>
+            <p>Trade <strong>clear playbook setups only</strong>. Remain patient.</p>
+          </div>
+        </div>
+        <div class="process-item">
+          <div class="process-time">4:00 – 5:00 PM</div>
+          <div class="process-content">
+            <h4>Journal Trades</h4>
+            <p>Document every trade taken. Review execution against your ideal entries and exits.</p>
+          </div>
+        </div>
+        <div class="process-item">
+          <div class="process-time">8:00 – 9:00 PM</div>
+          <div class="process-content">
+            <h4>Prep Charts for Next Day</h4>
+            <p>Mark up key S/R levels, ATR levels, and potential setups for the next session.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PRE-TRADE CHECKLIST ─── -->
+  <section class="section" id="checklist">
+    <div class="container">
+      <h2>Pre-Trade Checklist</h2>
+      <p class="section-intro">Answer every question before you enter a trade. No exceptions.</p>
+      <div class="checklist-grid">
+        <div class="checklist-item">
+          <span class="checklist-num">01</span>
+          <p>What is the <strong>setup / thesis</strong>?</p>
+        </div>
+        <div class="checklist-item">
+          <span class="checklist-num">02</span>
+          <p>What is my <strong>trigger</strong>?</p>
+        </div>
+        <div class="checklist-item">
+          <span class="checklist-num">03</span>
+          <p>What is my <strong>entry</strong>?</p>
+        </div>
+        <div class="checklist-item">
+          <span class="checklist-num">04</span>
+          <p>What are my <strong>exits</strong>?</p>
+        </div>
+        <div class="checklist-item">
+          <span class="checklist-num">05</span>
+          <p>What is my <strong>technical stop</strong>?</p>
+        </div>
+        <div class="checklist-item">
+          <span class="checklist-num">06</span>
+          <p>What is my <strong>sizing</strong> based on risk, entry, and stop?</p>
+        </div>
+        <div class="checklist-item checklist-rule">
+          <span class="checklist-num">⚠</span>
+          <p><strong>Do NOT trade</strong> if price is stuck between Call and Put Trigger and TICK/ADD is in the –500 to +500 range.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PLAYBOOK ─── -->
+  <section class="section" id="playbook" style="background: var(--bg-secondary);">
+    <div class="container">
+      <h2>Playbook Setups</h2>
+      <p class="section-intro">Six high-probability setups. Wait for the setup to come to you — never force a trade.</p>
+      <div class="playbook-grid">
+
+        <!-- 2-2 Reversal -->
+        <div class="setup-card">
+          <div class="setup-header">
+            <span class="setup-tag reversal">Reversal</span>
+            <h3>2-2 Reversal of a Broadening Formation</h3>
+          </div>
+          <div class="setup-rows">
+            <div class="setup-row">
+              <span class="setup-label">Condition</span>
+              <span>High and low of the previous 2 candles form a broadening pattern.</span>
+            </div>
+            <div class="setup-row">
+              <span class="setup-label">Entry</span>
+              <span>Break of the previous candle.</span>
+            </div>
+            <div class="setup-row risk-row">
+              <span class="setup-label">Risk</span>
+              <span>Break below the low of the previous candle.</span>
+            </div>
+            <div class="setup-row target-row">
+              <span class="setup-label">Target</span>
+              <span>Next swing high.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10-Min ORB -->
+        <div class="setup-card">
+          <div class="setup-header">
+            <span class="setup-tag breakout">Breakout</span>
+            <h3>10-Minute Open Range Breakout</h3>
+          </div>
+          <div class="setup-rows">
+            <div class="setup-row">
+              <span class="setup-label">Condition</span>
+              <span>Mark the high and low of the first 10-minute candle (9:30–9:40 AM EST).</span>
+            </div>
+            <div class="setup-row">
+              <span class="setup-label">Entry</span>
+              <span>Break and retest of the OR high or low.</span>
+            </div>
+            <div class="setup-row risk-row">
+              <span class="setup-label">Risk</span>
+              <span>Midpoint of the OR.</span>
+            </div>
+            <div class="setup-row target-row">
+              <span class="setup-label">Target</span>
+              <span>Next S/R level, ATR level, change in momentum, or larger EMA.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vomy / iVomy -->
+        <div class="setup-card">
+          <div class="setup-header">
+            <span class="setup-tag transition">Transition</span>
+            <h3>Vomy / iVomy</h3>
+          </div>
+          <div class="setup-rows">
+            <div class="setup-row">
+              <span class="setup-label">Condition</span>
+              <span>Price crosses the ribbon and closes on the other side.</span>
+            </div>
+            <div class="setup-row">
+              <span class="setup-label">Entry</span>
+              <span>Price retests the ribbon — anticipate and enter on the retest.</span>
+            </div>
+            <div class="setup-row risk-row">
+              <span class="setup-label">Risk</span>
+              <span>Other side of the ribbon.</span>
+            </div>
+            <div class="setup-row target-row">
+              <span class="setup-label">Target</span>
+              <span>Next S/R level, ATR level, VWAP, or larger EMA.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flag Into Ribbon -->
+        <div class="setup-card">
+          <div class="setup-header">
+            <span class="setup-tag trending">Trending</span>
+            <h3>Flag Into Ribbon</h3>
+          </div>
+          <div class="setup-rows">
+            <div class="setup-row">
+              <span class="setup-label">Condition</span>
+              <span>Trending market. Price pulls back into the ribbon, which acts as support.</span>
+            </div>
+            <div class="setup-row">
+              <span class="setup-label">Entry</span>
+              <span>13 or 21 EMA — anticipate the pullback to the EMA.</span>
+            </div>
+            <div class="setup-row risk-row">
+              <span class="setup-label">Risk</span>
+              <span>Other side of the ribbon.</span>
+            </div>
+            <div class="setup-row target-row">
+              <span class="setup-label">Target</span>
+              <span>Next S/R level, ATR level, VWAP, or larger EMA.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divergence From Extreme -->
+        <div class="setup-card">
+          <div class="setup-header">
+            <span class="setup-tag reversal">Reversal</span>
+            <h3>Divergence From Extreme</h3>
+          </div>
+          <div class="setup-rows">
+            <div class="setup-row">
+              <span class="setup-label">Condition</span>
+              <span>Range environment. Price has made a swing up or down. Phase Oscillator shows divergence from the extreme — anticipate the divergence, confirm swing high or low.</span>
+            </div>
+            <div class="setup-row">
+              <span class="setup-label">Entry</span>
+              <span>Divergence confirmation on swing candle close.</span>
+            </div>
+            <div class="setup-row risk-row">
+              <span class="setup-label">Risk</span>
+              <span>Above the swing high (short) or below the swing low (long).</span>
+            </div>
+            <div class="setup-row target-row">
+              <span class="setup-label">Target</span>
+              <span>Mean reversion to 21 EMA. Pullback or reversal to ribbon with possible S/R / ATR level / change in momentum / larger EMA.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1-Min EOD Divergence -->
+        <div class="setup-card">
+          <div class="setup-header">
+            <span class="setup-tag reversal">Reversal</span>
+            <h3>1-Minute End of Day Divergence</h3>
+          </div>
+          <div class="setup-rows">
+            <div class="setup-row">
+              <span class="setup-label">Condition</span>
+              <span>Price has made a swing. Phase Oscillator is near the middle — divergence can be anticipated if a new high or low is made.</span>
+            </div>
+            <div class="setup-row">
+              <span class="setup-label">Entry</span>
+              <span>Divergence confirmation on swing candle close. Look for supporting volume.</span>
+            </div>
+            <div class="setup-row risk-row">
+              <span class="setup-label">Risk</span>
+              <span>Above the swing high (short) or below the swing low (long).</span>
+            </div>
+            <div class="setup-row target-row">
+              <span class="setup-label">Target</span>
+              <span>Mean reversion to 21 EMA. Pullback or reversal to ribbon with possible S/R / ATR level / change in momentum / larger EMA.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tweezer Bottom -->
+        <div class="setup-card">
+          <div class="setup-header">
+            <span class="setup-tag reversal">Reversal</span>
+            <h3>Tweezer Bottom (aka Wicky Wicky)</h3>
+          </div>
+          <div class="setup-rows">
+            <div class="setup-row">
+              <span class="setup-label">Condition</span>
+              <span>Two parallel candles with matching bottom wicks forming a tweezer pattern.</span>
+            </div>
+            <div class="setup-row">
+              <span class="setup-label">Entry</span>
+              <span>Reclaim 50% of the down candle.</span>
+            </div>
+            <div class="setup-row risk-row">
+              <span class="setup-label">Risk</span>
+              <span>Below the tweezer wicks. Move stop to below candle body lows once working, then below structure when in profit.</span>
+            </div>
+            <div class="setup-row target-row">
+              <span class="setup-label">Target</span>
+              <span>Mean reversion to 21 EMA. Pullback or reversal to ribbon with possible S/R / ATR level / change in momentum / larger EMA.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── JOURNALING ─── -->
+  <section class="section" id="journaling">
     <div class="container">
       <h2>Journaling</h2>
       <div class="grid grid-3">
@@ -56,6 +354,165 @@ import { Icon } from 'astro-icon/components';
 </Layout>
 
 <style>
+  /* ── shared ── */
+  .section-intro {
+    max-width: 800px;
+    margin: 0 auto 3rem;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+
+  /* ── process timeline ── */
+  .process-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 860px;
+    margin: 0 auto;
+    border-left: 2px solid var(--accent-purple);
+    padding-left: 2rem;
+  }
+  .process-item {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 1.5rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .process-item:last-child { border-bottom: none; }
+  .process-time {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-purple);
+    padding-top: 0.2rem;
+    white-space: nowrap;
+  }
+  .process-content h4 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+  .process-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .rule-tag {
+    display: inline-block;
+    background: rgba(255, 100, 100, 0.15);
+    color: #ff8080;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    margin-right: 0.4rem;
+  }
+
+  /* ── checklist ── */
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .checklist-item {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .checklist-item.checklist-rule {
+    grid-column: 1 / -1;
+    border-color: rgba(255, 100, 100, 0.25);
+    background: rgba(255, 100, 100, 0.05);
+  }
+  .checklist-num {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+    min-width: 1.8rem;
+    padding-top: 0.05rem;
+  }
+  .checklist-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ── playbook ── */
+  .playbook-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+  }
+  .setup-card {
+    background: var(--bg-primary);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .setup-header {
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .setup-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+  .setup-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0.15rem 0.55rem;
+    border-radius: 4px;
+    width: fit-content;
+  }
+  .setup-tag.reversal   { background: rgba(153, 139, 255, 0.15); color: #998BFF; }
+  .setup-tag.breakout   { background: rgba(95, 92, 255, 0.15);   color: #8B9FFF; }
+  .setup-tag.transition { background: rgba(80, 180, 255, 0.15);  color: #70BFFF; }
+  .setup-tag.trending   { background: rgba(80, 220, 160, 0.15);  color: #60DCA0; }
+
+  .setup-rows {
+    padding: 0.75rem 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .setup-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    align-items: baseline;
+  }
+  .setup-label {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding-top: 0.1rem;
+  }
+  .risk-row   .setup-label { color: #ff8080; }
+  .target-row .setup-label { color: #60DCA0; }
+  .setup-row span:last-child { color: var(--text-secondary); }
+
+  /* ── journal icons (existing) ── */
   [data-icon] {
     width: 2.5rem;
     height: 2.5rem;
@@ -64,5 +521,13 @@ import { Icon } from 'astro-icon/components';
     margin: 0 auto 1rem;
     display: block;
   }
+
+  /* ── responsive ── */
+  @media (max-width: 768px) {
+    .process-item { grid-template-columns: 1fr; gap: 0.35rem; }
+    .playbook-grid { grid-template-columns: 1fr; }
+    .setup-row { grid-template-columns: 70px 1fr; }
+  }
+
   /* ... rest of your existing CSS ... */
 </style>
