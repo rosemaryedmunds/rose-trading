@@ -58,34 +58,41 @@ const { title, description = "Your guide to options trading" } = Astro.props;
 <body>
   <header>
     <nav class="container">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0;">
-        <a href="/" style="display: flex; align-items: center; gap: 1rem; text-decoration: none;">
+      <div class="nav-inner">
+        <!-- Logo -->
+        <a href="/" class="nav-logo">
           <img src="/rose-logo.png" alt="Rose Trading Logo" style="width: 60px; height: 60px; object-fit: contain;" />
-          <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">
-           
-          </span>
         </a>
-        <div style="display: flex; gap: 2rem;">
-          <a href="/">Home</a>
-          <a href="/about">About</a>
-          <a href="/morning-brief">News</a>
-          <div class="nav-dropdown" id="learning-dropdown">
-            <button class="nav-dropdown-btn" aria-label="Learning menu" aria-expanded="false" onclick="toggleLearningMenu(this)">
-              <span class="ham-line ham-top"></span>
-              <span class="ham-line ham-mid"></span>
-              <span class="ham-line ham-bot"></span>
-            </button>
-            <div class="nav-dropdown-menu">
-              <a href="/course">Course</a>
-              <a href="/guides">Guides</a>
-              <a href="/resources">Resources</a>
-            </div>
-          </div>
-          <a href="/alerts">Alerts</a>
-          <a href="/contact">Contact</a>
-        </div>
+
+        <!-- Hamburger button -->
+        <button
+          class="ham-btn"
+          id="ham-btn"
+          aria-label="Toggle navigation"
+          aria-expanded="false"
+          aria-controls="nav-menu"
+          onclick="toggleNav(this)"
+        >
+          <span class="ham-line ham-top"></span>
+          <span class="ham-line ham-mid"></span>
+          <span class="ham-line ham-bot"></span>
+        </button>
       </div>
     </nav>
+
+    <!-- Full-screen dropdown menu -->
+    <div class="nav-menu" id="nav-menu" role="dialog" aria-label="Navigation menu">
+      <nav class="nav-menu-inner">
+        <a href="/" class="nav-menu-link" onclick="closeNav()">Home</a>
+        <a href="/about" class="nav-menu-link" onclick="closeNav()">About</a>
+        <a href="/morning-brief" class="nav-menu-link" onclick="closeNav()">News</a>
+        <a href="/course" class="nav-menu-link" onclick="closeNav()">Course</a>
+        <a href="/guides" class="nav-menu-link" onclick="closeNav()">Guides</a>
+        <a href="/resources" class="nav-menu-link" onclick="closeNav()">Resources</a>
+        <a href="/alerts" class="nav-menu-link" onclick="closeNav()">Alerts</a>
+        <a href="/contact" class="nav-menu-link" onclick="closeNav()">Contact</a>
+      </nav>
+    </div>
   </header>
 
   <main>
@@ -103,105 +110,147 @@ const { title, description = "Your guide to options trading" } = Astro.props;
 </html>
 
 <style>
-  .nav-dropdown {
-    position: relative;
-    display: inline-block;
+  /* ── Nav bar ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--bg-primary);
+    border-bottom: 1px solid rgba(153, 139, 255, 0.1);
   }
 
-  .nav-dropdown-btn {
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    z-index: 300;
+    position: relative;
+  }
+
+  /* ── Hamburger button ── */
+  .ham-btn {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px 2px;
+    padding: 6px 4px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    transition: color 0.2s;
+    gap: 6px;
+    z-index: 300;
+    position: relative;
   }
 
-  /* ── Hamburger lines ── */
   .ham-line {
     display: block;
-    width: 20px;
+    width: 26px;
     height: 2px;
     background: var(--accent-primary);
     border-radius: 2px;
     transform-origin: center;
-    transition: transform 0.25s ease, opacity 0.25s ease, background 0.2s;
-  }
-  .nav-dropdown-btn:hover .ham-line {
-    background: var(--accent-secondary);
+    transition: transform 0.28s ease, opacity 0.2s ease, background 0.2s;
   }
 
-  /* ── X state (open class on the wrapper) ── */
-  .nav-dropdown.open .ham-top {
-    transform: translateY(7px) rotate(45deg);
+  .ham-btn:hover .ham-line {
+    background: var(--accent-secondary, #5F5CFF);
   }
-  .nav-dropdown.open .ham-mid {
+
+  /* X state — toggled via .nav-open on <header> */
+  header.nav-open .ham-top {
+    transform: translateY(8px) rotate(45deg);
+  }
+  header.nav-open .ham-mid {
     opacity: 0;
     transform: scaleX(0);
   }
-  .nav-dropdown.open .ham-bot {
-    transform: translateY(-7px) rotate(-45deg);
+  header.nav-open .ham-bot {
+    transform: translateY(-8px) rotate(-45deg);
   }
 
-  /* ── Dropdown menu ── */
-  .nav-dropdown-menu {
+  /* ── Full-screen dropdown ── */
+  .nav-menu {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    z-index: 150;
     display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    position: absolute;
-    top: calc(100% + 0.75rem);
-    left: 50%;
-    transform: translateX(-50%) translateY(-6px);
-    background: var(--bg-secondary, #1C1E2D);
-    border: 1px solid rgba(153,139,255,0.2);
-    border-radius: 10px;
-    padding: 0.5rem;
-    min-width: 140px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    z-index: 100;
+    align-items: center;
+    justify-content: center;
+
+    /* hidden state */
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateY(-12px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
   }
 
-  .nav-dropdown.open .nav-dropdown-menu {
+  header.nav-open ~ .nav-menu,   /* sibling approach fallback */
+  .nav-menu.open {
     opacity: 1;
     pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
 
-  .nav-dropdown-menu a {
-    display: block;
-    padding: 0.55rem 1rem;
-    border-radius: 6px;
-    text-decoration: none;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    transition: background 0.15s, color 0.15s;
-    white-space: nowrap;
+  .nav-menu-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 6rem 2rem 4rem;
   }
-  .nav-dropdown-menu a:hover {
-    background: rgba(153,139,255,0.1);
+
+  .nav-menu-link {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.6rem, 5vw, 2.5rem);
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 10px;
+    letter-spacing: 0.02em;
+    transition: color 0.15s, background 0.15s;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+  }
+
+  .nav-menu-link:hover {
     color: var(--accent-primary);
+    background: rgba(153, 139, 255, 0.08);
   }
 </style>
 
 <script is:inline>
-  function toggleLearningMenu(btn) {
-    const dropdown = document.getElementById('learning-dropdown');
-    const isOpen = dropdown.classList.toggle('open');
+  function toggleNav(btn) {
+    const header = btn.closest('header');
+    const menu   = document.getElementById('nav-menu');
+    const isOpen = header.classList.toggle('nav-open');
+    menu.classList.toggle('open', isOpen);
     btn.setAttribute('aria-expanded', isOpen);
+    // Prevent body scroll while menu is open
+    document.body.style.overflow = isOpen ? 'hidden' : '';
   }
 
-  // Close when clicking outside
-  document.addEventListener('click', function(e) {
-    const dropdown = document.getElementById('learning-dropdown');
-    if (dropdown && !dropdown.contains(e.target)) {
-      dropdown.classList.remove('open');
-      const btn = dropdown.querySelector('.nav-dropdown-btn');
-      if (btn) btn.setAttribute('aria-expanded', 'false');
-    }
+  function closeNav() {
+    const header = document.querySelector('header');
+    const menu   = document.getElementById('nav-menu');
+    const btn    = document.getElementById('ham-btn');
+    header.classList.remove('nav-open');
+    menu.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeNav();
   });
 </script>
