@@ -1,0 +1,1655 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Saty's Trading System | rose.trading">
+  <main class="setups-page">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-noise"></div>
+      <div class="hero-glow"></div>
+      <div class="hero-content">
+        <p class="eyebrow">Saty Mahajan · SPX / ES · 0DTE Options</p>
+        <h1>The <em>System</em></h1>
+        <p class="hero-sub">
+          Indicators. Levels. Setups. Rules. Everything that governs how we read the market
+          and when — and when not — to pull the trigger.
+        </p>
+        <nav class="pill-nav">
+          <a href="#indicators" class="pill">Indicators</a>
+          <a href="#atr" class="pill">ATR Grid</a>
+          <a href="#setups" class="pill">Setups</a>
+          <a href="#grading" class="pill">Grading</a>
+          <a href="#process" class="pill">Daily Process</a>
+          <a href="#rules" class="pill">Hard Rules</a>
+        </nav>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- SECTION 1: The Three Indicators   -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section" id="indicators">
+      <div class="container">
+        <div class="section-label">Layer 01</div>
+        <h2 class="section-heading">The Three Core Indicators</h2>
+        <p class="section-intro">Everything in the system flows from how these three tools interact. Read them together, never in isolation.</p>
+
+        <div class="three-col">
+
+          <!-- Pivot Ribbon -->
+          <div class="indicator-card">
+            <div class="ind-header">
+              <span class="ind-num">01</span>
+              <h3>Pivot Ribbon</h3>
+            </div>
+            <p class="ind-def">An EMA stack that defines trend structure, pullback entries, and regime shifts. The ribbon tells you <em>where you are</em> in the trend.</p>
+            <div class="ema-table">
+              <div class="ema-row">
+                <span class="ema-num">8</span>
+                <span class="ema-role">Fast trend · pullback reference</span>
+              </div>
+              <div class="ema-row">
+                <span class="ema-num">13</span>
+                <span class="ema-role">Vomy/iVomy cross partner · conviction arrow</span>
+              </div>
+              <div class="ema-row ema-key">
+                <span class="ema-num">21</span>
+                <span class="ema-role">Core pivot EMA — primary trend reference</span>
+              </div>
+              <div class="ema-row">
+                <span class="ema-num">34</span>
+                <span class="ema-role">Common stop reference</span>
+              </div>
+              <div class="ema-row ema-key">
+                <span class="ema-num">48</span>
+                <span class="ema-role">Major slow EMA — cloud anchor</span>
+              </div>
+              <div class="ema-row">
+                <span class="ema-num">200</span>
+                <span class="ema-role">Long-term anchor</span>
+              </div>
+            </div>
+            <div class="candle-legend">
+              <h4>Candle Colors</h4>
+              <div class="candle-row"><span class="dot-green"></span> Green — up, above EMA 48 (bull trend)</div>
+              <div class="candle-row"><span class="dot-red"></span> Red — down, below EMA 48 (bear trend)</div>
+              <div class="candle-row"><span class="dot-blue"></span> Blue — down, above EMA 48 (pullback in bull)</div>
+              <div class="candle-row"><span class="dot-orange"></span> Orange — up, below EMA 48 (bounce in bear)</div>
+              <div class="candle-row"><span class="dot-gray"></span> Gray/Violet — compression zone</div>
+            </div>
+          </div>
+
+          <!-- Phase Oscillator -->
+          <div class="indicator-card">
+            <div class="ind-header">
+              <span class="ind-num">02</span>
+              <h3>Phase Oscillator</h3>
+            </div>
+            <p class="ind-def">Measures momentum and where price sits in the cycle. The PO tells you <em>how much fuel is left</em> — and when it's running out.</p>
+            <div class="po-zones">
+              <div class="po-zone extended-up">
+                <span class="po-label">Extended Up</span>
+                <span class="po-range">&gt; +100</span>
+                <span class="po-meaning">Overbought extreme</span>
+              </div>
+              <div class="po-zone distribution">
+                <span class="po-label">Distribution</span>
+                <span class="po-range">+61.8 → +100</span>
+                <span class="po-meaning">Potential topping · Bilbo bear zone</span>
+              </div>
+              <div class="po-zone neutral-up">
+                <span class="po-label">Neutral Up</span>
+                <span class="po-range">+23.6 → +61.8</span>
+                <span class="po-meaning">Healthy uptrend</span>
+              </div>
+              <div class="po-zone neutral">
+                <span class="po-label">Neutral</span>
+                <span class="po-range">−23.6 → +23.6</span>
+                <span class="po-meaning">No clear momentum · chop zone</span>
+              </div>
+              <div class="po-zone neutral-down">
+                <span class="po-label">Neutral Down</span>
+                <span class="po-range">−61.8 → −23.6</span>
+                <span class="po-meaning">Healthy downtrend</span>
+              </div>
+              <div class="po-zone accumulation">
+                <span class="po-label">Accumulation</span>
+                <span class="po-range">−100 → −61.8</span>
+                <span class="po-meaning">Potential bottoming · Bilbo bull zone</span>
+              </div>
+              <div class="po-zone extended-down">
+                <span class="po-label">Extended Down</span>
+                <span class="po-range">&lt; −100</span>
+                <span class="po-meaning">Oversold extreme</span>
+              </div>
+            </div>
+            <div class="po-signals">
+              <div class="po-signal bull">Leaves accumulation (crosses above −61.8) → potential long</div>
+              <div class="po-signal bear">Leaves distribution (crosses below +61.8) → potential short</div>
+              <div class="po-signal caution">⚠️ 1h PO caveat: extended-hours ATR inflation causes TV mismatch — use 1h PO directionally only</div>
+            </div>
+          </div>
+
+          <!-- ATR Levels -->
+          <div class="indicator-card">
+            <div class="ind-header">
+              <span class="ind-num">03</span>
+              <h3>ATR Level Grid</h3>
+            </div>
+            <p class="ind-def">Fibonacci multiples of the daily ATR anchored to the previous close. These are the <em>targets and triggers</em> — not support/resistance on their own.</p>
+            <div class="atr-mini">
+              <div class="atr-level trigger">
+                <span class="atr-pct">±23.6%</span>
+                <span class="atr-name">Trigger</span>
+                <span class="atr-note">First long/short trigger zone</span>
+              </div>
+              <div class="atr-level gg-open">
+                <span class="atr-pct">±38.2%</span>
+                <span class="atr-name">GG Open</span>
+                <span class="atr-note">Golden Gate opens here — not at trigger</span>
+              </div>
+              <div class="atr-level midrange">
+                <span class="atr-pct">±50%</span>
+                <span class="atr-name">Midrange</span>
+                <span class="atr-note">Intermediate target</span>
+              </div>
+              <div class="atr-level golden">
+                <span class="atr-pct">±61.8%</span>
+                <span class="atr-name">Golden Fib</span>
+                <span class="atr-note">Primary GG completion target</span>
+              </div>
+              <div class="atr-level full">
+                <span class="atr-pct">±100%</span>
+                <span class="atr-name">Full ATR</span>
+                <span class="atr-note">Large move zone — ~2% cumulative probability</span>
+              </div>
+            </div>
+            <div class="atr-warning">
+              Hitting the trigger does <strong>not</strong> mean the Golden Gate opened. GG opens at 38.2%. GG completes at 61.8%.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- SECTION 2: ATR Grid explained     -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section alt-bg" id="atr">
+      <div class="container">
+        <div class="section-label">Layer 02</div>
+        <h2 class="section-heading">How to Read the ATR Grid</h2>
+        <p class="section-intro">The grid gives you a probability map for the day. Here's how levels interact with setups.</p>
+
+        <div class="atr-explainer">
+          <div class="atr-visual">
+            <div class="atr-bar-wrap">
+              <div class="atr-center-line">PDC</div>
+              <div class="atr-segment bull-full"><span>+100% Full ATR</span></div>
+              <div class="atr-segment bull-golden"><span>+61.8% Golden Fib — GG Target</span></div>
+              <div class="atr-segment bull-mid"><span>+50% Midrange</span></div>
+              <div class="atr-segment bull-gg"><span>+38.2% GG Opens</span></div>
+              <div class="atr-segment bull-trigger"><span>+23.6% Call Trigger ▲</span></div>
+              <div class="atr-pdc-bar">← Previous Day Close →</div>
+              <div class="atr-segment bear-trigger"><span>−23.6% Put Trigger ▼</span></div>
+              <div class="atr-segment bear-gg"><span>−38.2% GG Opens</span></div>
+              <div class="atr-segment bear-mid"><span>−50% Midrange</span></div>
+              <div class="atr-segment bear-golden"><span>−61.8% Golden Fib — GG Target</span></div>
+              <div class="atr-segment bear-full"><span>−100% Full ATR</span></div>
+            </div>
+          </div>
+          <div class="atr-stats">
+            <h3>Backtested Edge</h3>
+            <div class="stat-row">
+              <span class="stat-label">Trigger → 38.2%</span>
+              <span class="stat-bar"><span class="stat-fill" style="width:80%"></span></span>
+              <span class="stat-pct">80%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">38.2% → 61.8% (GG complete)</span>
+              <span class="stat-bar"><span class="stat-fill" style="width:69%"></span></span>
+              <span class="stat-pct">69%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Baseline GG (Bull)</span>
+              <span class="stat-bar"><span class="stat-fill" style="width:63%"></span></span>
+              <span class="stat-pct">63%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Baseline GG (Bear)</span>
+              <span class="stat-bar"><span class="stat-fill" style="width:65%"></span></span>
+              <span class="stat-pct">65%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Bilbo GG (PO high+rising bull)</span>
+              <span class="stat-bar"><span class="stat-fill bilbo" style="width:77.7%"></span></span>
+              <span class="stat-pct">77.7%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Bilbo GG (PO low+falling bear) ⚠️</span>
+              <span class="stat-bar"><span class="stat-fill bilbo-bear" style="width:90.2%"></span></span>
+              <span class="stat-pct">90.2%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Box held 1h → GG open (Bull)</span>
+              <span class="stat-bar"><span class="stat-fill" style="width:82.2%"></span></span>
+              <span class="stat-pct">82.2%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">3m close above trigger → 38.2</span>
+              <span class="stat-bar"><span class="stat-fill gold" style="width:97.1%"></span></span>
+              <span class="stat-pct">97.1%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Full ATR (cumulative)</span>
+              <span class="stat-bar"><span class="stat-fill low" style="width:2%"></span></span>
+              <span class="stat-pct">~2%</span>
+            </div>
+            <p class="stat-caveat">⚠️ Bilbo GG bear 90.2% has an audit flag — use as directional texture, not sole reason to oversize.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- SECTION 3: The Setups             -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section" id="setups">
+      <div class="container">
+        <div class="section-label">Layer 03</div>
+        <h2 class="section-heading">The Playbook Setups</h2>
+        <p class="section-intro">Only these setups are valid entries. Any trade outside this playbook is a hard rule violation.</p>
+
+        <div class="setups-grid">
+
+          <!-- Golden Gate -->
+          <article class="setup-card" data-direction="both">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag gg">Golden Gate</span>
+                <span class="setup-dir both">Bull / Bear</span>
+              </div>
+              <h3>Golden Gate (GG)</h3>
+              <p class="setup-desc">The core ATR setup. Price reaches the 38.2% level and is expected to complete to 61.8%. The GG does not open at the trigger — it opens at 38.2%.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Trigger</span>
+                <span>Price at ±38.2% ATR level</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target 1</span>
+                <span>±61.8% (Golden Fib — GG completion)</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target 2</span>
+                <span>±50% midrange as interim level-to-level hop</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Kill Signal</span>
+                <span>10m close back through ±23.6% trigger</span>
+              </div>
+            </div>
+            <div class="edge-strip">
+              <span>Baseline edge: Bull 63% / Bear 65%</span>
+            </div>
+          </article>
+
+          <!-- Bilbo GG -->
+          <article class="setup-card featured-setup" data-direction="both">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag bilbo">Bilbo GG</span>
+                <span class="setup-dir both">Bull / Bear</span>
+                <span class="best-badge">Highest Edge</span>
+              </div>
+              <h3>Bilbo Golden Gate</h3>
+              <p class="setup-desc">Enhanced GG with Phase Oscillator alignment. The PO must be in the right zone AND moving in the right direction for a Bilbo to be valid. This is the upgrade — not just price at 38.2%, but the 1h PO confirming momentum.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Bull Condition</span>
+                <span>Price at +38.2% AND 1h PO in accumulation/neutral-up, rising</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label trigger-l bear-cond">Bear Condition</span>
+                <span>Price at −38.2% AND 1h PO in distribution/neutral-down, falling</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>±61.8% or beyond if PO remains aligned</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Kill Signal</span>
+                <span>Trigger close break + 1h PO diverging from direction</span>
+              </div>
+            </div>
+            <div class="edge-strip bilbo-edge">
+              <span>Bull: 77.7% &nbsp;·&nbsp; Bear: 90.2% ⚠️ audit flag</span>
+            </div>
+          </article>
+
+          <!-- ORB -->
+          <article class="setup-card" data-direction="both">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag orb">ORB</span>
+                <span class="setup-dir both">Bull / Bear</span>
+              </div>
+              <h3>10-Min Open Range Breakout</h3>
+              <p class="setup-desc">9:30–9:40 CT marks the Open Range High and Low. A clean break AND retest of either level is the entry. Never chase the initial break — wait for the pullback to the level.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Mark</span>
+                <span>9:40 CT — record OR High and OR Low</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label trigger-l">Entry</span>
+                <span>Retest of the broken level (not the breakout candle)</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Stop</span>
+                <span>Midpoint of the Open Range</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>PM High/Low → ATR levels → next S/R</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Kill Signal</span>
+                <span>Close back inside the OR</span>
+              </div>
+            </div>
+            <div class="rule-note">❌ Entering on the initial break candle — no chasing</div>
+          </article>
+
+          <!-- Vomy / iVomy -->
+          <article class="setup-card" data-direction="both">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag vomy">Vomy / iVomy</span>
+                <span class="setup-dir both">Bull / Bear</span>
+              </div>
+              <h3>Ribbon Transition (Vomy / iVomy)</h3>
+              <p class="setup-desc">A trending transition where price crosses the ribbon and closes on the other side. Vomy = bearish flip (8/13 bear cross + rejection). iVomy = bullish reclaim (8/13 bull cross + reclaim). Wait for the retest — anticipate the ribbon, enter on the touch.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Vomy (Bear)</span>
+                <span>8/13 EMA bear flip, price closes below ribbon, retest from below</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label trigger-l">iVomy (Bull)</span>
+                <span>8/13 EMA bull flip, price reclaims ribbon, retest from above</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Stop</span>
+                <span>Other side of the ribbon</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>Call/Put trigger → ATR levels → VWAP → larger EMA</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Vomy Kill</span>
+                <span>13 EMA reclaim</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">iVomy Kill</span>
+                <span>13 EMA loss</span>
+              </div>
+            </div>
+            <div class="rule-note">❌ Entering mid-cross before candle close confirmation</div>
+          </article>
+
+          <!-- Flag Into Ribbon -->
+          <article class="setup-card" data-direction="bull">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag flag">Flag Into Ribbon</span>
+                <span class="setup-dir bull">Bull</span>
+              </div>
+              <h3>Flag Into Ribbon</h3>
+              <p class="setup-desc">A trending market setup. Price pulls back into the ribbon which acts as dynamic support. Anticipate the pullback — enter as price tags the 13 or 21 EMA. The ribbon must be acting as support, not broken.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Condition</span>
+                <span>Trending market + ribbon in bull stack (fast cloud green)</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label trigger-l">Entry</span>
+                <span>13 or 21 EMA tag — anticipate and enter on the touch</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Stop</span>
+                <span>Other side of the ribbon</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>Next ATR level → continuation high</span>
+              </div>
+            </div>
+            <div class="rule-note">❌ Entering before price reaches the EMA · ❌ Ribbon not acting as support</div>
+          </article>
+
+          <!-- Compression / Expansion -->
+          <article class="setup-card" data-direction="both">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag compression">Compression Expansion</span>
+                <span class="setup-dir both">Bull / Bear</span>
+              </div>
+              <h3>Compression → Expansion</h3>
+              <p class="setup-desc">A squeeze is building — EMA 21 and EMA 48 converge, ribbon goes gray/violet. Once the squeeze fires AND the EMA21/48 alignment supports direction, it expands. 180+ minutes of compression before expansion has an 83.7% bullish bias if EMA21 &gt; EMA48.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Setup</span>
+                <span>Active squeeze (black/red/orange/green dots) + EMA21 vs EMA48 aligned</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label trigger-l">Entry</span>
+                <span>Squeeze fires (green dot) in direction of EMA alignment</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Kill Signal</span>
+                <span>Failure back into the compression range</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>ATR level ladder — level to level</span>
+              </div>
+            </div>
+            <div class="edge-strip">
+              <span>180m+ compression, bull EMA21&gt;48: 83.7% bullish expansion</span>
+            </div>
+          </article>
+
+          <!-- Divergence From Extreme -->
+          <article class="setup-card" data-direction="both">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag divergence">Divergence From Extreme</span>
+                <span class="setup-dir both">Bull / Bear</span>
+              </div>
+              <h3>Divergence From Extreme</h3>
+              <p class="setup-desc">A range market reversal setup. Price makes a swing high or low while the Phase Oscillator diverges — showing the move is losing momentum at an extreme. Used in range conditions, not trends.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Condition</span>
+                <span>Range market + price at swing extreme + PO divergence visible</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label trigger-l">Entry</span>
+                <span>Divergence confirmation on swing candle close</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Stop</span>
+                <span>Above/below the swing High/Low</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>Mean reversion → 21 EMA → Ribbon → S/R / ATR levels</span>
+              </div>
+            </div>
+            <div class="rule-note">❌ Entering before candle closes · ❌ No divergence on PO</div>
+          </article>
+
+          <!-- Call → Put Reversal -->
+          <article class="setup-card" data-direction="bear">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag reversal">Call → Put Reversal</span>
+                <span class="setup-dir bear">Bear</span>
+              </div>
+              <h3>Call Trigger → Put Reversal</h3>
+              <p class="setup-desc">Bull trigger was hit, but PDC is then lost. Price is now attempting the put trigger. A failed bull move becoming a bear setup — one of the highest probability intraday reversals.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Condition</span>
+                <span>Call trigger hit → PDC lost → put trigger targeted</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target A</span>
+                <span>PDC recovery (73.7% probability)</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target B</span>
+                <span>Downside GG open −38.2% (75.3% probability)</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Kill Signal</span>
+                <span>PDC reclaim + no downside follow-through</span>
+              </div>
+            </div>
+            <div class="edge-strip">
+              <span>PDC recovery 73.7% · GG open 75.3% · −1 ATR only 18.5% — do not assume</span>
+            </div>
+          </article>
+
+          <!-- EOD Divergence -->
+          <article class="setup-card" data-direction="both">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag eod">1-Min EOD Divergence</span>
+                <span class="setup-dir both">3:00–4:00 CT only</span>
+              </div>
+              <h3>1-Minute End-of-Day Divergence</h3>
+              <p class="setup-desc">A reversal setup exclusive to the 3:00–4:00 CT window. Phase Oscillator is near the middle — if a new high or low forms, anticipate divergence on the next push. Volume confirmation required.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Window</span>
+                <span>3:00–4:00 CT only — invalid outside this window</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label trigger-l">Entry</span>
+                <span>Divergence on swing candle close + volume confirmation</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Stop</span>
+                <span>Above/below the swing High/Low</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>Mean reversion → 21 EMA → ribbon → ATR levels</span>
+              </div>
+            </div>
+            <div class="rule-note">❌ No volume confirmation · ❌ Outside 3–4pm window</div>
+          </article>
+
+          <!-- Tweezer Bottom -->
+          <article class="setup-card" data-direction="bull">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag tweezer">Tweezer / Wicky Wicky</span>
+                <span class="setup-dir bull">Bull</span>
+              </div>
+              <h3>Tweezer Bottom ("Wicky Wicky")</h3>
+              <p class="setup-desc">Two parallel candles with matching bottom wicks forming a tweezer — a precision reversal signal. Entry on the reclaim of 50% of the down candle. Trail the stop as it works.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Condition</span>
+                <span>Two parallel candles with matching bottom wicks</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label trigger-l">Entry</span>
+                <span>Reclaim of 50% of the down candle body</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Stop</span>
+                <span>Below tweezer wicks → trail to below candle body lows → trail structure when in profit</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>Mean reversion → 21 EMA → ribbon → ATR levels</span>
+              </div>
+            </div>
+            <div class="rule-note">❌ Entering before 50% reclaim · ❌ Wicks not parallel/matching</div>
+          </article>
+
+          <!-- Gap Fill -->
+          <article class="setup-card" data-direction="both">
+            <div class="setup-top">
+              <div class="setup-meta">
+                <span class="setup-tag gap">Gap Fill</span>
+                <span class="setup-dir both">Bull / Bear</span>
+              </div>
+              <h3>Gap Fill</h3>
+              <p class="setup-desc">Counter-trend gap that fails to continue — OR is rejected at the Open Range. Small gaps fill with high probability. The bigger the gap, the more confirmation needed before fading.</p>
+            </div>
+            <div class="setup-body">
+              <div class="setup-row">
+                <span class="row-label trigger-l">Condition</span>
+                <span>Counter-trend gap + OR rejection</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label target-l">Target</span>
+                <span>Gap midpoint → PDC → full fill</span>
+              </div>
+              <div class="setup-row">
+                <span class="row-label kill-l">Kill Signal</span>
+                <span>Gap continues with trend (pro-trend gap — do not fade)</span>
+              </div>
+            </div>
+            <div class="edge-strip">
+              <span>Gap &lt;0.25% midpoint fill day-1: ~94–95%</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- SECTION 4: Grading Rubric         -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section alt-bg" id="grading">
+      <div class="container">
+        <div class="section-label">Layer 04</div>
+        <h2 class="section-heading">Setup Grading Rubric</h2>
+        <p class="section-intro">Before naming a grade, score directional confluence across these seven factors. No setup is automatic — grade the conditions.</p>
+
+        <div class="grading-layout">
+          <div class="confluence-table-wrap">
+            <table class="confluence-table">
+              <thead>
+                <tr>
+                  <th>Factor</th>
+                  <th class="bull-col">Bullish ✓</th>
+                  <th class="bear-col">Bearish ✓</th>
+                  <th class="avoid-col">Avoid ✗</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Price vs PDC</td>
+                  <td>Above &amp; holding</td>
+                  <td>Below &amp; holding</td>
+                  <td>Chopping around</td>
+                </tr>
+                <tr>
+                  <td>ATR ladder</td>
+                  <td>Above call trigger path</td>
+                  <td>Below put trigger path</td>
+                  <td>Between levels, no trigger</td>
+                </tr>
+                <tr>
+                  <td>VWAP</td>
+                  <td>Above, dips reclaimed</td>
+                  <td>Below, bounces rejected</td>
+                  <td>Mean-reverting through</td>
+                </tr>
+                <tr>
+                  <td>10m Ribbon</td>
+                  <td>Stacked / up-sloping</td>
+                  <td>Stacked / down-sloping</td>
+                  <td>Entangled / flat</td>
+                </tr>
+                <tr>
+                  <td>1h Phase Oscillator</td>
+                  <td>High / rising for bull GG</td>
+                  <td>Low / falling for bear GG</td>
+                  <td>Mid against direction</td>
+                </tr>
+                <tr>
+                  <td>Compression</td>
+                  <td>Expansion aligns with trade</td>
+                  <td>Expansion aligns with short</td>
+                  <td>Box unresolved</td>
+                </tr>
+                <tr>
+                  <td>Time of Day</td>
+                  <td>First hour favors bull GG</td>
+                  <td>Bear can persist later</td>
+                  <td>Late bullish trigger = weak</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="grade-buckets">
+            <div class="grade-bucket grade-a">
+              <span class="grade-letter">A</span>
+              <div class="grade-desc">
+                <strong>All conditions met</strong>
+                <p>Named setup active, trigger present, HTF aligned, clear invalidation, nearby target with good R:R. Win or loss — process was excellent.</p>
+              </div>
+            </div>
+            <div class="grade-bucket grade-b">
+              <span class="grade-letter">B</span>
+              <div class="grade-desc">
+                <strong>One major confluence missing</strong>
+                <p>Valid setup but size smaller, demand better entry. Solid trade with minor deviations.</p>
+              </div>
+            </div>
+            <div class="grade-bucket grade-c">
+              <span class="grade-letter">C</span>
+              <div class="grade-desc">
+                <strong>Mostly thesis, not enough structure</strong>
+                <p>R:R below 1:2, emotional exit, incomplete checklist, or entry timing off. Observe/paper only.</p>
+              </div>
+            </div>
+            <div class="grade-bucket grade-nt">
+              <span class="grade-letter">—</span>
+              <div class="grade-desc">
+                <strong>No-Trade</strong>
+                <p>No named setup, chop around PDC/VWAP, conflicting ribbon/PO, invalidation too wide. DO NOTHING.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- SECTION 5: Daily Process          -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section" id="process">
+      <div class="container">
+        <div class="section-label">Layer 05</div>
+        <h2 class="section-heading">The Daily Process</h2>
+        <p class="section-intro">Structure protects you from yourself. The process is non-negotiable.</p>
+
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-time">8:30 CT</div>
+            <div class="tl-content">
+              <h4>Market Analysis &amp; Prep</h4>
+              <p>ES/SPX overnight and pre-market markup. Quant Data (SPX + Tech). Broker prep. Mark ATR grid. Note PDC, gap, VWAP, key levels.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-time">8:45–9:30</div>
+            <div class="tl-content">
+              <h4>Mark Up Opening Trade Plan</h4>
+              <p>Identify potential setups. Pre-market or open trades only if setup is <strong>exceptionally clear</strong>. No guessing — wait for structure.</p>
+            </div>
+          </div>
+          <div class="tl-item active-window">
+            <div class="tl-time">9:40 CT</div>
+            <div class="tl-content">
+              <h4>Mark the 10-Min Open Range</h4>
+              <p>Record OR High and OR Low. This is the ORB reference for the day. No trades before this unless setup is undeniable.</p>
+            </div>
+          </div>
+          <div class="tl-item active-window">
+            <div class="tl-time">9:40–12:30</div>
+            <div class="tl-content">
+              <h4>Primary Trading Window</h4>
+              <p>Trade clear playbook setups only. Be patient. Let the setup come to you. No setups = no trades. First hour is highest-probability window for GG setups.</p>
+            </div>
+          </div>
+          <div class="tl-item break-window">
+            <div class="tl-time">12:30–3:00</div>
+            <div class="tl-content">
+              <h4>Break from Charts — No Trading</h4>
+              <p>Hard stop. No exceptions. Trading in this window is an automatic hard rule violation regardless of "how good" the setup looks.</p>
+              <div class="hard-stop-badge">HARD RULE — NO TRADING</div>
+            </div>
+          </div>
+          <div class="tl-item active-window">
+            <div class="tl-time">3:00–4:00</div>
+            <div class="tl-content">
+              <h4>EOD Trading Window</h4>
+              <p>Clear playbook setups only. Primary focus: 1-min EOD Divergence and continuation setups. Time decay is real — size accordingly on 0DTE.</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-time">4:00–5:00</div>
+            <div class="tl-content">
+              <h4>Journal Trades</h4>
+              <p>Review every trade. Grade the process. Log to Notion. What did the setup look like? Did you follow the rules? What would you do differently?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════ -->
+    <!-- SECTION 6: Hard Rules             -->
+    <!-- ══════════════════════════════════ -->
+    <section class="section alt-bg" id="rules">
+      <div class="container">
+        <div class="section-label">Layer 06</div>
+        <h2 class="section-heading">Hard Rules</h2>
+        <p class="section-intro">These cap your grade automatically. Break them and it doesn't matter what the chart looked like.</p>
+
+        <div class="rules-grid">
+          <div class="rule-card cap-f">
+            <div class="cap-badge">Cap: F</div>
+            <h4>Risk exceeds $1,000 on the trade</h4>
+            <p>No single trade justifies more than $1,000 of maximum risk. Period. Oversizing is the fastest way to blow up a good system.</p>
+          </div>
+          <div class="rule-card cap-d">
+            <div class="cap-badge">Cap: D</div>
+            <h4>Averaged down into a losing position</h4>
+            <p>Adding to a loser is not position management — it's denial. The setup was wrong. Honor the stop and move on.</p>
+          </div>
+          <div class="rule-card cap-d">
+            <div class="cap-badge">Cap: D</div>
+            <h4>Entry not based on a playbook setup</h4>
+            <p>No setup name = no trade. Trading on "feel" or an unnamed thesis is a hard rule violation regardless of outcome.</p>
+          </div>
+          <div class="rule-card cap-c">
+            <div class="cap-badge">Cap: C</div>
+            <h4>Chased entry — not at planned level</h4>
+            <p>If the entry was supposed to be at the ribbon and you bought 20 points above it because it was "moving fast," that's a chase. Wait for the level.</p>
+          </div>
+          <div class="rule-card cap-d hard-stop-rule">
+            <div class="cap-badge">Cap: D</div>
+            <h4>Traded during 12:30–3:00 CT break</h4>
+            <p>The most reliable setups appear after the break. Trading in the dead zone gives back gains, ruins focus, and costs psychological capital.</p>
+          </div>
+          <div class="rule-card cap-c">
+            <div class="cap-badge">Cap: C</div>
+            <h4>Pre-trade checklist not completed</h4>
+            <p>Missing thesis, stop, or sizing = incomplete checklist. You're not ready to trade. Six questions must be answered before entry.</p>
+          </div>
+          <div class="rule-card cap-c">
+            <div class="cap-badge">Cap: C</div>
+            <h4>R:R below 1:2 at time of entry</h4>
+            <p>If the risk/reward doesn't support the trade, don't take it. An R:R below 1:2 means the math doesn't work regardless of how good the setup looks.</p>
+          </div>
+        </div>
+
+        <div class="six-checklist">
+          <h3>The Pre-Trade Checklist</h3>
+          <p>Every single trade must answer all six before the entry button is touched.</p>
+          <div class="checklist-grid">
+            <div class="check-item"><span class="check-num">1</span><span>What is the setup / thesis?</span></div>
+            <div class="check-item"><span class="check-num">2</span><span>What's my trigger?</span></div>
+            <div class="check-item"><span class="check-num">3</span><span>What's my entry?</span></div>
+            <div class="check-item"><span class="check-num">4</span><span>What are my exits (TP1, TP2)?</span></div>
+            <div class="check-item"><span class="check-num">5</span><span>What is my technical stop?</span></div>
+            <div class="check-item"><span class="check-num">6</span><span>What is my sizing based on risk, entry, and stop?</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Doctrine footer strip -->
+    <section class="doctrine-strip">
+      <div class="container">
+        <div class="doctrine-items">
+          <div class="doctrine-item">Separate facts from thesis</div>
+          <div class="doctrine-sep">·</div>
+          <div class="doctrine-item">Name the setup before naming the target</div>
+          <div class="doctrine-sep">·</div>
+          <div class="doctrine-item">Level-to-level thinking always</div>
+          <div class="doctrine-sep">·</div>
+          <div class="doctrine-item">Include invalidation for every setup</div>
+          <div class="doctrine-sep">·</div>
+          <div class="doctrine-item">Grade the process — not the outcome</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  /* ══ BASE ══ */
+  .setups-page {
+    color: var(--text-primary, #E0E0E0);
+    background: var(--bg-primary, #0B0C15);
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  .alt-bg {
+    background: rgba(28, 30, 45, 0.55);
+  }
+
+  /* ══ HERO ══ */
+  .hero {
+    position: relative;
+    padding: 7rem 2rem 5rem;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero-noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(153,139,255,0.14) 0%, transparent 65%),
+      radial-gradient(ellipse 30% 30% at 85% 90%, rgba(95,92,255,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .eyebrow {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-purple, #998BFF);
+    opacity: 0.75;
+    margin-bottom: 1.4rem;
+  }
+  .hero h1 {
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    font-weight: 700;
+    line-height: 0.95;
+    color: #fff;
+    margin: 0 0 1.5rem;
+    letter-spacing: -0.03em;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent-purple, #998BFF);
+  }
+  .hero-sub {
+    font-size: 1.1rem;
+    line-height: 1.75;
+    color: rgba(224,224,224,0.65);
+    font-style: italic;
+    margin-bottom: 2.5rem;
+  }
+  .pill-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .pill {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(224,224,224,0.55);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .pill:hover {
+    color: var(--accent-purple, #998BFF);
+    border-color: rgba(153,139,255,0.35);
+    background: rgba(153,139,255,0.07);
+  }
+
+  /* ══ SECTIONS ══ */
+  .section {
+    padding: 5.5rem 0;
+    border-top: 1px solid rgba(153,139,255,0.1);
+  }
+  .section-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(153,139,255,0.45);
+    margin-bottom: 0.5rem;
+  }
+  .section-heading {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.6rem;
+    letter-spacing: -0.02em;
+  }
+  .section-intro {
+    font-size: 0.97rem;
+    color: rgba(224,224,224,0.5);
+    font-style: italic;
+    margin-bottom: 3rem;
+    max-width: 600px;
+  }
+
+  /* ══ INDICATORS THREE-COL ══ */
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .indicator-card {
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 1.8rem;
+  }
+  .ind-header {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.8rem;
+  }
+  .ind-num {
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    color: rgba(153,139,255,0.4);
+    letter-spacing: 0.05em;
+  }
+  .ind-header h3 {
+    font-size: 1.2rem;
+    color: #fff;
+    margin: 0;
+    font-weight: 600;
+  }
+  .ind-def {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: rgba(224,224,224,0.6);
+    margin-bottom: 1.3rem;
+    font-style: italic;
+  }
+
+  /* EMA table */
+  .ema-table {
+    margin-bottom: 1.3rem;
+  }
+  .ema-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.83rem;
+  }
+  .ema-row:last-child { border-bottom: none; }
+  .ema-row.ema-key { background: rgba(153,139,255,0.04); border-radius: 5px; padding: 0.4rem 0.5rem; }
+  .ema-num {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--accent-purple, #998BFF);
+    width: 32px;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+  }
+  .ema-role { color: rgba(224,224,224,0.65); }
+
+  /* Candle legend */
+  .candle-legend h4 {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(224,224,224,0.3);
+    margin-bottom: 0.6rem;
+  }
+  .candle-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+    color: rgba(224,224,224,0.6);
+    padding: 0.25rem 0;
+  }
+  .dot-green, .dot-red, .dot-blue, .dot-orange, .dot-gray {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-green  { background: #52d077; }
+  .dot-red    { background: #ff6b6b; }
+  .dot-blue   { background: #6ab4ff; }
+  .dot-orange { background: #ffa040; }
+  .dot-gray   { background: #8888aa; }
+
+  /* PO zones */
+  .po-zones { margin-bottom: 1rem; }
+  .po-zone {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    margin-bottom: 3px;
+    font-size: 0.78rem;
+  }
+  .po-label { font-weight: 600; min-width: 100px; font-size: 0.75rem; }
+  .po-range { font-family: 'Courier New', monospace; font-size: 0.72rem; min-width: 100px; opacity: 0.7; }
+  .po-meaning { color: rgba(224,224,224,0.55); font-style: italic; }
+
+  .extended-up   { background: rgba(255,80,80,0.1); color: #ff8080; }
+  .distribution  { background: rgba(255,140,0,0.1); color: #ffaa50; }
+  .neutral-up    { background: rgba(80,200,120,0.08); color: #70d090; }
+  .neutral       { background: rgba(200,200,200,0.05); color: #aaa; }
+  .neutral-down  { background: rgba(100,160,255,0.08); color: #80b0ff; }
+  .accumulation  { background: rgba(153,139,255,0.1); color: #b8aeff; }
+  .extended-down { background: rgba(80,80,255,0.12); color: #8888ff; }
+
+  .po-signals { display: flex; flex-direction: column; gap: 0.4rem; }
+  .po-signal {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.65rem;
+    border-radius: 6px;
+    line-height: 1.5;
+  }
+  .po-signal.bull    { background: rgba(80,200,120,0.07); color: #70d090; }
+  .po-signal.bear    { background: rgba(255,100,100,0.07); color: #ff8888; }
+  .po-signal.caution { background: rgba(255,200,50,0.07); color: #f5c842; font-size: 0.74rem; }
+
+  /* ATR mini */
+  .atr-mini { margin-bottom: 1rem; }
+  .atr-level {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 6px;
+    margin-bottom: 3px;
+    font-size: 0.78rem;
+  }
+  .atr-pct { font-family: 'Courier New', monospace; font-weight: 700; min-width: 52px; font-size: 0.8rem; }
+  .atr-name { font-weight: 600; min-width: 80px; }
+  .atr-note { color: rgba(224,224,224,0.5); font-style: italic; font-size: 0.74rem; }
+  .trigger   { background: rgba(255,200,50,0.07); color: #f5c842; }
+  .gg-open   { background: rgba(153,139,255,0.1); color: #998BFF; }
+  .midrange  { background: rgba(100,180,255,0.07); color: #80b8ff; }
+  .golden    { background: rgba(255,165,0,0.1); color: #ffa840; }
+  .full      { background: rgba(255,80,80,0.07); color: #ff8080; }
+  .atr-warning {
+    font-size: 0.78rem;
+    background: rgba(255,200,50,0.07);
+    border: 1px solid rgba(255,200,50,0.15);
+    border-radius: 7px;
+    padding: 0.6rem 0.8rem;
+    color: #f5c842;
+    line-height: 1.5;
+  }
+
+  /* ══ ATR EXPLAINER ══ */
+  .atr-explainer {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .atr-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+  }
+  .atr-pdc-bar {
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.5);
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    text-align: center;
+    padding: 0.35rem;
+    border-radius: 4px;
+    margin: 3px 0;
+  }
+  .atr-segment {
+    padding: 0.4rem 0.75rem;
+    border-radius: 5px;
+    font-size: 0.74rem;
+    font-family: 'Courier New', monospace;
+    opacity: 0.85;
+  }
+  .bull-trigger { background: rgba(255,200,50,0.12); color: #f5c842; }
+  .bull-gg      { background: rgba(153,139,255,0.12); color: #998BFF; }
+  .bull-mid     { background: rgba(100,180,255,0.09); color: #80b8ff; }
+  .bull-golden  { background: rgba(255,165,0,0.12); color: #ffa840; }
+  .bull-full    { background: rgba(255,80,80,0.1); color: #ff8080; }
+  .bear-trigger { background: rgba(255,200,50,0.08); color: rgba(245,200,66,0.7); }
+  .bear-gg      { background: rgba(153,139,255,0.08); color: rgba(153,139,255,0.7); }
+  .bear-mid     { background: rgba(100,180,255,0.06); color: rgba(128,184,255,0.7); }
+  .bear-golden  { background: rgba(255,165,0,0.08); color: rgba(255,168,64,0.7); }
+  .bear-full    { background: rgba(255,80,80,0.07); color: rgba(255,128,128,0.7); }
+
+  /* stat bars */
+  .atr-stats h3 {
+    font-size: 1rem;
+    color: #fff;
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+  }
+  .stat-label {
+    font-size: 0.76rem;
+    color: rgba(224,224,224,0.6);
+    min-width: 220px;
+    flex-shrink: 0;
+  }
+  .stat-bar {
+    flex: 1;
+    height: 5px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .stat-fill {
+    display: block;
+    height: 100%;
+    background: var(--accent-purple, #998BFF);
+    border-radius: 3px;
+  }
+  .stat-fill.bilbo      { background: #ffa840; }
+  .stat-fill.bilbo-bear { background: #ff7070; }
+  .stat-fill.gold       { background: #f5c842; }
+  .stat-fill.low        { background: #666; }
+  .stat-pct {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: rgba(224,224,224,0.5);
+    min-width: 36px;
+    text-align: right;
+  }
+  .stat-caveat {
+    font-size: 0.75rem;
+    color: #f5c842;
+    margin-top: 0.75rem;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ══ SETUPS GRID ══ */
+  .setups-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  .setup-card {
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s;
+  }
+  .setup-card:hover { border-color: rgba(153,139,255,0.25); }
+  .setup-card.featured-setup {
+    border-color: rgba(255,165,0,0.2);
+    background: linear-gradient(135deg, rgba(255,165,0,0.04) 0%, var(--bg-secondary,#1C1E2D) 60%);
+  }
+  .setup-top { margin-bottom: 1.2rem; }
+  .setup-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+  }
+  .setup-tag {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.18rem 0.55rem;
+    border-radius: 4px;
+  }
+  .setup-tag.gg          { background: rgba(153,139,255,0.15); color: #998BFF; }
+  .setup-tag.bilbo       { background: rgba(255,165,0,0.15); color: #ffa840; }
+  .setup-tag.orb         { background: rgba(80,200,120,0.12); color: #52d077; }
+  .setup-tag.vomy        { background: rgba(100,160,255,0.12); color: #80b0ff; }
+  .setup-tag.flag        { background: rgba(80,200,120,0.12); color: #52d077; }
+  .setup-tag.compression { background: rgba(255,200,50,0.12); color: #f5c842; }
+  .setup-tag.divergence  { background: rgba(200,100,255,0.12); color: #cc88ff; }
+  .setup-tag.reversal    { background: rgba(255,80,80,0.12); color: #ff7070; }
+  .setup-tag.eod         { background: rgba(153,139,255,0.1); color: #9988ee; }
+  .setup-tag.tweezer     { background: rgba(80,200,120,0.1); color: #60c880; }
+  .setup-tag.gap         { background: rgba(100,200,220,0.1); color: #70d0dd; }
+
+  .setup-dir {
+    font-size: 0.62rem;
+    padding: 0.18rem 0.55rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(224,224,224,0.4);
+  }
+  .setup-dir.bull { border-color: rgba(80,200,120,0.2); color: #52d077; }
+  .setup-dir.bear { border-color: rgba(255,80,80,0.2); color: #ff7070; }
+  .setup-dir.both { border-color: rgba(153,139,255,0.2); color: #998BFF; }
+
+  .best-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #ffa840;
+    background: rgba(255,165,0,0.1);
+    border: 1px solid rgba(255,165,0,0.2);
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+  }
+  .setup-top h3 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+  .setup-desc {
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: rgba(224,224,224,0.6);
+    font-style: italic;
+    margin: 0;
+  }
+  .setup-body {
+    flex: 1;
+    margin-bottom: 1rem;
+  }
+  .setup-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: baseline;
+    font-size: 0.83rem;
+    color: rgba(224,224,224,0.75);
+    padding: 0.45rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+  .setup-row:last-child { border-bottom: none; }
+  .row-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .trigger-l  { background: rgba(255,200,50,0.1); color: #f5c842; }
+  .target-l   { background: rgba(80,200,120,0.1); color: #52d077; }
+  .kill-l     { background: rgba(255,80,80,0.1); color: #ff7070; }
+  .bear-cond  { background: rgba(255,80,80,0.1) !important; color: #ff8888 !important; }
+
+  .edge-strip {
+    background: rgba(153,139,255,0.07);
+    border: 1px solid rgba(153,139,255,0.12);
+    border-radius: 7px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.76rem;
+    color: rgba(153,139,255,0.8);
+    font-family: 'Courier New', monospace;
+  }
+  .edge-strip.bilbo-edge {
+    background: rgba(255,165,0,0.07);
+    border-color: rgba(255,165,0,0.15);
+    color: rgba(255,168,64,0.85);
+  }
+  .rule-note {
+    font-size: 0.75rem;
+    color: rgba(255,100,100,0.65);
+    background: rgba(255,80,80,0.05);
+    border-radius: 6px;
+    padding: 0.45rem 0.7rem;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* ══ GRADING ══ */
+  .grading-layout {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  .confluence-table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .confluence-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  .confluence-table thead {
+    background: rgba(153,139,255,0.07);
+  }
+  .confluence-table th {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(224,224,224,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .bull-col { color: #52d077 !important; }
+  .bear-col { color: #ff7070 !important; }
+  .avoid-col { color: rgba(255,200,50,0.6) !important; }
+  .confluence-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: rgba(224,224,224,0.7);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .confluence-table tr:last-child td { border-bottom: none; }
+  .confluence-table td:first-child {
+    font-weight: 600;
+    color: rgba(224,224,224,0.85);
+    white-space: nowrap;
+  }
+
+  /* grade buckets */
+  .grade-buckets { display: flex; flex-direction: column; gap: 0.75rem; }
+  .grade-bucket {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 1rem;
+  }
+  .grade-letter {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .grade-desc strong { display: block; font-size: 0.85rem; color: #fff; margin-bottom: 0.25rem; }
+  .grade-desc p { font-size: 0.78rem; color: rgba(224,224,224,0.55); margin: 0; line-height: 1.5; }
+  .grade-a .grade-letter { background: rgba(80,200,120,0.15); color: #52d077; }
+  .grade-b .grade-letter { background: rgba(153,139,255,0.15); color: #998BFF; }
+  .grade-c .grade-letter { background: rgba(255,200,50,0.12); color: #f5c842; }
+  .grade-nt .grade-letter { background: rgba(150,150,150,0.1); color: #888; }
+
+  /* ══ TIMELINE ══ */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    max-width: 700px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 70px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(153,139,255,0.15);
+  }
+  .tl-item {
+    display: flex;
+    gap: 2rem;
+    padding: 1.5rem 0;
+    position: relative;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: 67px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(153,139,255,0.3);
+    transform: translateY(-50%);
+  }
+  .tl-item.active-window::before { background: #52d077; box-shadow: 0 0 8px rgba(82,208,119,0.4); }
+  .tl-item.break-window::before  { background: #ff7070; box-shadow: 0 0 8px rgba(255,112,112,0.4); }
+  .tl-time {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: rgba(224,224,224,0.35);
+    min-width: 70px;
+    text-align: right;
+    padding-top: 0.15rem;
+    letter-spacing: 0.04em;
+  }
+  .tl-content h4 {
+    font-size: 0.95rem;
+    color: #fff;
+    margin: 0 0 0.35rem;
+    font-weight: 600;
+  }
+  .tl-item.active-window .tl-content h4 { color: #52d077; }
+  .tl-item.break-window .tl-content h4  { color: #ff7070; }
+  .tl-content p {
+    font-size: 0.84rem;
+    line-height: 1.65;
+    color: rgba(224,224,224,0.6);
+    margin: 0;
+  }
+  .hard-stop-badge {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ff7070;
+    background: rgba(255,80,80,0.1);
+    border: 1px solid rgba(255,80,80,0.2);
+    border-radius: 4px;
+    padding: 0.2rem 0.6rem;
+  }
+
+  /* ══ HARD RULES ══ */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  .rule-card {
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1.4rem;
+    position: relative;
+  }
+  .rule-card.hard-stop-rule { border-color: rgba(255,80,80,0.15); }
+  .cap-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
+  }
+  .cap-f { background: rgba(255,40,40,0.15); color: #ff5555; }
+  .cap-d { background: rgba(255,120,0,0.12); color: #ffa040; }
+  .cap-c { background: rgba(255,200,50,0.1); color: #f5c842; }
+  .rule-card h4 {
+    font-size: 0.9rem;
+    color: #fff;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .rule-card p {
+    font-size: 0.81rem;
+    color: rgba(224,224,224,0.55);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* checklist */
+  .six-checklist {
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(153,139,255,0.15);
+    border-radius: 14px;
+    padding: 2rem;
+  }
+  .six-checklist h3 {
+    font-size: 1.1rem;
+    color: var(--accent-purple, #998BFF);
+    margin: 0 0 0.4rem;
+  }
+  .six-checklist > p {
+    font-size: 0.85rem;
+    color: rgba(224,224,224,0.5);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+  }
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.87rem;
+    color: rgba(224,224,224,0.75);
+    line-height: 1.4;
+  }
+  .check-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(153,139,255,0.12);
+    color: var(--accent-purple, #998BFF);
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ══ DOCTRINE STRIP ══ */
+  .doctrine-strip {
+    padding: 2rem 0;
+    border-top: 1px solid rgba(153,139,255,0.12);
+    background: rgba(153,139,255,0.03);
+  }
+  .doctrine-items {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+  .doctrine-item {
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: rgba(153,139,255,0.45);
+    text-transform: uppercase;
+  }
+  .doctrine-sep { color: rgba(153,139,255,0.2); }
+
+  /* ══ RESPONSIVE ══ */
+  @media (max-width: 1024px) {
+    .three-col { grid-template-columns: 1fr 1fr; }
+    .rules-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .three-col { grid-template-columns: 1fr; }
+    .setups-grid { grid-template-columns: 1fr; }
+    .atr-explainer { grid-template-columns: 1fr; }
+    .grading-layout { grid-template-columns: 1fr; }
+    .rules-grid { grid-template-columns: 1fr; }
+    .checklist-grid { grid-template-columns: 1fr; }
+    .timeline::before { left: 60px; }
+    .tl-item::before { left: 57px; }
+    .stat-label { min-width: 160px; font-size: 0.7rem; }
+    .hero h1 { font-size: 3rem; }
+  }
+</style>
