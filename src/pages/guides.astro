@@ -135,6 +135,39 @@ import { Icon } from 'astro-icon/components';
     </div>
   </section>
 
+  <!-- ─── GUIDE LINKS ─── -->
+  <section class="section" id="guide-links">
+    <div class="container">
+      <h2>Explore the System</h2>
+      <p class="section-intro">Deep-dive guides that underpin every trade decision.</p>
+      <div class="guide-links-grid">
+
+        <a href="/market-internals" class="guide-link-card">
+          <div class="guide-link-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="guide-link-body">
+            <h3>Market Internals</h3>
+            <p>The language of the market. Learn to read TICK, ADD, and cumulative signals before price moves.</p>
+          </div>
+          <div class="guide-link-arrow">→</div>
+        </a>
+
+        <a href="/saty-setups" class="guide-link-card">
+          <div class="guide-link-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="guide-link-body">
+            <h3>Saty Setups</h3>
+            <p>Indicators, levels, and rules for SPX / ES 0DTE options — Saty Mahajan's complete trading system.</p>
+          </div>
+          <div class="guide-link-arrow">→</div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ─── PLAYBOOK ─── -->
   <section class="section" id="playbook" style="background: var(--bg-secondary);">
     <div class="container">
@@ -511,6 +544,67 @@ import { Icon } from 'astro-icon/components';
   .risk-row   .setup-label { color: #ff8080; }
   .target-row .setup-label { color: #60DCA0; }
   .setup-row span:last-child { color: var(--text-secondary); }
+
+  /* ── guide link cards ── */
+  .guide-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .guide-link-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .guide-link-card:hover {
+    border-color: var(--accent-purple);
+    transform: translateY(-2px);
+  }
+  .guide-link-icon {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: rgba(108, 99, 255, 0.12);
+    color: var(--accent-purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .guide-link-body {
+    flex: 1;
+  }
+  .guide-link-body h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+  }
+  .guide-link-body p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+  .guide-link-arrow {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+    color: var(--accent-purple);
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .guide-link-card:hover .guide-link-arrow {
+    opacity: 1;
+    transform: translateX(3px);
+  }
 
   /* ── journal icons (existing) ── */
   [data-icon] {
