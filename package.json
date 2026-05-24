@@ -23,5 +23,8 @@
     "chart.js": "^4.5.1",
     "lucide-astro": "^0.556.0",
     "onesignal-cordova-plugin": "^5.3.6"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
   }
 }
