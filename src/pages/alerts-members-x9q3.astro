@@ -77,6 +77,19 @@ import { Icon } from 'astro-icon/components';
   let allItems  = [];
   let curFilter = 'all';
 
+  // Auto-fix TradingView snapshot URLs to direct image URLs
+  function resolveChartUrl(url) {
+    if (!url) return null;
+    // Convert https://www.tradingview.com/x/ABC123/ to https://s3.tradingview.com/snapshots/a/ABC123.png
+    const tvMatch = url.match(/tradingview\.com\/x\/([A-Za-z0-9]+)\/?$/);
+    if (tvMatch) {
+      const id = tvMatch[1];
+      const prefix = id.charAt(0).toLowerCase();
+      return `https://s3.tradingview.com/snapshots/${prefix}/${id}.png`;
+    }
+    return url;
+  }
+
   async function checkAuth() {
     try {
       const res  = await fetch('/.netlify/functions/verify-session');
@@ -121,6 +134,7 @@ import { Icon } from 'astro-icon/components';
 
     feed.innerHTML = items.map(item => {
       const isAlert = item.type === 'alert';
+      const chartSrc = resolveChartUrl(item.chartUrl);
       const time = new Date(item.timestamp).toLocaleString('en-US', {
         timeZone: 'America/Chicago',
         weekday: 'short', month: 'short', day: 'numeric',
@@ -142,7 +156,7 @@ import { Icon } from 'astro-icon/components';
               <span class="card-time">${time}</span>
             </div>
             <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
-            ${item.chartUrl ? `<img src="${item.chartUrl}" alt="Chart" class="chart-img">` : ''}
+            ${chartSrc ? `<div class="chart-wrap"><img src="${chartSrc}" alt="Chart" class="chart-img"></div>` : ''}
           </div>`;
       }
 
@@ -156,7 +170,7 @@ import { Icon } from 'astro-icon/components';
             <span class="card-time">${time}</span>
           </div>
           <div class="review-message">${item.message}</div>
-          ${item.chartUrl ? `<img src="${item.chartUrl}" alt="Chart" class="chart-img">` : ''}
+          ${chartSrc ? `<div class="chart-wrap"><img src="${chartSrc}" alt="Chart" class="chart-img"></div>` : ''}
         </div>`;
     }).join('');
   }
@@ -316,6 +330,7 @@ import { Icon } from 'astro-icon/components';
     border-left: 4px solid transparent;
     border-radius: 14px;
     padding: 1.25rem 1.5rem;
+    overflow: hidden;
     animation: fadeIn 0.3s ease;
     transition: box-shadow 0.2s, border-color 0.2s;
   }
@@ -342,15 +357,21 @@ import { Icon } from 'astro-icon/components';
   }
 
   /* ── Chart Image ──────────────────────────────────────────────── */
+  .chart-wrap {
+    width: 100%;
+    margin-top: 0.75rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(153,139,255,0.2);
+    background: #0B0C15;
+    line-height: 0;
+  }
   .chart-img {
     width: 100%;
-    max-height: 300px;
+    height: auto;
+    max-height: 280px;
     object-fit: contain;
-    border-radius: 8px;
-    margin-top: 0.75rem;
-    border: 1px solid rgba(153,139,255,0.2);
     display: block;
-    background: #0B0C15;
   }
 
   .feed-skeleton { display: flex; flex-direction: column; gap: 1rem; }
