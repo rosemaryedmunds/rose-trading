@@ -1,0 +1,983 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Market Internals | rose.trading">
+  <main class="internals-page">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <p class="hero-label">Chapter 5 · Mastering the Trade</p>
+        <h1>Market <span class="accent">Internals</span></h1>
+        <p class="hero-sub">
+          The language of the market. Before price moves, the internals speak.
+          Learn to read them and you'll know what's coming — before it happens.
+        </p>
+        <div class="hero-meta">
+          <span>Derived from <em>Mastering the Trade</em> by John F. Carter</span>
+          <span class="dot">·</span>
+          <span>Applied to 0DTE SPX / ES Options</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Intro callout -->
+    <section class="intro-block">
+      <div class="container">
+        <div class="intro-grid">
+          <div class="intro-text">
+            <h2>Why Internals Matter</h2>
+            <p>
+              Every single trading day presents setups on both the long side and the short side.
+              Market internals tell you which days to <strong>ignore all short setups</strong>,
+              which days to <strong>ignore all long setups</strong>, which days are pure chop —
+              and which days are setting up for a violent reversal.
+            </p>
+            <p>
+              Price action alone is blind to what's happening beneath the surface.
+              Internals reveal the <em>conviction</em> behind the move — whether buyers or sellers
+              truly mean it.
+            </p>
+          </div>
+          <div class="four-questions">
+            <h3>The Four Questions Internals Answer</h3>
+            <ul>
+              <li><span class="q-icon">↑</span> Is this a day to only trade longs?</li>
+              <li><span class="q-icon">↓</span> Is this a day to only trade shorts?</li>
+              <li><span class="q-icon">~</span> Is this a chop day — fade extremes?</li>
+              <li><span class="q-icon">⚡</span> Is a violent reversal setting up?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Internals cards -->
+    <section class="internals-grid-section">
+      <div class="container">
+        <h2 class="section-title">The Six Core Internals</h2>
+        <p class="section-sub">Carter's primary dashboard — read in this order every morning.</p>
+
+        <div class="internals-grid">
+
+          <!-- TICK -->
+          <article class="internal-card featured" id="tick">
+            <div class="card-header">
+              <div class="symbol">$TICK</div>
+              <div class="badge">Most Important</div>
+            </div>
+            <h3>NYSE TICK</h3>
+            <p class="card-def">
+              Measures the number of NYSE stocks ticking up minus those ticking down at any given moment.
+              Carter calls it <em>"the DJ of the market"</em> — it reflects the immediate mood with more
+              accuracy than any other single indicator.
+            </p>
+
+            <div class="rules-block">
+              <h4>Key Rules</h4>
+              <div class="rule">
+                <span class="rule-label noise">Noise Zone</span>
+                <span>–400 to +400 → ignore, no conviction</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label watch">Watch Zone</span>
+                <span>±600 → attention required, conviction building</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label action">Action Zone</span>
+                <span>±1,000 → sustained = take action on your position</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label extreme">Extreme</span>
+                <span>±1,200–1,400 → something big is happening; do not fight it</span>
+              </div>
+            </div>
+
+            <div class="playbook">
+              <h4>Playbook</h4>
+              <div class="play bullish">
+                <strong>Bullish conviction:</strong> TICK consistently above zero, 5-period SMA crosses +500 and holds → stay long, add on pullbacks to 0.00 line
+              </div>
+              <div class="play bearish">
+                <strong>Bearish conviction:</strong> TICK consistently below zero, SMA below –500 → stay short, ignore long setups all day
+              </div>
+              <div class="play neutral">
+                <strong>Fade play:</strong> Quiet market suddenly spikes to ±1,000 → fade the move (first test often a head-fake)
+              </div>
+              <div class="play exit">
+                <strong>Early exit rule:</strong> In a long and TICK hits –1,000, bounces to –500, then makes a new low → exit at market regardless of stop
+              </div>
+              <div class="play divergence">
+                <strong>Divergence:</strong> Price makes lower lows but TICK makes higher lows → watch for major bullish reversal
+              </div>
+            </div>
+
+            <div class="saty-note">
+              <span class="note-label">Rose's Setup</span>
+              Used alongside Phase Oscillator for confirmation. A PO cross with TICK above +600 and sustained = high-conviction entry. TICK at –1,000 with PO rolling over = avoid all long setups.
+            </div>
+          </article>
+
+          <!-- TRIN -->
+          <article class="internal-card" id="trin">
+            <div class="card-header">
+              <div class="symbol">$TRIN</div>
+              <div class="badge secondary">Volume Pressure</div>
+            </div>
+            <h3>Arms Index (TRIN)</h3>
+            <p class="card-def">
+              Tracks where <em>volume</em> is actually flowing. Formula: (Advancing Issues ÷ Declining Issues) ÷ (Advancing Volume ÷ Declining Volume).
+              Below 1.0 = volume flowing into advancing stocks. Above 1.0 = volume flowing into declining stocks.
+            </p>
+
+            <div class="rules-block">
+              <h4>Key Rules</h4>
+              <div class="rule">
+                <span class="rule-label action">Rule #1</span>
+                <span>Don't care about the current reading in isolation — care about the <strong>trend</strong></span>
+              </div>
+              <div class="rule">
+                <span class="rule-label bullish-r">Bullish</span>
+                <span>TRIN trending lower all day → ignore short setups</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label bearish-r">Bearish</span>
+                <span>TRIN trending higher all day → ignore long setups</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label extreme">Daily Close Rule</span>
+                <span>Closes above 2.0 → 80% chance of rally next day. Closes below 0.60 → 80% chance of selloff next day</span>
+              </div>
+            </div>
+
+            <div class="playbook">
+              <h4>Key Insight</h4>
+              <div class="play neutral">
+                A TRIN reading of 1.50 can be <em>bullish</em> if it opened at 2.0 and has been falling. A reading of 0.85 can be <em>bearish</em> if it opened at 0.45 and has been rising.
+                Context and trend, not the number itself.
+              </div>
+              <div class="play neutral">
+                The biggest rallies happen when the TRIN hovers below 0.50 all day — "overbought" means nothing here. The trend continues.
+              </div>
+            </div>
+
+            <div class="saty-note">
+              <span class="note-label">Rose's Setup</span>
+              When TRIN is trending up and Pivot Ribbon is in bearish stack, those two together = strong short-only day filter.
+            </div>
+          </article>
+
+          <!-- ADD -->
+          <article class="internal-card" id="add">
+            <div class="card-header">
+              <div class="symbol">$ADD</div>
+              <div class="badge secondary">Breadth</div>
+            </div>
+            <h3>NYSE Advance-Decline</h3>
+            <p class="card-def">
+              Simply the number of advancing NYSE stocks minus the number of declining stocks at any moment.
+              Measures the <em>breadth</em> of market participation — is the move broad or narrow?
+            </p>
+
+            <div class="rules-block">
+              <h4>Key Rules</h4>
+              <div class="rule">
+                <span class="rule-label watch">Confirmation</span>
+                <span>ADD and price both moving the same direction = broad, high-conviction move</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label divergence-r">Divergence</span>
+                <span>Price makes new low, ADD makes higher low → major bullish reversal signal</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label action">Reversal signal</span>
+                <span>ADD was dropping all day then suddenly turns sharply higher = distribution of selling pressure, rally incoming</span>
+              </div>
+            </div>
+
+            <div class="playbook">
+              <h4>How to Read It</h4>
+              <div class="play bullish">
+                <strong>Strong day:</strong> ADD pushing sharply higher confirms TICK readings. Both agree = high probability directional day.
+              </div>
+              <div class="play bearish">
+                <strong>Fake rally:</strong> Price rallies but ADD barely moves or stays negative → narrow breadth, likely to fail.
+              </div>
+            </div>
+          </article>
+
+          <!-- VIX -->
+          <article class="internal-card" id="vix">
+            <div class="card-header">
+              <div class="symbol">$VIX</div>
+              <div class="badge secondary">Fear Gauge</div>
+            </div>
+            <h3>CBOE Volatility Index</h3>
+            <p class="card-def">
+              Measures the market's expectation of 30-day volatility. Known as "the fear index."
+              The VIX moves <em>inversely</em> to the market and typically leads price — it breaks
+              before the market breaks.
+            </p>
+
+            <div class="rules-block">
+              <h4>Key Rules</h4>
+              <div class="rule">
+                <span class="rule-label bearish-r">Intraday — Sell signal</span>
+                <span>VIX making new highs on the day in a negative TICK environment → danger, exit longs</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label bullish-r">Intraday — Buy signal</span>
+                <span>VIX rolls over and starts falling while TICK hits new day highs → strong reversal buy signal</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label action">Daily chart</span>
+                <span>VIX closes above upper Bollinger Band (20,2) → market bottom forming, violent rally likely</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label extreme">Panic extreme</span>
+                <span>VIX massively extended = selling has exhausted itself; don't get excited on the downside</span>
+              </div>
+            </div>
+
+            <div class="playbook">
+              <h4>Two Timeframes</h4>
+              <div class="play neutral">
+                <strong>5-min chart:</strong> Watch for breakout/breakdown moves. VIX breaks first — it's the tell. A VIX spike before a TICK breakdown is the earliest warning available.
+              </div>
+              <div class="play neutral">
+                <strong>Daily chart:</strong> Track Bollinger Band extremes. Extreme fear = capitulation = reversal. The flash crash, the 2018 vol blowup — all visible in VIX Bollinger extremes.
+              </div>
+            </div>
+
+            <div class="saty-note">
+              <span class="note-label">Rose's Setup</span>
+              VIX rolling over + TICK making new day highs = one of the cleanest high-conviction long entries. This is the short-covering rally setup Carter describes in Chapter 5.
+            </div>
+          </article>
+
+          <!-- VOLD / VOLSPD -->
+          <article class="internal-card" id="vold">
+            <div class="card-header">
+              <div class="symbol">$VOLSPD</div>
+              <div class="badge secondary">Volume Diff</div>
+            </div>
+            <h3>Up-Down Volume Difference</h3>
+            <p class="card-def">
+              The S&P 500 Up-Down Volume Difference. Shows the net difference between the volume
+              trading above vs. below yesterday's closing prices. Carter says this indicator is
+              <em>"worthless at the beginning of the day, but priceless into the last hour."</em>
+            </p>
+
+            <div class="rules-block">
+              <h4>Key Rules</h4>
+              <div class="rule">
+                <span class="rule-label watch">EOD only</span>
+                <span>Most valuable in the final 60–90 minutes of trading</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label bullish-r">Bullish divergence</span>
+                <span>Market selling off hard but VOLSPD grinds higher → market will reverse and rally into close</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label bearish-r">Bearish divergence</span>
+                <span>Market rallying but VOLSPD making new lows → rally is a fake-out, expect sell into close</span>
+              </div>
+            </div>
+
+            <div class="playbook">
+              <h4>Primary Use Case</h4>
+              <div class="play neutral">
+                End-of-day fake-out filter. When the market sells off hard into close but VOLSPD stays positive,
+                Carter fades the selloff. Similar to $ADD but volume-weighted — tells you where the big money is actually going.
+              </div>
+            </div>
+          </article>
+
+          <!-- PCVA / Put-Call -->
+          <article class="internal-card" id="pcva">
+            <div class="card-header">
+              <div class="symbol">$PCVA</div>
+              <div class="badge secondary">Sentiment</div>
+            </div>
+            <h3>Combined Put/Call Ratio</h3>
+            <p class="card-def">
+              The combined equity and index put/call ratio. Measures total put volume divided by call volume
+              across both retail (equity) and institutional (index) options — giving the best picture of
+              overall market positioning.
+            </p>
+
+            <div class="rules-block">
+              <h4>Key Rules</h4>
+              <div class="rule">
+                <span class="rule-label bearish-r">Above 1.0</span>
+                <span>More puts than calls → bearish sentiment, potential short-covering setup forming</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label bullish-r">Well above 1.0 all day</span>
+                <span>Extreme put buying = everyone already short = short-covering rally imminent</span>
+              </div>
+              <div class="rule">
+                <span class="rule-label action">Contrarian signal</span>
+                <span>When everyone is positioned the same way, the market traps them. High PCVA + capitulation TICK = reversal buy</span>
+              </div>
+            </div>
+
+            <div class="playbook">
+              <h4>The Trap Mechanic</h4>
+              <div class="play neutral">
+                When all 100 market participants are short, there's nobody left to sell. The market drifts higher, takes out tight stops, which triggers short-covering, which drives price into medium stops — cascade rally.
+                High PCVA is your early warning that this trap is being set.
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Reading order / dashboard section -->
+    <section class="dashboard-section">
+      <div class="container">
+        <h2 class="section-title">Carter's Reading Order</h2>
+        <p class="section-sub">Scan in this sequence at the open, then monitor throughout the session.</p>
+        <div class="reading-order">
+          <div class="step">
+            <span class="step-num">1</span>
+            <div class="step-content">
+              <strong>$TRIN + $TRINQ</strong>
+              <p>Which direction is volume flowing? Are both trending together or diverging?</p>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <span class="step-num">2</span>
+            <div class="step-content">
+              <strong>$PCVA</strong>
+              <p>What's the overall positioning? Is a short-covering setup loading up?</p>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <span class="step-num">3</span>
+            <div class="step-content">
+              <strong>$TICK</strong>
+              <p>What's the immediate conviction? Above or below zero? Any ±1,000 readings?</p>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <span class="step-num">4</span>
+            <div class="step-content">
+              <strong>$ADD + $VOLSPD</strong>
+              <p>Confirming breadth and volume direction? Or diverging from price?</p>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <span class="step-num">5</span>
+            <div class="step-content">
+              <strong>$VIX</strong>
+              <p>Is fear rising or falling? Making new highs or rolling over?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cheat sheet table -->
+    <section class="cheatsheet-section">
+      <div class="container">
+        <h2 class="section-title">Day Type Filter</h2>
+        <p class="section-sub">Use this to classify the day within the first 30–45 minutes.</p>
+        <div class="table-wrap">
+          <table class="cheatsheet">
+            <thead>
+              <tr>
+                <th>Day Type</th>
+                <th>TICK Pattern</th>
+                <th>TRIN Pattern</th>
+                <th>VIX</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="bull-row">
+                <td><span class="type-badge bull">Bull Trend</span></td>
+                <td>90%+ of time above zero, repeated +1,000 hits</td>
+                <td>Trending lower all day, making new lows</td>
+                <td>Declining, making new lows</td>
+                <td class="action-cell">Long only. Buy pullbacks to TICK 0.00 line.</td>
+              </tr>
+              <tr class="bear-row">
+                <td><span class="type-badge bear">Bear Trend</span></td>
+                <td>90%+ of time below zero, repeated –1,000 hits</td>
+                <td>Trending higher all day, making new highs</td>
+                <td>Rising, making new highs</td>
+                <td class="action-cell">Short only. Sell rallies back to TICK 0.00 line.</td>
+              </tr>
+              <tr class="chop-row">
+                <td><span class="type-badge chop">Chop</span></td>
+                <td>Whipping ±400, no sustained extremes</td>
+                <td>Mixed / no clear trend</td>
+                <td>Flat</td>
+                <td class="action-cell">Fade extreme TICK readings. Reduce size. Avoid breakout trades.</td>
+              </tr>
+              <tr class="reversal-row">
+                <td><span class="type-badge reversal">Reversal</span></td>
+                <td>Price new lows but TICK higher lows (divergence)</td>
+                <td>Extended high reading starting to curl lower</td>
+                <td>Spike then rolls over sharply</td>
+                <td class="action-cell">Watch for short-covering rally setup. VIX rollover + TICK surge = entry.</td>
+              </tr>
+              <tr class="panic-row">
+                <td><span class="type-badge panic">Panic / Crash</span></td>
+                <td>Hanging below –1,200 for extended periods</td>
+                <td>Making extreme new highs</td>
+                <td>Exploding higher, making new highs continuously</td>
+                <td class="action-cell">Do not buy the dip. Something is blowing up. Sit on hands or short.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Source credit -->
+    <section class="source-section">
+      <div class="container">
+        <div class="source-card">
+          <div class="source-icon">📖</div>
+          <div class="source-text">
+            <h3>Source Material</h3>
+            <p>
+              This guide is derived from <strong>Chapter 5: "The Stock Market Is Now Open — What Tools Best Predict the Market's Next Move?"</strong>
+              in <em>Mastering the Trade, 3rd Edition</em> by John F. Carter (McGraw-Hill, 2019).
+              The framework has been adapted and filtered through Saty Mahajan's technical analysis
+              system for 0DTE SPX and ES options trading.
+            </p>
+            <p class="disclaimer">
+              For educational purposes only. Not financial advice. All trading involves risk.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  /* ─── Page base ─── */
+  .internals-page {
+    color: var(--text-primary, #E0E0E0);
+    background: var(--bg-primary, #0B0C15);
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    position: relative;
+    padding: 6rem 2rem 5rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(153, 139, 255, 0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(95, 92, 255, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .hero-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-purple, #998BFF);
+    margin-bottom: 1.2rem;
+    opacity: 0.8;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: #fff;
+    margin: 0 0 1.2rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 .accent {
+    color: var(--accent-purple, #998BFF);
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: rgba(224, 224, 224, 0.75);
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .hero-meta {
+    font-family: 'Courier New', monospace;
+    font-size: 0.72rem;
+    color: rgba(224, 224, 224, 0.4);
+    letter-spacing: 0.05em;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .dot { opacity: 0.4; }
+
+  /* ─── Intro block ─── */
+  .intro-block {
+    padding: 4rem 0;
+    border-top: 1px solid rgba(153, 139, 255, 0.15);
+  }
+
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .intro-text h2 {
+    font-size: 1.6rem;
+    color: var(--accent-purple, #998BFF);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .intro-text p {
+    line-height: 1.8;
+    color: rgba(224, 224, 224, 0.85);
+    margin-bottom: 1rem;
+  }
+
+  .four-questions {
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(153, 139, 255, 0.2);
+    border-radius: 12px;
+    padding: 1.8rem;
+  }
+
+  .four-questions h3 {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-purple, #998BFF);
+    margin-bottom: 1.2rem;
+  }
+
+  .four-questions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .four-questions li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: rgba(224, 224, 224, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .q-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: rgba(153, 139, 255, 0.15);
+    color: var(--accent-purple, #998BFF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* ─── Section titles ─── */
+  .section-title {
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  .section-sub {
+    color: rgba(224, 224, 224, 0.5);
+    font-size: 0.95rem;
+    margin-bottom: 2.5rem;
+    font-style: italic;
+  }
+
+  /* ─── Internals grid ─── */
+  .internals-grid-section {
+    padding: 5rem 0;
+    border-top: 1px solid rgba(153, 139, 255, 0.1);
+  }
+
+  .internals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .internal-card {
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 1.8rem;
+    transition: border-color 0.2s;
+  }
+
+  .internal-card:hover {
+    border-color: rgba(153, 139, 255, 0.3);
+  }
+
+  .internal-card.featured {
+    grid-column: span 2;
+    border-color: rgba(153, 139, 255, 0.25);
+    background: linear-gradient(135deg, rgba(153,139,255,0.04) 0%, var(--bg-secondary,#1C1E2D) 50%);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .symbol {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-purple, #998BFF);
+    background: rgba(153, 139, 255, 0.12);
+    padding: 0.2rem 0.6rem;
+    border-radius: 5px;
+    letter-spacing: 0.05em;
+  }
+
+  .badge {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-blue, #5F5CFF);
+    background: rgba(95, 92, 255, 0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid rgba(95, 92, 255, 0.2);
+  }
+
+  .badge.secondary {
+    color: rgba(224,224,224,0.5);
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08);
+  }
+
+  .internal-card h3 {
+    font-size: 1.3rem;
+    color: #fff;
+    margin: 0 0 0.75rem;
+    font-weight: 600;
+  }
+
+  .card-def {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: rgba(224, 224, 224, 0.7);
+    margin-bottom: 1.4rem;
+  }
+
+  /* ─── Rules block ─── */
+  .rules-block {
+    margin-bottom: 1.4rem;
+  }
+
+  .rules-block h4,
+  .playbook h4 {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(224,224,224,0.35);
+    margin-bottom: 0.7rem;
+  }
+
+  .rule {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    font-size: 0.85rem;
+    color: rgba(224,224,224,0.8);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+
+  .rule:last-child { border-bottom: none; }
+
+  .rule-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .rule-label.noise    { background: rgba(100,100,100,0.3); color: #888; }
+  .rule-label.watch    { background: rgba(255,200,50,0.12); color: #f5c842; }
+  .rule-label.action   { background: rgba(153,139,255,0.15); color: #998BFF; }
+  .rule-label.extreme  { background: rgba(255,80,80,0.15); color: #ff7070; }
+  .rule-label.bullish-r { background: rgba(80,200,120,0.12); color: #52d077; }
+  .rule-label.bearish-r { background: rgba(255,80,80,0.12); color: #ff7070; }
+  .rule-label.divergence-r { background: rgba(255,165,0,0.12); color: #ffa040; }
+
+  /* ─── Playbook ─── */
+  .playbook {
+    margin-bottom: 1.2rem;
+  }
+
+  .play {
+    font-size: 0.84rem;
+    line-height: 1.65;
+    color: rgba(224,224,224,0.75);
+    padding: 0.6rem 0.8rem;
+    border-radius: 7px;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid transparent;
+  }
+
+  .play.bullish  { background: rgba(80,200,120,0.06); border-left-color: #52d077; }
+  .play.bearish  { background: rgba(255,80,80,0.06); border-left-color: #ff7070; }
+  .play.neutral  { background: rgba(153,139,255,0.06); border-left-color: #998BFF; }
+  .play.exit     { background: rgba(255,165,0,0.06); border-left-color: #ffa040; }
+  .play.divergence { background: rgba(255,200,50,0.06); border-left-color: #f5c842; }
+
+  /* ─── Saty note ─── */
+  .saty-note {
+    background: rgba(95,92,255,0.08);
+    border: 1px solid rgba(95,92,255,0.2);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: rgba(224,224,224,0.7);
+    margin-top: 0.5rem;
+  }
+
+  .note-label {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-blue, #5F5CFF);
+    margin-bottom: 0.3rem;
+  }
+
+  /* ─── Reading order ─── */
+  .dashboard-section {
+    padding: 5rem 0;
+    background: rgba(28,30,45,0.4);
+    border-top: 1px solid rgba(153,139,255,0.1);
+  }
+
+  .reading-order {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(153,139,255,0.15);
+    color: var(--accent-purple, #998BFF);
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-content strong {
+    display: block;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: var(--accent-purple, #998BFF);
+    margin-bottom: 0.3rem;
+  }
+
+  .step-content p {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: rgba(224,224,224,0.55);
+    margin: 0;
+  }
+
+  .step-arrow {
+    color: rgba(153,139,255,0.3);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* ─── Cheat sheet ─── */
+  .cheatsheet-section {
+    padding: 5rem 0;
+    border-top: 1px solid rgba(153,139,255,0.1);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .cheatsheet {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .cheatsheet thead {
+    background: rgba(153,139,255,0.08);
+  }
+
+  .cheatsheet th {
+    padding: 1rem 1.2rem;
+    text-align: left;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(224,224,224,0.45);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .cheatsheet td {
+    padding: 0.9rem 1.2rem;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: rgba(224,224,224,0.75);
+    line-height: 1.55;
+  }
+
+  .cheatsheet tr:last-child td { border-bottom: none; }
+
+  .type-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .type-badge.bull     { background: rgba(80,200,120,0.12); color: #52d077; }
+  .type-badge.bear     { background: rgba(255,80,80,0.12); color: #ff7070; }
+  .type-badge.chop     { background: rgba(255,200,50,0.12); color: #f5c842; }
+  .type-badge.reversal { background: rgba(153,139,255,0.15); color: #998BFF; }
+  .type-badge.panic    { background: rgba(255,60,60,0.2); color: #ff4444; }
+
+  .action-cell {
+    font-weight: 600;
+    color: rgba(224,224,224,0.9) !important;
+  }
+
+  /* ─── Source ─── */
+  .source-section {
+    padding: 4rem 0;
+    border-top: 1px solid rgba(153,139,255,0.1);
+  }
+
+  .source-card {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    background: var(--bg-secondary, #1C1E2D);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 2rem;
+  }
+
+  .source-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .source-text h3 {
+    font-size: 1rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+
+  .source-text p {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: rgba(224,224,224,0.6);
+    margin-bottom: 0.5rem;
+  }
+
+  .disclaimer {
+    font-size: 0.75rem !important;
+    color: rgba(224,224,224,0.35) !important;
+    font-style: italic;
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 768px) {
+    .intro-grid { grid-template-columns: 1fr; }
+    .internals-grid { grid-template-columns: 1fr; }
+    .internal-card.featured { grid-column: span 1; }
+    .reading-order { flex-direction: column; }
+    .step-arrow { transform: rotate(90deg); align-self: center; }
+    .step { min-width: unset; width: 100%; }
+    .hero h1 { font-size: 2.4rem; }
+  }
+</style>
