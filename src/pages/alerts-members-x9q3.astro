@@ -139,9 +139,12 @@ import { Icon } from 'astro-icon/components';
         hour: '2-digit', minute: '2-digit'
       }) + ' CT';
 
+      // Inline styles bypass Astro scoping on dynamically injected HTML
       const chartHtml = chartSrc
-        ? `<a href="${chartSrc}" target="_blank" rel="noopener" class="chart-link">
-             <img src="${chartSrc}" alt="Chart" class="chart-img" loading="lazy">
+        ? `<a href="${chartSrc}" target="_blank" rel="noopener"
+             style="display:block;margin-top:0.75rem;border-radius:8px;overflow:hidden;border:1px solid rgba(153,139,255,0.2);line-height:0;">
+             <img src="${chartSrc}" alt="Chart" loading="lazy"
+               style="display:block;width:100%;height:240px;object-fit:cover;object-position:top center;max-width:100%;">
            </a>`
         : '';
 
@@ -154,10 +157,10 @@ import { Icon } from 'astro-icon/components';
           ? ('SWING' + (item.ticker ? ' · ' + item.ticker : ''))
           : 'ALERT';
         return `
-          <div class="feed-card" style="border-left-color: ${accent};">
-            <div class="card-header">
-              <span class="card-tag" style="color:${accent}; background:${accent}22; border-color:${accent}44;">${tagLabel}</span>
-              <span class="card-time">${time}</span>
+          <div style="background:#1C1E2D;border:1px solid rgba(153,139,255,0.15);border-left:4px solid ${accent};border-radius:14px;padding:1.25rem 1.5rem;overflow:hidden;margin-bottom:0;box-sizing:border-box;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+              <span style="font-size:0.65rem;letter-spacing:0.15em;font-family:'JetBrains Mono',monospace;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;color:${accent};background:${accent}22;border:1px solid ${accent}44;">${tagLabel}</span>
+              <span style="font-size:0.7rem;color:#555;font-family:'JetBrains Mono',monospace;">${time}</span>
             </div>
             <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
             ${chartHtml}
@@ -168,12 +171,12 @@ import { Icon } from 'astro-icon/components';
       const label = reviewType === 'PRE-MARKET'  ? 'PRE-MARKET'  :
                     reviewType === 'POST-MARKET' ? 'POST-MARKET' : reviewType;
       return `
-        <div class="feed-card" style="border-left-color: #998BFF;">
-          <div class="card-header">
-            <span class="card-tag" style="color:#998BFF; background:rgba(153,139,255,0.1); border-color:rgba(153,139,255,0.25);">${label}</span>
-            <span class="card-time">${time}</span>
+        <div style="background:#1C1E2D;border:1px solid rgba(153,139,255,0.15);border-left:4px solid #998BFF;border-radius:14px;padding:1.25rem 1.5rem;overflow:hidden;box-sizing:border-box;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <span style="font-size:0.65rem;letter-spacing:0.15em;font-family:'JetBrains Mono',monospace;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;color:#998BFF;background:rgba(153,139,255,0.1);border:1px solid rgba(153,139,255,0.25);">${label}</span>
+            <span style="font-size:0.7rem;color:#555;font-family:'JetBrains Mono',monospace;">${time}</span>
           </div>
-          <div class="review-message">${item.message}</div>
+          <div style="font-size:0.92rem;color:#b0b0c0;line-height:1.75;white-space:pre-wrap;">${item.message}</div>
           ${chartHtml}
         </div>`;
     }).join('');
@@ -233,15 +236,6 @@ import { Icon } from 'astro-icon/components';
   }
 
   :global(body) { background: var(--bg); color: var(--text); }
-
-  :global(.alert-message) {
-    font-family: 'Syne', sans-serif !important;
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
-    color: #E0E0E0 !important;
-    line-height: 1.5 !important;
-    margin-bottom: 0 !important;
-  }
 
   .auth-screen {
     display: flex; flex-direction: column; align-items: center;
@@ -328,54 +322,6 @@ import { Icon } from 'astro-icon/components';
   .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 
   .feed { display: flex; flex-direction: column; gap: 1rem; }
-  .feed-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 4px solid transparent;
-    border-radius: 14px;
-    padding: 1.25rem 1.5rem;
-    overflow: hidden;
-    animation: fadeIn 0.3s ease;
-    transition: box-shadow 0.2s;
-  }
-  .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.1); }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-
-  .card-header {
-    display: flex; justify-content: space-between;
-    align-items: center; margin-bottom: 0.75rem;
-  }
-  .card-tag {
-    font-size: 0.65rem; letter-spacing: 0.15em;
-    font-family: 'JetBrains Mono', monospace; font-weight: 700;
-    padding: 0.25rem 0.65rem; border-radius: 6px;
-    border: 1px solid transparent;
-  }
-  .card-time {
-    font-size: 0.7rem; color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .review-message {
-    font-size: 0.92rem; color: #b0b0c0;
-    line-height: 1.75; white-space: pre-wrap;
-  }
-
-  /* ── Chart Image ──────────────────────────────────────────────── */
-  .chart-link {
-    display: block;
-    margin-top: 0.75rem;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid rgba(153,139,255,0.2);
-    line-height: 0;
-  }
-  .chart-img {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    border-radius: 8px;
-  }
 
   .feed-skeleton { display: flex; flex-direction: column; gap: 1rem; }
   .skeleton-card {
