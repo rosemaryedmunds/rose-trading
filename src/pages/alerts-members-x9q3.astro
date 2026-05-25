@@ -77,10 +77,8 @@ import { Icon } from 'astro-icon/components';
   let allItems  = [];
   let curFilter = 'all';
 
-  // Auto-fix TradingView snapshot URLs to direct image URLs
   function resolveChartUrl(url) {
     if (!url) return null;
-    // Convert https://www.tradingview.com/x/ABC123/ to https://s3.tradingview.com/snapshots/a/ABC123.png
     const tvMatch = url.match(/tradingview\.com\/x\/([A-Za-z0-9]+)\/?$/);
     if (tvMatch) {
       const id = tvMatch[1];
@@ -133,7 +131,7 @@ import { Icon } from 'astro-icon/components';
     empty.style.display = 'none';
 
     feed.innerHTML = items.map(item => {
-      const isAlert = item.type === 'alert';
+      const isAlert  = item.type === 'alert';
       const chartSrc = resolveChartUrl(item.chartUrl);
       const time = new Date(item.timestamp).toLocaleString('en-US', {
         timeZone: 'America/Chicago',
@@ -142,10 +140,10 @@ import { Icon } from 'astro-icon/components';
       }) + ' CT';
 
       if (isAlert) {
-        const isCall  = item.message.includes('CALL');
-        const isPut   = item.message.includes('PUT');
-        const isSwing = item.reviewType === 'SWING';
-        const accent  = isCall ? '#3DDC84' : isPut ? '#FF5C5C' : '#998BFF';
+        const isCall   = item.message.includes('CALL');
+        const isPut    = item.message.includes('PUT');
+        const isSwing  = item.reviewType === 'SWING';
+        const accent   = isCall ? '#3DDC84' : isPut ? '#FF5C5C' : '#998BFF';
         const tagLabel = isSwing
           ? ('SWING' + (item.ticker ? ' · ' + item.ticker : ''))
           : 'ALERT';
@@ -156,7 +154,7 @@ import { Icon } from 'astro-icon/components';
               <span class="card-time">${time}</span>
             </div>
             <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
-            ${chartSrc ? `<div class="chart-wrap"><img src="${chartSrc}" alt="Chart" class="chart-img"></div>` : ''}
+            ${chartSrc ? `<div class="chart-wrap"><img src="${chartSrc}" alt="Chart" class="chart-img" loading="lazy"></div>` : ''}
           </div>`;
       }
 
@@ -170,7 +168,7 @@ import { Icon } from 'astro-icon/components';
             <span class="card-time">${time}</span>
           </div>
           <div class="review-message">${item.message}</div>
-          ${chartSrc ? `<div class="chart-wrap"><img src="${chartSrc}" alt="Chart" class="chart-img"></div>` : ''}
+          ${chartSrc ? `<div class="chart-wrap"><img src="${chartSrc}" alt="Chart" class="chart-img" loading="lazy"></div>` : ''}
         </div>`;
     }).join('');
   }
@@ -332,7 +330,7 @@ import { Icon } from 'astro-icon/components';
     padding: 1.25rem 1.5rem;
     overflow: hidden;
     animation: fadeIn 0.3s ease;
-    transition: box-shadow 0.2s, border-color 0.2s;
+    transition: box-shadow 0.2s;
   }
   .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.1); }
   @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
@@ -365,12 +363,13 @@ import { Icon } from 'astro-icon/components';
     border: 1px solid rgba(153,139,255,0.2);
     background: #0B0C15;
     line-height: 0;
+    max-height: 200px;
   }
   .chart-img {
     width: 100%;
-    height: auto;
-    max-height: 280px;
-    object-fit: contain;
+    height: 200px;
+    object-fit: cover;
+    object-position: top;
     display: block;
   }
 
