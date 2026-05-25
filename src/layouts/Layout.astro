@@ -43,7 +43,6 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
 <script is:inline>
-  // Only initialize OneSignal on the members alerts page
   if (window.location.pathname.startsWith('/alerts-members-x9q3')) {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async function(OneSignal) {
@@ -59,12 +58,9 @@ const { title, description = "Your guide to options trading" } = Astro.props;
   <header>
     <nav class="container">
       <div class="nav-inner">
-        <!-- Logo -->
         <a href="/" class="nav-logo">
           <img src="/rose-logo.png" alt="Rose Trading Logo" style="width: 60px; height: 60px; object-fit: contain;" />
         </a>
-
-        <!-- Hamburger button -->
         <button
           class="ham-btn"
           id="ham-btn"
@@ -80,7 +76,6 @@ const { title, description = "Your guide to options trading" } = Astro.props;
       </div>
     </nav>
 
-    <!-- Full-screen dropdown menu -->
     <div class="nav-menu" id="nav-menu" role="dialog" aria-label="Navigation menu">
       <nav class="nav-menu-inner">
         <a href="/" class="nav-menu-link" onclick="closeNav()">Home</a>
@@ -110,6 +105,13 @@ const { title, description = "Your guide to options trading" } = Astro.props;
 </html>
 
 <style>
+  /* ── Main content ── */
+  main {
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
   /* ── Nav bar ── */
   header {
     position: sticky;
@@ -162,7 +164,6 @@ const { title, description = "Your guide to options trading" } = Astro.props;
     background: var(--accent-secondary, #5F5CFF);
   }
 
-  /* X state — toggled via .nav-open on <header> */
   header.nav-open .ham-top {
     transform: translateY(8px) rotate(45deg);
   }
@@ -183,15 +184,13 @@ const { title, description = "Your guide to options trading" } = Astro.props;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* hidden state */
     opacity: 0;
     pointer-events: none;
     transform: translateY(-12px);
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
 
-  header.nav-open ~ .nav-menu,   /* sibling approach fallback */
+  header.nav-open ~ .nav-menu,
   .nav-menu.open {
     opacity: 1;
     pointer-events: auto;
@@ -235,7 +234,6 @@ const { title, description = "Your guide to options trading" } = Astro.props;
     const isOpen = header.classList.toggle('nav-open');
     menu.classList.toggle('open', isOpen);
     btn.setAttribute('aria-expanded', isOpen);
-    // Prevent body scroll while menu is open
     document.body.style.overflow = isOpen ? 'hidden' : '';
   }
 
@@ -249,7 +247,6 @@ const { title, description = "Your guide to options trading" } = Astro.props;
     document.body.style.overflow = '';
   }
 
-  // Close on Escape key
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeNav();
   });
