@@ -69,6 +69,35 @@ import { Icon } from 'astro-icon/components';
     </div>
 
     <p class="refresh-note">Feed auto-refreshes every 60 seconds</p>
+
+    <!-- ── Weekly Reviews ─────────────────────────────────────── -->
+    <div class="section-divider"></div>
+    <div class="weekly-reviews">
+      <div class="section-header">
+        <Icon name="lucide:video" />
+        <h2>Weekly Reviews</h2>
+      </div>
+      <p class="section-sub">Every Sunday at 11AM CT — recorded and posted here after each session.</p>
+      <div class="playlist-wrap">
+        <iframe
+          src="https://www.youtube.com/embed/videoseries?list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e"
+          title="Rose Trading Weekly Reviews"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+      
+        href="https://www.youtube.com/playlist?list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e"
+        target="_blank"
+        rel="noopener"
+        class="playlist-link"
+      >
+        <Icon name="lucide:external-link" />
+        Open full playlist on YouTube
+      </a>
+    </div>
+
   </section>
 
 </Layout>
@@ -139,7 +168,6 @@ import { Icon } from 'astro-icon/components';
         hour: '2-digit', minute: '2-digit'
       }) + ' CT';
 
-      // Inline styles bypass Astro scoping on dynamically injected HTML
       const chartHtml = chartSrc
         ? `<a href="${chartSrc}" target="_blank" rel="noopener"
              style="display:block;margin-top:0.75rem;border-radius:8px;overflow:hidden;border:1px solid rgba(153,139,255,0.2);line-height:0;">
@@ -157,7 +185,7 @@ import { Icon } from 'astro-icon/components';
           ? ('SWING' + (item.ticker ? ' · ' + item.ticker : ''))
           : 'ALERT';
         return `
-          <div style="background:#1C1E2D;border:1px solid rgba(153,139,255,0.15);border-left:4px solid ${accent};border-radius:14px;padding:1.25rem 1.5rem;overflow:hidden;margin-bottom:0;box-sizing:border-box;">
+          <div style="background:#1C1E2D;border:1px solid rgba(153,139,255,0.15);border-left:4px solid ${accent};border-radius:14px;padding:1.25rem 1.5rem;overflow:hidden;box-sizing:border-box;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
               <span style="font-size:0.65rem;letter-spacing:0.15em;font-family:'JetBrains Mono',monospace;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;color:${accent};background:${accent}22;border:1px solid ${accent}44;">${tagLabel}</span>
               <span style="font-size:0.7rem;color:#555;font-family:'JetBrains Mono',monospace;">${time}</span>
@@ -339,6 +367,44 @@ import { Icon } from 'astro-icon/components';
     text-align: center; font-size: 0.72rem; color: var(--muted);
     margin-top: 2rem; font-family: 'JetBrains Mono', monospace;
   }
+
+  /* ── Weekly Reviews ───────────────────────────────────────────── */
+  .section-divider {
+    height: 1px; background: var(--border);
+    margin: 3rem 0 2.5rem;
+  }
+  .weekly-reviews { margin-bottom: 2rem; }
+  .section-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .section-header [data-icon] { width: 1.4rem; height: 1.4rem; stroke: var(--purple); }
+  .section-header h2 {
+    font-family: 'Syne', sans-serif; font-size: 1.5rem;
+    font-weight: 800; color: var(--text); margin: 0;
+  }
+  .section-sub {
+    font-size: 0.85rem; color: var(--muted);
+    margin: 0 0 1.25rem;
+  }
+  .playlist-wrap {
+    position: relative; width: 100%; padding-bottom: 56.25%;
+    border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--border);
+    background: #000;
+  }
+  .playlist-wrap iframe {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; border: none;
+  }
+  .playlist-link {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    margin-top: 1rem; font-size: 0.82rem;
+    color: var(--purple); text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .playlist-link [data-icon] { width: 13px; height: 13px; stroke: var(--purple); }
+  .playlist-link:hover { text-decoration: underline; }
 
   @media (max-width: 600px) {
     .alerts-page { padding: 2rem 1rem 4rem; }
