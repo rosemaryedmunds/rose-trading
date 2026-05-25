@@ -70,33 +70,39 @@ import { Icon } from 'astro-icon/components';
 
     <p class="refresh-note">Feed auto-refreshes every 60 seconds</p>
 
-    <!-- ── Weekly Reviews ─────────────────────────────────────── -->
-    <div class="section-divider"></div>
-    <div class="weekly-reviews">
-      <div class="section-header">
-        <Icon name="lucide:video" />
-        <h2>Weekly Reviews</h2>
+    <!-- ─── WEEKLY REVIEWS ─── -->
+    <div class="yt-section">
+      <div class="yt-section-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        Weekly Reviews
       </div>
-      <p class="section-sub">Every Sunday at 11AM CT — recorded and posted here after each session.</p>
-      <div class="playlist-wrap">
-        <iframe
-          src="https://www.youtube.com/embed/videoseries?list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e"
-          title="Rose Trading Weekly Reviews"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
-      </div>
-      
-        href="https://www.youtube.com/playlist?list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e"
-        target="_blank"
-        rel="noopener"
-        class="playlist-link"
-      >
-        <Icon name="lucide:external-link" />
-        Open full playlist on YouTube
+      <p class="yt-desc">Catch up on every weekly market review — breakdowns, setups, and lessons from the week.</p>
+      <a href="https://www.youtube.com/watch?v=IbgRemAKWdk&list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e" target="_blank" rel="noopener" class="yt-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-2.75C14.78 1.5 12 1.5 12 1.5s-2.78 0-3.82 2.44A4.83 4.83 0 0 1 4.41 6.69C2 7.73 2 10 2 12s0 4.27 2.41 5.31a4.83 4.83 0 0 1 3.77 2.75C9.22 22.5 12 22.5 12 22.5s2.78 0 3.82-2.44a4.83 4.83 0 0 1 3.77-2.75C22 16.27 22 14 22 12s0-4.27-2.41-5.31zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
+        Watch on YouTube
       </a>
     </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="alert">Alerts</button>
+      <button class="filter-btn" data-filter="review">Reviews</button>
+    </div>
+
+    <div class="feed" id="feed">
+      <div class="feed-skeleton">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <Icon name="lucide:radio-tower" />
+      <p>No alerts yet today. Check back during market hours (9:30 AM – 4:00 PM CT).</p>
+    </div>
+
+    <p class="refresh-note">Feed auto-refreshes every 60 seconds</p>
 
   </section>
 
