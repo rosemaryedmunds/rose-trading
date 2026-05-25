@@ -59,15 +59,6 @@ import { Icon } from 'astro-icon/components';
         Weekly Reviews
       </div>
       <p class="yt-desc">Catch up on every weekly market review — breakdowns, setups, and lessons from the week.</p>
-      <div class="playlist-wrap">
-        <iframe
-          src="https://www.youtube.com/embed/videoseries?list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e"
-          title="Rose Trading Weekly Reviews"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
-      </div>
       <a href="https://www.youtube.com/playlist?list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e" target="_blank" rel="noopener" class="yt-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-2.75C14.78 1.5 12 1.5 12 1.5s-2.78 0-3.82 2.44A4.83 4.83 0 0 1 4.41 6.69C2 7.73 2 10 2 12s0 4.27 2.41 5.31a4.83 4.83 0 0 1 3.77 2.75C9.22 22.5 12 22.5 12 22.5s2.78 0 3.82-2.44a4.83 4.83 0 0 1 3.77-2.75C22 16.27 22 14 22 12s0-4.27-2.41-5.31zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
         Watch Full Playlist on YouTube
@@ -164,7 +155,6 @@ import { Icon } from 'astro-icon/components';
         hour: '2-digit', minute: '2-digit'
       }) + ' CT';
 
-      // Inline styles to bypass Astro scoping on dynamically injected HTML
       const chartHtml = chartSrc
         ? `<a href="${chartSrc}" target="_blank" rel="noopener"
              style="display:block;margin-top:0.75rem;border-radius:8px;overflow:hidden;border:1px solid rgba(153,139,255,0.2);line-height:0;">
@@ -360,16 +350,6 @@ import { Icon } from 'astro-icon/components';
   .yt-desc {
     font-size: 0.88rem; color: var(--muted);
     max-width: 440px; margin: 0 auto 1.25rem; line-height: 1.6;
-  }
-  .playlist-wrap {
-    position: relative; width: 100%; padding-bottom: 56.25%;
-    border-radius: 10px; overflow: hidden;
-    border: 1px solid var(--border); background: #000;
-    margin-bottom: 1.25rem;
-  }
-  .playlist-wrap iframe {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%; border: none;
   }
   .yt-btn {
     display: inline-flex; align-items: center; gap: 0.6rem;
