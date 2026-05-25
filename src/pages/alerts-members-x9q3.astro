@@ -196,4 +196,227 @@ import { Icon } from 'astro-icon/components';
       const label = reviewType === 'PRE-MARKET'  ? 'PRE-MARKET'  :
                     reviewType === 'POST-MARKET' ? 'POST-MARKET' : reviewType;
       return `
-        <div style="background:#1C1E2D;border:1px solid rgba(153,139,255,0.15);border-left:4px solid #998BFF;border-radius:14
+        <div style="background:#1C1E2D;border:1px solid rgba(153,139,255,0.15);border-left:4px solid #998BFF;border-radius:14px;padding:1.25rem 1.5rem;overflow:hidden;box-sizing:border-box;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <span style="font-size:0.65rem;letter-spacing:0.15em;font-family:'JetBrains Mono',monospace;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;color:#998BFF;background:rgba(153,139,255,0.1);border:1px solid rgba(153,139,255,0.25);">${label}</span>
+            <span style="font-size:0.7rem;color:#555;font-family:'JetBrains Mono',monospace;">${time}</span>
+          </div>
+          <div style="font-size:0.92rem;color:#b0b0c0;line-height:1.75;white-space:pre-wrap;">${item.message}</div>
+          ${chartHtml}
+        </div>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      curFilter = btn.dataset.filter;
+      renderFeed();
+    });
+  });
+
+  function enableNotifications() {
+    const hint  = document.getElementById('notif-hint');
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isPWA = window.navigator.standalone === true;
+    if (isIOS && !isPWA) {
+      hint.textContent = 'Follow the install steps below to enable alerts on iPhone.';
+      hint.style.color = '#998BFF';
+      document.querySelector('.pwa-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+    if (window.OneSignal?.Slidedown) {
+      window.OneSignal.Slidedown.promptPush()
+        .then(() => {
+          hint.textContent = 'Subscribed! Alerts will come straight to your phone.';
+          hint.style.color = '#3DDC84';
+          if (window.OneSignal.User) {
+            window.OneSignal.User.addTag('subscriber', 'true');
+          }
+        })
+        .catch(() => {
+          hint.textContent = 'Notifications may be blocked. Check your browser settings.';
+          hint.style.color = '#FF5C5C';
+        });
+    } else {
+      hint.textContent = 'Still loading... please wait a moment and try again.';
+    }
+  }
+
+  checkAuth();
+</script>
+
+<style>
+  :root {
+    --bg:      #0B0C15;
+    --surface: #1C1E2D;
+    --border:  rgba(153,139,255,0.15);
+    --purple:  #998BFF;
+    --blue:    #5F5CFF;
+    --green:   #3DDC84;
+    --red:     #FF5C5C;
+    --text:    #E0E0E0;
+    --muted:   #555;
+  }
+
+  :global(body) { background: var(--bg); color: var(--text); }
+
+  :global(.alert-message) {
+    font-family: 'Syne', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #E0E0E0 !important;
+    line-height: 1.5 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .auth-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 60vh; text-align: center;
+    gap: 1rem; padding: 2rem; color: var(--muted);
+  }
+  .disclaimer {
+    font-size: 0.78rem; color: var(--muted); max-width: 560px;
+    margin: 0 auto 1.5rem; line-height: 1.6; text-align: center;
+    padding: 0.75rem 1rem; border: 1px solid var(--border);
+    border-radius: 8px; background: rgba(255,255,255,0.02);
+  }
+  .auth-spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--purple); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .auth-icon [data-icon] { width: 3rem; height: 3rem; stroke: var(--purple); }
+  .auth-screen h2 { color: var(--text); font-family: 'Syne', sans-serif; font-size: 1.5rem; }
+  .auth-screen p  { color: var(--muted); font-size: 0.95rem; max-width: 340px; }
+  .auth-btn {
+    background: var(--blue); color: #fff; text-decoration: none;
+    padding: 0.75rem 1.75rem; border-radius: 10px; font-weight: 700;
+    font-size: 0.95rem; font-family: 'Syne', sans-serif;
+  }
+  .auth-link { color: var(--purple); font-size: 0.82rem; text-decoration: none; }
+  .auth-link:hover { text-decoration: underline; }
+
+  .alerts-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .page-header  { text-align: center; margin-bottom: 2.5rem; }
+
+  .alert-cta { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
+  .enable-btn {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: #5F5CFF; color: #fff; border: none;
+    padding: 0.85rem 1.75rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(95,92,255,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .enable-btn [data-icon] { width: 18px; height: 18px; stroke: #fff; }
+  .enable-btn:hover  { box-shadow: 0 6px 24px rgba(95,92,255,0.5); transform: translateY(-1px); }
+  .enable-btn:active { transform: scale(0.97); }
+  .notif-hint { font-size: 0.82rem; min-height: 1.2em; margin: 0; }
+
+  .pwa-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.5rem;
+    text-align: left; max-width: 500px; margin: 0 auto;
+  }
+  .pwa-card-header {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem; font-weight: 700; color: var(--purple);
+    margin-bottom: 1.25rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .pwa-card-header [data-icon] { width: 18px; height: 18px; stroke: var(--purple); }
+  .pwa-steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.85rem; }
+  .pwa-steps li { display: flex; align-items: flex-start; gap: 0.85rem; font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+  .step-num {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 24px; height: 24px;
+    background: rgba(95,92,255,0.15); border: 1px solid rgba(95,92,255,0.3);
+    color: var(--blue); border-radius: 50%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; font-weight: 700;
+  }
+  .pwa-steps strong { color: var(--purple); }
+
+  /* ── Weekly Reviews ──────────────────────────────────────────── */
+  .yt-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .yt-section-header {
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    color: var(--purple); margin-bottom: 0.6rem;
+  }
+  .yt-section-header svg { stroke: var(--purple); flex-shrink: 0; }
+  .yt-desc {
+    font-size: 0.88rem; color: var(--muted);
+    max-width: 440px; margin: 0 auto 1.25rem; line-height: 1.6;
+  }
+  .playlist-wrap {
+    position: relative; width: 100%; padding-bottom: 56.25%;
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border); background: #000;
+    margin-bottom: 1.25rem;
+  }
+  .playlist-wrap iframe {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; border: none;
+  }
+  .yt-btn {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: #FF0000; color: #fff; text-decoration: none;
+    padding: 0.75rem 1.5rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700;
+    transition: opacity 0.15s, transform 0.15s;
+    box-shadow: 0 4px 16px rgba(255,0,0,0.3);
+  }
+  .yt-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .yt-btn svg { flex-shrink: 0; }
+
+  /* ── Filters ──────────────────────────────────────────────────── */
+  .filter-bar {
+    display: flex; gap: 0.5rem; margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 1rem;
+  }
+  .filter-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.8rem;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .filter-btn:hover  { border-color: var(--purple); color: var(--purple); }
+  .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  .feed { display: flex; flex-direction: column; gap: 1rem; }
+
+  .feed-skeleton { display: flex; flex-direction: column; gap: 1rem; }
+  .skeleton-card {
+    height: 100px; border-radius: 14px; border: 1px solid var(--border);
+    background: linear-gradient(90deg, var(--surface) 25%, #22243a 50%, var(--surface) 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .empty-state { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+  .empty-state [data-icon] { width: 3rem; height: 3rem; stroke: var(--muted); margin-bottom: 1rem; }
+  .empty-state p { margin-top: 0.5rem; }
+
+  .refresh-note {
+    text-align: center; font-size: 0.72rem; color: var(--muted);
+    margin-top: 2rem; font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 600px) {
+    .alerts-page { padding: 2rem 1rem 4rem; }
+    .pwa-card { padding: 1rem; }
+  }
+</style>
