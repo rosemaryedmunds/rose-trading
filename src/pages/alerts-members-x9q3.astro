@@ -397,10 +397,10 @@ import { Icon } from 'astro-icon/components';
   .filter-btn:hover  { border-color: var(--purple); color: var(--purple); }
   .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 
-  /* ── Feed Cards ───────────────────────────────────────────────── */
-  .feed { display: flex; flex-direction: column; gap: 1rem; }
+  /* ── Feed Cards (rendered via client-side innerHTML — must be :global) ── */
+  :global(.feed) { display: flex; flex-direction: column; gap: 1rem; }
 
-  .feed-card {
+  :global(.feed-card) {
     background: var(--surface);
     border: 1px solid var(--border);
     border-left: 4px solid transparent;
@@ -409,42 +409,39 @@ import { Icon } from 'astro-icon/components';
     animation: fadeIn 0.3s ease;
     transition: box-shadow 0.2s, border-color 0.2s;
   }
-  .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.1); }
+  :global(.feed-card:hover) { box-shadow: 0 4px 24px rgba(153,139,255,0.1); }
 
   @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-  .card-header {
+  :global(.card-header) {
     display: flex; justify-content: space-between;
     align-items: center; margin-bottom: 0.75rem;
   }
-  .card-tag {
+  :global(.card-tag) {
     font-size: 0.65rem; letter-spacing: 0.15em;
     font-family: 'JetBrains Mono', monospace; font-weight: 700;
     padding: 0.25rem 0.65rem; border-radius: 6px;
     border: 1px solid transparent;
   }
-  .card-time {
+  :global(.card-time) {
     font-size: 0.7rem; color: var(--muted);
     font-family: 'JetBrains Mono', monospace;
   }
 
-  .alert-message {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.05rem; font-weight: 700;
-    color: var(--text); line-height: 1.5;
-  }
-  .review-message {
+  :global(.review-message) {
     font-size: 0.92rem; color: #b0b0c0;
     line-height: 1.75; white-space: pre-wrap;
   }
 
-  /* ── Chart Image ──────────────────────────────────────────────── */
-  .chart-img {
+  /* ── Chart Image (dynamically injected — must be :global) ───────── */
+  :global(.chart-img) {
     width: 100%;
+    max-width: 100%;
     border-radius: 8px;
     margin-top: 0.75rem;
     border: 1px solid rgba(153,139,255,0.2);
     display: block;
+    box-sizing: border-box;
   }
 
   /* ── Skeleton ─────────────────────────────────────────────────── */
