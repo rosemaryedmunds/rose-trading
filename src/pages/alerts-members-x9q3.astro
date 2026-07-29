@@ -10,17 +10,13 @@ import { Icon } from 'astro-icon/components';
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 </Fragment>
 
-  <!-- Auth checking -->
   <div id="auth-checking" class="auth-screen">
     <div class="auth-spinner"></div>
     <p>Verifying your membership...</p>
   </div>
 
-  <!-- Auth failed -->
   <div id="auth-failed" class="auth-screen" style="display:none;">
-    <div class="auth-icon">
-      <Icon name="lucide:lock" />
-    </div>
+    <div class="auth-icon"><Icon name="lucide:lock" /></div>
     <h2>Access Required</h2>
     <p>You need an active Rose.Trading subscription to view this page.</p>
     <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" class="auth-btn">Subscribe for $39.99/mo →</a>
@@ -28,7 +24,6 @@ import { Icon } from 'astro-icon/components';
     <a href="/.netlify/functions/discord-login" class="auth-link">Adex Trades member? Sign in with Discord</a>
   </div>
 
-  <!-- Main content -->
   <section class="alerts-page" id="main-content" style="display:none;">
 
     <div class="page-header">
@@ -65,9 +60,9 @@ import { Icon } from 'astro-icon/components';
         Weekly Reviews
       </div>
       <p class="yt-desc">Catch up on every weekly market review — breakdowns, setups, and lessons from the week.</p>
-      <a href="https://www.youtube.com/watch?v=IbgRemAKWdk&list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e" target="_blank" rel="noopener" class="yt-btn">
+      <a href="https://www.youtube.com/playlist?list=PL1P32hXnOI60kbueNSZJtXXCi3LK5r_6e" target="_blank" rel="noopener" class="yt-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-2.75C14.78 1.5 12 1.5 12 1.5s-2.78 0-3.82 2.44A4.83 4.83 0 0 1 4.41 6.69C2 7.73 2 10 2 12s0 4.27 2.41 5.31a4.83 4.83 0 0 1 3.77 2.75C9.22 22.5 12 22.5 12 22.5s2.78 0 3.82-2.44a4.83 4.83 0 0 1 3.77-2.75C22 16.27 22 14 22 12s0-4.27-2.41-5.31zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
-        Watch on YouTube
+        Watch Full Playlist on YouTube
       </a>
     </div>
 
@@ -98,6 +93,17 @@ import { Icon } from 'astro-icon/components';
 <script is:inline>
   let allItems  = [];
   let curFilter = 'all';
+
+  function resolveChartUrl(url) {
+    if (!url) return null;
+    const tvMatch = url.match(/tradingview\.com\/x\/([A-Za-z0-9]+)\/?$/);
+    if (tvMatch) {
+      const id = tvMatch[1];
+      const prefix = id.charAt(0).toLowerCase();
+      return `https://s3.tradingview.com/snapshots/${prefix}/${id}.png`;
+    }
+    return url;
+  }
 
   async function checkAuth() {
     try {
@@ -142,39 +148,52 @@ import { Icon } from 'astro-icon/components';
     empty.style.display = 'none';
 
     feed.innerHTML = items.map(item => {
-      const isAlert = item.type === 'alert';
+      const isAlert  = item.type === 'alert';
+      const chartSrc = resolveChartUrl(item.chartUrl);
       const time = new Date(item.timestamp).toLocaleString('en-US', {
         timeZone: 'America/Chicago',
         weekday: 'short', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit'
       }) + ' CT';
 
+      const chartHtml = chartSrc
+        ? `<a href="${chartSrc}" target="_blank" rel="noopener"
+             style="display:block;margin-top:0.75rem;border-radius:8px;overflow:hidden;border:1px solid rgba(153,139,255,0.2);line-height:0;">
+             <img src="${chartSrc}" alt="Chart" loading="lazy"
+               style="display:block;width:100%;height:240px;object-fit:cover;object-position:top center;max-width:100%;">
+           </a>`
+        : '';
+
       if (isAlert) {
-        const isCall = item.message.includes('CALL');
-        const isPut  = item.message.includes('PUT');
-        const accent = isCall ? '#3DDC84' : isPut ? '#FF5C5C' : '#998BFF';
+        const isCall   = item.message.includes('CALL');
+        const isPut    = item.message.includes('PUT');
+        const isSwing  = item.reviewType === 'SWING';
+        const accent   = isCall ? '#3DDC84' : isPut ? '#FF5C5C' : '#998BFF';
+        const tagLabel = isSwing
+          ? ('SWING' + (item.ticker ? ' · ' + item.ticker : ''))
+          : 'ALERT';
         return `
-          <div class="feed-card" style="border-left-color: ${accent};">
-            <div class="card-header">
-              <span class="card-tag" style="color:${accent}; background:${accent}22; border-color:${accent}44;">ALERT</span>
-              <span class="card-time">${time}</span>
+          <div style="background:#1C1E2D;border:1px solid rgba(153,139,255,0.15);border-left:4px solid ${accent};border-radius:14px;padding:1.25rem 1.5rem;overflow:hidden;box-sizing:border-box;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+              <span style="font-size:0.65rem;letter-spacing:0.15em;font-family:'JetBrains Mono',monospace;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;color:${accent};background:${accent}22;border:1px solid ${accent}44;">${tagLabel}</span>
+              <span style="font-size:0.7rem;color:#555;font-family:'JetBrains Mono',monospace;">${time}</span>
             </div>
             <div style="font-family:Syne,sans-serif;font-size:1.05rem;font-weight:700;color:#E0E0E0;line-height:1.5;">${item.message}</div>
-            ${item.chartUrl ? `<img src="${item.chartUrl}" alt="Chart" class="chart-img">` : ''}
+            ${chartHtml}
           </div>`;
       }
 
       const reviewType = item.reviewType || 'NOTE';
-      const label = reviewType === 'PRE-MARKET' ? 'PRE-MARKET' :
+      const label = reviewType === 'PRE-MARKET'  ? 'PRE-MARKET'  :
                     reviewType === 'POST-MARKET' ? 'POST-MARKET' : reviewType;
       return `
-        <div class="feed-card" style="border-left-color: #998BFF;">
-          <div class="card-header">
-            <span class="card-tag" style="color:#998BFF; background:rgba(153,139,255,0.1); border-color:rgba(153,139,255,0.25);">${label}</span>
-            <span class="card-time">${time}</span>
+        <div style="background:#1C1E2D;border:1px solid rgba(153,139,255,0.15);border-left:4px solid #998BFF;border-radius:14px;padding:1.25rem 1.5rem;overflow:hidden;box-sizing:border-box;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <span style="font-size:0.65rem;letter-spacing:0.15em;font-family:'JetBrains Mono',monospace;font-weight:700;padding:0.25rem 0.65rem;border-radius:6px;color:#998BFF;background:rgba(153,139,255,0.1);border:1px solid rgba(153,139,255,0.25);">${label}</span>
+            <span style="font-size:0.7rem;color:#555;font-family:'JetBrains Mono',monospace;">${time}</span>
           </div>
-          <div class="review-message">${item.message}</div>
-          ${item.chartUrl ? `<img src="${item.chartUrl}" alt="Chart" class="chart-img">` : ''}
+          <div style="font-size:0.92rem;color:#b0b0c0;line-height:1.75;white-space:pre-wrap;">${item.message}</div>
+          ${chartHtml}
         </div>`;
     }).join('');
   }
@@ -207,7 +226,10 @@ import { Icon } from 'astro-icon/components';
             window.OneSignal.User.addTag('subscriber', 'true');
           }
         })
-        .catch(() => { hint.textContent = 'Notifications may be blocked. Check your browser settings.'; hint.style.color = '#FF5C5C'; });
+        .catch(() => {
+          hint.textContent = 'Notifications may be blocked. Check your browser settings.';
+          hint.style.color = '#FF5C5C';
+        });
     } else {
       hint.textContent = 'Still loading... please wait a moment and try again.';
     }
@@ -231,18 +253,6 @@ import { Icon } from 'astro-icon/components';
 
   :global(body) { background: var(--bg); color: var(--text); }
 
-  :global(.page-title) {
-    font-family: 'Syne', sans-serif !important;
-    font-size: 3rem !important;
-    font-weight: 800 !important;
-    background: linear-gradient(135deg, #998BFF, #5F5CFF) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    color: transparent !important;
-    margin-bottom: 0.75rem !important;
-  }
-
   :global(.alert-message) {
     font-family: 'Syne', sans-serif !important;
     font-size: 1.05rem !important;
@@ -252,25 +262,17 @@ import { Icon } from 'astro-icon/components';
     margin-bottom: 0 !important;
   }
 
-  /* ── Auth ─────────────────────────────────────────────────────── */
   .auth-screen {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; min-height: 60vh; text-align: center;
     gap: 1rem; padding: 2rem; color: var(--muted);
   }
   .disclaimer {
-    font-size: 0.78rem;
-    color: var(--muted);
-    max-width: 560px;
-    margin: 0 auto 1.5rem;
-    line-height: 1.6;
-    text-align: center;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.02);
+    font-size: 0.78rem; color: var(--muted); max-width: 560px;
+    margin: 0 auto 1.5rem; line-height: 1.6; text-align: center;
+    padding: 0.75rem 1rem; border: 1px solid var(--border);
+    border-radius: 8px; background: rgba(255,255,255,0.02);
   }
-
   .auth-spinner {
     width: 36px; height: 36px; border: 3px solid var(--border);
     border-top-color: var(--purple); border-radius: 50%;
@@ -288,35 +290,10 @@ import { Icon } from 'astro-icon/components';
   .auth-link { color: var(--purple); font-size: 0.82rem; text-decoration: none; }
   .auth-link:hover { text-decoration: underline; }
 
-  /* ── Page ─────────────────────────────────────────────────────── */
   .alerts-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
   .page-header  { text-align: center; margin-bottom: 2.5rem; }
 
-  .page-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 3rem; font-weight: 800;
-    background: linear-gradient(135deg, #998BFF, #5F5CFF);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.75rem;
-  }
-
-  .member-badge {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    background: rgba(61,220,132,0.1); border: 1px solid rgba(61,220,132,0.25);
-    color: var(--green); font-size: 0.75rem;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.1em; padding: 0.3rem 0.85rem;
-    border-radius: 100px; margin-bottom: 1rem;
-  }
-  .member-badge [data-icon] { width: 13px; height: 13px; stroke: var(--green); }
-
-  .page-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
-
-  /* ── Enable Button ────────────────────────────────────────────── */
   .alert-cta { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
-
   .enable-btn {
     display: inline-flex; align-items: center; gap: 0.6rem;
     background: #5F5CFF; color: #fff; border: none;
@@ -331,7 +308,6 @@ import { Icon } from 'astro-icon/components';
   .enable-btn:active { transform: scale(0.97); }
   .notif-hint { font-size: 0.82rem; min-height: 1.2em; margin: 0; }
 
-  /* ── PWA Card ─────────────────────────────────────────────────── */
   .pwa-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 14px; padding: 1.5rem;
@@ -401,57 +377,8 @@ import { Icon } from 'astro-icon/components';
   .filter-btn:hover  { border-color: var(--purple); color: var(--purple); }
   .filter-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
 
-  /* ── Feed Cards ───────────────────────────────────────────────── */
   .feed { display: flex; flex-direction: column; gap: 1rem; }
 
-  .feed-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 4px solid transparent;
-    border-radius: 14px;
-    padding: 1.25rem 1.5rem;
-    animation: fadeIn 0.3s ease;
-    transition: box-shadow 0.2s, border-color 0.2s;
-  }
-  .feed-card:hover { box-shadow: 0 4px 24px rgba(153,139,255,0.1); }
-
-  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-
-  .card-header {
-    display: flex; justify-content: space-between;
-    align-items: center; margin-bottom: 0.75rem;
-  }
-  .card-tag {
-    font-size: 0.65rem; letter-spacing: 0.15em;
-    font-family: 'JetBrains Mono', monospace; font-weight: 700;
-    padding: 0.25rem 0.65rem; border-radius: 6px;
-    border: 1px solid transparent;
-  }
-  .card-time {
-    font-size: 0.7rem; color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .alert-message {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.05rem; font-weight: 700;
-    color: var(--text); line-height: 1.5;
-  }
-  .review-message {
-    font-size: 0.92rem; color: #b0b0c0;
-    line-height: 1.75; white-space: pre-wrap;
-  }
-
-  /* ── Chart Image ──────────────────────────────────────────────── */
-  .chart-img {
-    width: 100%;
-    border-radius: 8px;
-    margin-top: 0.75rem;
-    border: 1px solid rgba(153,139,255,0.2);
-    display: block;
-  }
-
-  /* ── Skeleton ─────────────────────────────────────────────────── */
   .feed-skeleton { display: flex; flex-direction: column; gap: 1rem; }
   .skeleton-card {
     height: 100px; border-radius: 14px; border: 1px solid var(--border);
@@ -470,7 +397,7 @@ import { Icon } from 'astro-icon/components';
   }
 
   @media (max-width: 600px) {
-    .page-title { font-size: 2.2rem; }
-    .pwa-card   { padding: 1rem; }
+    .alerts-page { padding: 2rem 1rem 4rem; }
+    .pwa-card { padding: 1rem; }
   }
 </style>

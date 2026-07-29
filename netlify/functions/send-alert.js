@@ -3,7 +3,10 @@ export async function handler(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const { title, message, notes, imageUrl, ticker, swingOnly } = JSON.parse(event.body);
+  const { title, message, notes, imageUrl, chartUrl, ticker, swingOnly } = JSON.parse(event.body);
+
+  // Support both chartUrl (new) and imageUrl (legacy) field names
+  const resolvedChartUrl = chartUrl || imageUrl || null;
 
   // ── OneSignal push ──────────────────────────────────────────────────────
   try {
@@ -14,11 +17,11 @@ export async function handler(event) {
         'Authorization': `Basic ${process.env.ONESIGNAL_REST_API_KEY}`,
       },
       body: JSON.stringify({
-        app_id:            process.env.ONESIGNAL_APP_ID,
+        app_id: process.env.ONESIGNAL_APP_ID,
         included_segments: ['All'],
-        headings:          { en: title },
-        contents:          { en: message },
-        url:               'https://rose.trading/alerts-members-x9q3',
+        headings: { en: title },
+        contents: { en: message },
+        url: 'https://rose.trading/alerts-members-x9q3',
       }),
     });
     if (!pushRes.ok) console.error('OneSignal error:', await pushRes.text());
@@ -36,9 +39,10 @@ export async function handler(event) {
   const isNote       = title.includes('Note from Rose');
 
   let color, emoji, footer;
+
   if (isSwing) {
-    color = isCall ? 0x3DDC84 : 0xFF5C5C;
-    emoji = isCall ? '🟢' : '🔴';
+    color  = isCall ? 0x3DDC84 : 0xFF5C5C;
+    emoji  = isCall ? '🟢' : '🔴';
     footer = ticker ? `Swing Alert — ${ticker}` : 'Swing Alert';
   } else if (isAlert && isCall) {
     color = 0x3DDC84; emoji = '🟢'; footer = 'SPX Options Alert';
@@ -68,25 +72,25 @@ export async function handler(event) {
     description += `\n\n📌 ${notes.trim()}`;
   }
 
-  const avatarUrl = 'https://rose.trading/rose-no-border.png';
-
+  const avatarUrl  = 'https://rose.trading/rose-no-border.png';
   const embedTitle = isSwing && ticker
     ? `${emoji} Swing Alert — ${ticker}`
     : `${emoji} ${title}`;
 
   const embed = {
-    title:       embedTitle,
+    title: embedTitle,
     description: (isAlert || isSwing) ? `\`\`\`${description}\`\`\`` : description,
     color,
     footer: {
-      text:     `${footer} | ${ctTime} CT`,
+      text: `${footer} | ${ctTime} CT`,
       icon_url: avatarUrl,
     },
     timestamp: new Date().toISOString(),
   };
 
-  if (imageUrl && imageUrl.trim()) {
-    embed.image = { url: imageUrl.trim() };
+  // Attach chart image to Discord embed if provided
+  if (resolvedChartUrl && resolvedChartUrl.trim()) {
+    embed.image = { url: resolvedChartUrl.trim() };
   }
 
   // ── Primary Discord webhook (not used for swing alerts) ────────────────
@@ -94,12 +98,12 @@ export async function handler(event) {
   if (discordWebhookUrl && !swingOnly) {
     try {
       const res = await fetch(discordWebhookUrl, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username:   'Rose Alerts 🌹',
           avatar_url: avatarUrl,
-          embeds:     [embed],
+          embeds: [embed],
         }),
       });
       if (!res.ok) console.error('Discord primary error:', await res.text());
@@ -113,12 +117,12 @@ export async function handler(event) {
   if (swingWebhookUrl && swingOnly) {
     try {
       const res = await fetch(swingWebhookUrl, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username:   'Rose Alerts 🌹',
           avatar_url: avatarUrl,
-          embeds:     [embed],
+          embeds: [embed],
         }),
       });
       if (!res.ok) console.error('Discord swing error:', await res.text());
@@ -132,13 +136,13 @@ export async function handler(event) {
   if (adexWebhookUrl && !swingOnly) {
     try {
       const res = await fetch(adexWebhookUrl, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content:    '<@&1316500131633299467>',
           username:   'Rose Alerts 🌹',
           avatar_url: avatarUrl,
-          embeds:     [embed],
+          embeds: [embed],
         }),
       });
       if (!res.ok) console.error('Discord ADEX error:', await res.text());
@@ -150,19 +154,21 @@ export async function handler(event) {
   // ── Save to feed (members page) ────────────────────────────────────────
   try {
     const feedItem = {
-      type:      title === 'SPX Alert' ? 'alert' : (title.toLowerCase().includes('review') ? 'review' : 'note'),
+      type:       (title === 'SPX Alert' || title === 'Swing Alert') ? 'alert' : (title.toLowerCase().includes('review') ? 'review' : 'note'),
+      reviewType: isPreMarket ? 'PRE-MARKET' : isPostMarket ? 'POST-MARKET' : isNote ? 'NOTE' : isSwing ? 'SWING' : null,
       title,
       message,
-      notes:     notes  || null,
-      imageUrl:  imageUrl || null,
-      timestamp: new Date().toISOString(),
+      notes:      notes    || null,
+      ticker:     ticker   || null,
+      chartUrl:   resolvedChartUrl,
+      timestamp:  new Date().toISOString(),
     };
 
     const siteUrl = process.env.URL || 'https://rose.trading';
     await fetch(`${siteUrl}/.netlify/functions/save-feed`, {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(feedItem),
+      body: JSON.stringify(feedItem),
     });
   } catch (err) {
     console.error('Feed save error:', err);
