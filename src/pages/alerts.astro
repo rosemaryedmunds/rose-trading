@@ -22,12 +22,29 @@ import { Icon } from 'astro-icon/components';
         <span class="lock-icon"><Icon name="lucide:lock" /></span>
         <div>
           <div class="lock-title">Members Only</div>
-          <div class="lock-desc">Get live SPX alerts straight to your phone for <strong>$39.99/mo</strong></div>
+          <div class="lock-desc">Get live SPX alerts straight to your phone for <strong>Adex Members/mo</strong></div>
         </div>
       </div>
       <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" target="_blank" class="unlock-btn">
         Unlock Alerts →
       </a>
+    </div>
+
+    <!-- Adex Trades cross-promo -->
+    <div class="adex-banner">
+      <div class="adex-banner-left">
+        <span class="lock-icon"><Icon name="lucide:zap" /></span>
+        <div>
+          <div class="lock-title">Adex Trades Member?</div>
+          <div class="lock-desc">Diamond members get access to these alerts too — no extra charge.</div>
+        </div>
+      </div>
+      <div class="adex-banner-actions">
+        <a href="/.netlify/functions/discord-login" class="adex-signin-btn">Sign in with Discord</a>
+        <a href="https://whop.com/checkout/plan_0S7UBXkzD2JTf?a=user1ec11086429" target="_blank" class="unlock-btn">
+          Join Adex Trades →
+        </a>
+      </div>
     </div>
 
     <!-- Blurred Feed Preview -->
@@ -37,7 +54,6 @@ import { Icon } from 'astro-icon/components';
           <div class="overlay-icon"><Icon name="lucide:radio-tower" /></div>
           <h2 class="overlay-title">Subscribe to See Live Alerts</h2>
           <p class="overlay-sub">Real-time SPX entries, exits, and daily market reviews — delivered to your phone the moment Rose trades.</p>
-          <div class="price-badge">$39.99 / month</div>
           <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" target="_blank" class="overlay-btn">
             <Icon name="lucide:unlock" /> Unlock Full Access
           </a>
@@ -184,6 +200,36 @@ import { Icon } from 'astro-icon/components';
   }
   .unlock-btn:hover { opacity: 0.85; }
 
+  /* Adex Trades cross-promo */
+  .adex-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(153,139,255,0.06);
+    border: 1px solid rgba(153,139,255,0.25);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .adex-banner-left { display: flex; align-items: center; gap: 0.85rem; }
+  .adex-banner-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .adex-signin-btn {
+    background: transparent;
+    border: 1px solid rgba(153,139,255,0.4);
+    color: var(--purple);
+    text-decoration: none;
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    font-family: 'Syne', sans-serif;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .adex-signin-btn:hover { background: rgba(153,139,255,0.1); border-color: var(--purple); }
+
   /* Feed wrap + blur */
   .feed-wrap { position: relative; margin-bottom: 3rem; }
 
@@ -233,19 +279,6 @@ import { Icon } from 'astro-icon/components';
     color: var(--muted);
     font-size: 0.9rem;
     line-height: 1.6;
-    margin-bottom: 1.25rem;
-  }
-
-  .price-badge {
-    display: inline-block;
-    background: rgba(153,139,255,0.1);
-    border: 1px solid rgba(153,139,255,0.3);
-    color: var(--purple);
-    font-family: 'JetBrains Mono', monospace !important;
-    font-weight: 700;
-    font-size: 1.1rem;
-    padding: 0.4rem 1rem;
-    border-radius: 8px;
     margin-bottom: 1.25rem;
   }
 
@@ -345,6 +378,7 @@ import { Icon } from 'astro-icon/components';
   @media (max-width: 600px) {
     .page-title   { font-size: 2rem; }
     .lock-banner  { flex-direction: column; align-items: flex-start; }
+    .adex-banner  { flex-direction: column; align-items: flex-start; }
     .overlay-card { margin-top: 5rem; }
   }
 </style>
