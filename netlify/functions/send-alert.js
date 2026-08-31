@@ -93,9 +93,9 @@ export async function handler(event) {
     embed.image = { url: resolvedChartUrl.trim() };
   }
 
-  // ── Primary Discord webhook (not used for swing alerts) ────────────────
+  // ── Primary Discord webhook ────────────────────────────────────────────
   const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
-  if (discordWebhookUrl && !swingOnly) {
+  if (discordWebhookUrl) {
     try {
       const res = await fetch(discordWebhookUrl, {
         method: 'POST',
@@ -114,7 +114,7 @@ export async function handler(event) {
 
   // ── Swing Discord webhook ───────────────────────────────────────────────
   const swingWebhookUrl = process.env.DISCORD_SWING_WEBHOOK_URL;
-  if (swingWebhookUrl && swingOnly) {
+  if (swingWebhookUrl) {
     try {
       const res = await fetch(swingWebhookUrl, {
         method: 'POST',
@@ -131,9 +131,9 @@ export async function handler(event) {
     }
   }
 
-  // ── ADEX Discord webhook (SPX alerts only, not swing) ──────────────────
+  // ── ADEX Discord webhook ───────────────────────────────────────────────
   const adexWebhookUrl = process.env.DISCORD_ADEX_WEBHOOK_URL;
-  if (adexWebhookUrl && !swingOnly) {
+  if (adexWebhookUrl) {
     try {
       const res = await fetch(adexWebhookUrl, {
         method: 'POST',
@@ -148,6 +148,26 @@ export async function handler(event) {
       if (!res.ok) console.error('Discord ADEX error:', await res.text());
     } catch (err) {
       console.error('Discord ADEX exception:', err);
+    }
+  }
+
+  // ── Mono Discord webhook ───────────────────────────────────────────────
+  const monoWebhookUrl = process.env.DISCORD_MONO_WEBHOOK_URL;
+  if (monoWebhookUrl) {
+    try {
+      const res = await fetch(monoWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content:    '@everyone',
+          username:   'Rose Alerts 🌹',
+          avatar_url: avatarUrl,
+          embeds: [embed],
+        }),
+      });
+      if (!res.ok) console.error('Discord Mono error:', await res.text());
+    } catch (err) {
+      console.error('Discord Mono exception:', err);
     }
   }
 
