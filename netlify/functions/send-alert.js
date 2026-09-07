@@ -171,6 +171,26 @@ export async function handler(event) {
     }
   }
 
+  // ── OGs Discord webhook ───────────────────────────────────────────────
+  const ogsWebhookUrl = process.env.DISCORD_OGS_WEBHOOK_URL;
+  if (ogsWebhookUrl) {
+    try {
+      const res = await fetch(ogsWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content:    '<@&1326654398109057064>',
+          username:   'Rose Alerts 🌹',
+          avatar_url: avatarUrl,
+          embeds: [embed],
+        }),
+      });
+      if (!res.ok) console.error('Discord OGs error:', await res.text());
+    } catch (err) {
+      console.error('Discord OGs exception:', err);
+    }
+  }
+
   // ── Save to feed (members page) ────────────────────────────────────────
   try {
     const feedItem = {
