@@ -22,7 +22,7 @@ exports.handler = async (event) => {
 
   const redirect = (url) => ({ statusCode: 302, headers: { Location: url }, body: '' });
 
-  if (!token) return redirect(siteUrl + '/alerts?error=no_code');
+  if (!token) return redirect(siteUrl + '/alerts-members-x9q3?invite=invalid');
 
   const invites = (process.env.GUEST_INVITES || '')
     .split(',')
@@ -38,7 +38,7 @@ exports.handler = async (event) => {
 
   if (!match) {
     console.log('Guest invite rejected');
-    return redirect(siteUrl + '/alerts?error=no_membership');
+    return redirect(siteUrl + '/alerts-members-x9q3?invite=invalid');
   }
 
   console.log('Guest access granted for:', match.email);

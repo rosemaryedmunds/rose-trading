@@ -26,6 +26,27 @@ import { Icon } from 'astro-icon/components';
     <a href="https://whop.com/checkout/plan_HE6PHzR97QEX3" class="auth-btn">Subscribe →</a>
     <a href="/.netlify/functions/whop-login" class="auth-link">Already subscribed? Sign in</a>
     <a href="/.netlify/functions/discord-login" class="auth-link">Adex Trades member? Sign in with Discord</a>
+
+    <!-- Invite code sign-in (works inside the iPhone home-screen app) -->
+    <div class="invite-box">
+      <button type="button" class="invite-toggle" id="invite-toggle" onclick="toggleInvite()">Have an invite code?</button>
+      <form id="invite-form" class="invite-form" onsubmit="return submitInvite(event)" style="display:none;">
+        <input
+          id="invite-code"
+          class="invite-input"
+          type="text"
+          inputmode="text"
+          autocomplete="one-time-code"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          placeholder="Paste your invite code"
+          aria-label="Invite code"
+        />
+        <button type="submit" class="invite-submit">Sign in</button>
+      </form>
+      <p class="invite-msg" id="invite-msg"></p>
+    </div>
   </div>
 
   <!-- Main content -->
@@ -209,6 +230,48 @@ import { Icon } from 'astro-icon/components';
     }
   }
 
+  // ── Invite code sign-in ──────────────────────────────────────────
+  function toggleInvite(forceOpen) {
+    const form   = document.getElementById('invite-form');
+    const toggle = document.getElementById('invite-toggle');
+    const open   = forceOpen === true || form.style.display === 'none';
+    form.style.display   = open ? 'flex' : 'none';
+    toggle.style.display = open ? 'none' : 'inline';
+    if (open) document.getElementById('invite-code').focus();
+  }
+
+  function submitInvite(e) {
+    e.preventDefault();
+    const raw  = document.getElementById('invite-code').value.trim();
+    const msg  = document.getElementById('invite-msg');
+    // Accept either the bare code or the full invite link pasted in
+    let code = raw;
+    try {
+      const fromUrl = new URL(raw).searchParams.get('t');
+      if (fromUrl) code = fromUrl;
+    } catch {}
+    if (!code) {
+      msg.textContent = 'Please enter your invite code.';
+      msg.style.color = '#FF5C5C';
+      return false;
+    }
+    msg.textContent = 'Signing you in...';
+    msg.style.color = '#998BFF';
+    window.location.href = '/.netlify/functions/guest-login?t=' + encodeURIComponent(code);
+    return false;
+  }
+
+  (function showInviteError() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('invite') === 'invalid') {
+      toggleInvite(true);
+      const msg = document.getElementById('invite-msg');
+      msg.textContent = "That invite code didn't work. Check it and try again.";
+      msg.style.color = '#FF5C5C';
+      history.replaceState(null, '', window.location.pathname);
+    }
+  })();
+
   checkAuth();
 </script>
 
@@ -283,6 +346,35 @@ import { Icon } from 'astro-icon/components';
   }
   .auth-link { color: var(--purple); font-size: 0.82rem; text-decoration: none; }
   .auth-link:hover { text-decoration: underline; }
+
+  /* ── Invite code ─────────────────────────────────────────────── */
+  .invite-box {
+    margin-top: 0.75rem; padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    width: 100%; max-width: 340px;
+    display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+  }
+  .invite-toggle {
+    background: none; border: none; cursor: pointer; padding: 0;
+    color: var(--purple); font-size: 0.82rem; font-family: inherit;
+  }
+  .invite-toggle:hover { text-decoration: underline; }
+  .invite-form { display: flex; gap: 0.5rem; width: 100%; }
+  .invite-input {
+    flex: 1; min-width: 0;
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.65rem 0.8rem;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px; /* 16px stops iOS zoom */
+  }
+  .invite-input:focus { outline: none; border-color: var(--purple); }
+  .invite-submit {
+    background: var(--blue); color: #fff; border: none; cursor: pointer;
+    padding: 0.65rem 1rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem;
+  }
+  .invite-submit:active { transform: scale(0.97); }
+  .invite-msg { font-size: 0.8rem; min-height: 1.1em; margin: 0; }
 
   /* ── Page ─────────────────────────────────────────────────────── */
   .alerts-page { max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
