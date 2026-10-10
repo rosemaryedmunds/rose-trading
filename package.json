@@ -9,6 +9,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
     "@capacitor/android": "^8.3.1",
     "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
@@ -16,13 +17,14 @@
     "@google/genai": "^1.50.1",
     "@google/generative-ai": "^0.24.1",
     "@iconify-json/lucide": "^1.2.102",
-    "@netlify/blobs": "^10.7.4",
+    "@netlify/blobs": "^10.7.13",
     "@revenuecat/purchases-capacitor": "^13.0.0",
     "astro": "^4.16.18",
     "astro-icon": "^1.1.5",
     "chart.js": "^4.5.1",
     "lucide-astro": "^0.556.0",
-    "onesignal-cordova-plugin": "^5.3.6"
+    "onesignal-cordova-plugin": "^5.3.6",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "playwright": "^1.60.0"

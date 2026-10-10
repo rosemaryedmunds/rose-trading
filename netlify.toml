@@ -2,13 +2,16 @@
   command = "npm run build"
   publish = "dist/"
 
+[functions]
+  node_bundler = "esbuild"
+
 # Redirect /feed.json to the serverless function
 [[redirects]]
   from   = "/feed.json"
   to     = "/.netlify/functions/feed-json"
   status = 200
 
-# Morning brief scheduler — 8:00 AM CT (UTC-5/6), Mon–Fri
+# Morning brief scheduler — 8:00 AM CT (UTC-5/6), Mon-Fri
 [functions."discord-morning-brief"]
   schedule = "0 13 * * 1-5"
 
