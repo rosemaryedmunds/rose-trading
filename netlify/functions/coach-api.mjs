@@ -1,10 +1,20 @@
 // The chat endpoint. Called by the /coach page (typed messages, buttons) and by the
 // service worker when a notification button is tapped.
-import { etNow, loadDay, saveDay, askCoach, authorized, replyActions, BUTTONS, MAX_TRADES } from "../lib/coach.mjs";
+import { etNow, loadDay, saveDay, askCoach, authorized, replyActions, pushToAll, actions, BUTTONS, MAX_TRADES } from "../lib/coach.mjs";
 
 export default async (req) => {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   if (!(await authorized(req, body))) return new Response("Forbidden", { status: 403 });
+
+  // Test notification: goes to every signed-up device, with real buttons.
+  if (body.test) {
+    const result = await pushToAll({
+      title: "Coach",
+      body: "Test notification. Tap a button to check that replies come back.",
+      actions: actions(["breathed", "tilted"]),
+    });
+    return Response.json(result);
+  }
 
   const { date } = etNow();
   const day = await loadDay(date);

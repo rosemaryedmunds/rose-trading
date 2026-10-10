@@ -106,6 +106,9 @@
       <p class="notice" id="notice" hidden>
         Notifications are off. <button id="enable">Turn on notifications</button>
       </p>
+      <p class="notice" id="testRow" hidden>
+        <button id="test">Send test notification</button> <span id="testResult" role="status"></span>
+      </p>
       <button class="tilt" data-button="tilted">I'm feeling tilted</button>
       <div class="row">
         <button class="quick" data-button="logged">Logged a trade</button>
@@ -203,7 +206,9 @@
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) { $("notice").hidden = true; return; }
       const reg = await navigator.serviceWorker.register("/coach-sw.js", { scope: "/coach" });
       const sub = await reg.pushManager.getSubscription();
-      $("notice").hidden = !!sub && Notification.permission === "granted";
+      const on = !!sub && Notification.permission === "granted";
+      $("notice").hidden = on;
+      $("testRow").hidden = !on;
     }
 
     async function enablePush() {
@@ -219,6 +224,7 @@
       });
       if (!res.ok) { alert("Couldn't save this device. Unlock again and retry."); return; }
       $("notice").hidden = true;
+      $("testRow").hidden = false;
     }
 
     // --- Wire up ---
@@ -244,6 +250,21 @@
     });
 
     $("enable").addEventListener("click", enablePush);
+
+    $("test").addEventListener("click", async () => {
+      $("test").disabled = true;
+      $("testResult").textContent = "Sending...";
+      try {
+        const r = await api("POST", { test: true });
+        $("testResult").textContent = r.sent
+          ? `Sent to ${r.sent} device${r.sent > 1 ? "s" : ""}. It should appear in a few seconds.`
+          : "No devices are signed up. Turn on notifications on this device first.";
+      } catch (err) {
+        if (err.message !== "forbidden") $("testResult").textContent = "Couldn't send. Check the coach-api function log in Netlify.";
+      } finally {
+        $("test").disabled = false;
+      }
+    });
 
     $("unlock").addEventListener("click", () => {
       const v = $("pass").value.trim();
