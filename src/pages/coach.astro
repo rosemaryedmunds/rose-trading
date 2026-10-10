@@ -256,9 +256,11 @@
       $("testResult").textContent = "Sending...";
       try {
         const r = await api("POST", { test: true });
-        $("testResult").textContent = r.sent
-          ? `Sent to ${r.sent} device${r.sent > 1 ? "s" : ""}. It should appear in a few seconds.`
-          : "No devices are signed up. Turn on notifications on this device first.";
+        const plural = (n) => `${n} device${n === 1 ? "" : "s"}`;
+        $("testResult").textContent =
+          r.sent || r.failed
+            ? `Sent to ${plural(r.sent)}.` + (r.failed ? ` ${plural(r.failed)} didn't respond.` : " It should appear in a few seconds.")
+            : "No devices are signed up. Turn on notifications on this device first.";
       } catch (err) {
         if (err.message !== "forbidden") $("testResult").textContent = "Couldn't send. Check the coach-api function log in Netlify.";
       } finally {
