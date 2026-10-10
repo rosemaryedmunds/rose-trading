@@ -32,7 +32,7 @@ export default async (req) => {
     return new Response("Nothing to send", { status: 400 });
   }
 
-  const reply = await askCoach(day, modelText, displayText, searchHint);
+  const reply = await askCoach(day, modelText, displayText, searchHint, { chat: !body.button });
   await saveDay(date, day);
   return Response.json({ reply, trades: day.trades, max: MAX_TRADES, actions: replyActions(day, body.button) });
 };
