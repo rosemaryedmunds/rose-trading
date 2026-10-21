@@ -38,6 +38,10 @@ export async function handler(event) {
   const isPostMarket = title === 'Post-Market Review';
   const isNote       = title.includes('Note from Rose');
 
+  // Only swing alerts (or anything explicitly flagged swingOnly, e.g. a
+  // follow-up note on a swing trade) go to the swing channel.
+  const sendToSwing  = isSwing || swingOnly === true;
+
   let color, emoji, footer;
 
   if (isSwing) {
@@ -112,9 +116,9 @@ export async function handler(event) {
     }
   }
 
-  // ── Swing Discord webhook ───────────────────────────────────────────────
+  // ── Swing Discord webhook (swing trades only) ──────────────────────────
   const swingWebhookUrl = process.env.DISCORD_SWING_WEBHOOK_URL;
-  if (swingWebhookUrl) {
+  if (swingWebhookUrl && sendToSwing) {
     try {
       const res = await fetch(swingWebhookUrl, {
         method: 'POST',
