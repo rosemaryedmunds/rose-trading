@@ -24,6 +24,7 @@
     "chart.js": "^4.5.1",
     "lucide-astro": "^0.556.0",
     "onesignal-cordova-plugin": "^5.3.6",
+    "stripe": "^23.1.0",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
