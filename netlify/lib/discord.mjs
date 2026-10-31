@@ -31,23 +31,23 @@ export async function joinGuild(userId, accessToken) {
   }
 }
 
-export async function addMemberRole(userId) {
+export async function addRole(userId, roleId) {
   const res = await discordBot(
     "PUT",
-    `/guilds/${env("DISCORD_GUILD_ID")}/members/${userId}/roles/${env("DISCORD_MEMBER_ROLE_ID")}`
+    `/guilds/${env("DISCORD_GUILD_ID")}/members/${userId}/roles/${roleId}`
   );
   if (res.status !== 204) throw new Error(`addRole ${res.status}: ${await res.text()}`);
-  console.log(`Role added to ${userId}`);
+  console.log(`Role ${roleId} added to ${userId}`);
 }
 
-export async function removeMemberRole(userId) {
+export async function removeRole(userId, roleId) {
   const res = await discordBot(
     "DELETE",
-    `/guilds/${env("DISCORD_GUILD_ID")}/members/${userId}/roles/${env("DISCORD_MEMBER_ROLE_ID")}`
+    `/guilds/${env("DISCORD_GUILD_ID")}/members/${userId}/roles/${roleId}`
   );
   // 404 = user already left the server, nothing to do
   if (![204, 404].includes(res.status)) throw new Error(`removeRole ${res.status}: ${await res.text()}`);
-  console.log(`Role removed from ${userId}`);
+  console.log(`Role ${roleId} removed from ${userId}`);
 }
 
 export { env };

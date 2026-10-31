@@ -1,16 +1,34 @@
-// Step 3: Stripe tells us when subscriptions start, change, or end.
-// We add/remove the Discord role to match.
+// Stripe tells us when subscriptions start, change tier, or end.
+// We recompute which tier roles the member should have and sync Discord to match.
 import Stripe from "stripe";
-import { addMemberRole, removeMemberRole } from "../lib/discord.mjs";
+import { addRole, removeRole } from "../lib/discord.mjs";
+import { tierForPrice, allRoleIds } from "../lib/tiers.mjs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // past_due keeps access during Stripe's automatic payment retries (grace period)
 const ACCESS_STATUSES = ["active", "trialing", "past_due"];
 
-async function customerStillHasAccess(customerId) {
+/** Roles this customer should have right now, based on ALL their subscriptions. */
+async function rolesForCustomer(customerId) {
   const subs = await stripe.subscriptions.list({ customer: customerId, status: "all", limit: 20 });
-  return subs.data.some((s) => ACCESS_STATUSES.includes(s.status));
+  const roles = new Set();
+  for (const sub of subs.data) {
+    if (!ACCESS_STATUSES.includes(sub.status)) continue;
+    for (const item of sub.items.data) {
+      const tier = tierForPrice(item.price.id);
+      if (tier) roles.add(tier.roleId);
+    }
+  }
+  return roles;
+}
+
+async function syncMember(discordId, customerId) {
+  const keep = await rolesForCustomer(customerId);
+  for (const roleId of allRoleIds()) {
+    if (keep.has(roleId)) await addRole(discordId, roleId);
+    else await removeRole(discordId, roleId);
+  }
 }
 
 export default async (req) => {
@@ -36,21 +54,16 @@ export default async (req) => {
         await stripe.customers.update(s.customer, {
           metadata: { discord_id: s.client_reference_id },
         });
-        await addMemberRole(s.client_reference_id);
+        await syncMember(s.client_reference_id, s.customer);
         break;
       }
 
-      case "customer.subscription.updated":
+      case "customer.subscription.updated": // renewals, failed payments, tier switches
       case "customer.subscription.deleted": {
         const sub = event.data.object;
         const discordId = sub.metadata?.discord_id;
         if (!discordId) break; // not a Discord-linked subscription (e.g. legacy)
-
-        if (ACCESS_STATUSES.includes(sub.status)) {
-          await addMemberRole(discordId);
-        } else if (!(await customerStillHasAccess(sub.customer))) {
-          await removeMemberRole(discordId);
-        }
+        await syncMember(discordId, sub.customer);
         break;
       }
     }

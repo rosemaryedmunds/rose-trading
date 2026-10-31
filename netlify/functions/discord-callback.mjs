@@ -2,6 +2,7 @@
 // server (no role yet), then send them to Stripe Checkout tagged with their Discord ID.
 import Stripe from "stripe";
 import { env, joinGuild } from "../lib/discord.mjs";
+import { TIERS, DEFAULT_TIER } from "../lib/tiers.mjs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -15,6 +16,8 @@ export default async (req, context) => {
     return new Response("Login expired or invalid. Please try again.", { status: 400 });
   }
   context.cookies.delete("discord_oauth_state");
+  const tierKey = TIERS[context.cookies.get("join_tier")] ? context.cookies.get("join_tier") : DEFAULT_TIER;
+  context.cookies.delete("join_tier");
 
   // Exchange code for an access token
   const tokenRes = await fetch("https://discord.com/api/v10/oauth2/token", {
@@ -50,6 +53,7 @@ export default async (req, context) => {
   const customer = existing.data[0];
 
   // Already subscribed? Skip checkout and go to the billing portal instead
+  // (they can upgrade/downgrade tiers there if you enable plan switching)
   if (customer) {
     const subs = await stripe.subscriptions.list({ customer: customer.id, status: "all", limit: 10 });
     if (subs.data.some((s) => ["active", "trialing", "past_due"].includes(s.status))) {
@@ -63,10 +67,10 @@ export default async (req, context) => {
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
-    line_items: [{ price: env("STRIPE_PRICE_ID"), quantity: 1 }],
+    line_items: [{ price: TIERS[tierKey].priceId, quantity: 1 }],
     ...(customer ? { customer: customer.id } : {}),
     client_reference_id: user.id,
-    metadata: { discord_id: user.id, discord_username: user.username },
+    metadata: { discord_id: user.id, discord_username: user.username, tier: tierKey },
     subscription_data: {
       metadata: { discord_id: user.id, discord_username: user.username },
     },
