@@ -4,10 +4,11 @@
 // Env var GUEST_INVITES holds comma-separated "email:token" pairs, e.g.
 //   rc8200@gmail.com:qWNh1eX5wXDe-PykdMN3ee7-qjRXMl9c
 // Invite link: https://rose.trading/.netlify/functions/guest-login?t=<token>
-// Sets the same rose_session cookie as whop-auth / discord-auth, so
+// Sets the same signed rose_session cookie as whop-auth, so
 // verify-session and the members page need no changes.
 
 const { timingSafeEqual } = require('crypto');
+const { createSession, sessionCookie } = require('../lib/session.mjs');
 
 function safeEqual(a, b) {
   const bufA = Buffer.from(String(a));
@@ -43,20 +44,13 @@ exports.handler = async (event) => {
 
   console.log('Guest access granted for:', match.email);
 
-  // Same shape as the Whop/Discord sessions; "guest:" prefix keeps the
-  // id from colliding with Whop or Discord user ids.
-  const sessionToken = Buffer.from(JSON.stringify({
-    userId:    'guest:' + match.email,
-    email:     match.email,
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
-  })).toString('base64url');
+  // "guest:" prefix keeps the id from colliding with Whop user ids.
+  const sessionToken = createSession({ userId: 'guest:' + match.email, email: match.email });
 
   return {
     statusCode: 302,
     multiValueHeaders: {
-      'Set-Cookie': [
-        'rose_session=' + sessionToken + '; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800',
-      ],
+      'Set-Cookie': [sessionCookie(sessionToken)],
       Location: [siteUrl + '/alerts-members-x9q3'],
     },
     body: '',

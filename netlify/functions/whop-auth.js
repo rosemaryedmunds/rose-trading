@@ -1,4 +1,5 @@
 // netlify/functions/whop-auth.js
+var { createSession, sessionCookie } = require('../lib/session.mjs');
 
 exports.handler = async (event) => {
   var params = new URLSearchParams(event.rawQuery || '');
@@ -10,7 +11,7 @@ exports.handler = async (event) => {
     return { statusCode: 302, headers: { Location: url }, body: '' };
   }
 
-  if (!code) return redirect(siteUrl + '/alerts?error=no_code');
+  if (!code) return redirect(siteUrl + '/alerts-members-x9q3?error=no_code');
 
   var cookieHeader = (event.headers && event.headers.cookie) ? event.headers.cookie : '';
   var cookies = {};
@@ -24,7 +25,7 @@ exports.handler = async (event) => {
   var codeVerifier = cookies['pkce_verifier'];
   if (!codeVerifier) {
     console.error('Missing PKCE verifier');
-    return redirect(siteUrl + '/alerts?error=missing_verifier');
+    return redirect(siteUrl + '/alerts-members-x9q3?error=missing_verifier');
   }
 
   try {
@@ -42,7 +43,7 @@ exports.handler = async (event) => {
 
     var tokenData = await tokenRes.json();
     if (!tokenRes.ok || !tokenData.access_token) {
-      return redirect(siteUrl + '/alerts?error=auth_failed');
+      return redirect(siteUrl + '/alerts-members-x9q3?error=auth_failed');
     }
 
     var userRes = await fetch('https://api.whop.com/oauth/userinfo', {
@@ -52,22 +53,18 @@ exports.handler = async (event) => {
     console.log('User sub:', user.sub);
 
     if (!userRes.ok || !user.sub) {
-      return redirect(siteUrl + '/alerts?error=user_failed');
+      return redirect(siteUrl + '/alerts-members-x9q3?error=user_failed');
     }
 
     // Owner bypass
     if (user.sub === process.env.WHOP_OWNER_ID) {
       console.log('Owner access granted');
-      var ownerToken = Buffer.from(JSON.stringify({
-        userId: user.sub,
-        email: user.email || '',
-        expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
-      })).toString('base64');
+      var ownerToken = createSession({ userId: user.sub, email: user.email || '' });
       return {
         statusCode: 302,
         multiValueHeaders: {
           'Set-Cookie': [
-            'rose_session=' + ownerToken + '; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800',
+            sessionCookie(ownerToken),
             'pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0',
             'pkce_state=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0',
           ],
@@ -90,11 +87,14 @@ exports.handler = async (event) => {
         { headers: { Authorization: 'Bearer ' + process.env.WHOP_API_KEY } }
       );
       var memberText = await memberRes.text();
+      if (!memberRes.ok) console.error('Whop memberships API error', memberRes.status, memberText.slice(0, 200));
       if (memberRes.ok && memberText) {
         var memberData = JSON.parse(memberText);
         if (memberData && memberData.data) {
           hasMembership = memberData.data.some(function(m) {
-            return m.user_id === user.sub && validStatuses.indexOf(m.status) !== -1;
+            // Whop returns the member's id as user_id, or as user (string or object)
+            var memberId = m.user_id || (m.user && (typeof m.user === 'string' ? m.user : m.user.id));
+            return memberId === user.sub && validStatuses.indexOf(m.status) !== -1;
           });
           totalPages = memberData.pagination ? memberData.pagination.total_pages : 1;
         }
@@ -105,20 +105,16 @@ exports.handler = async (event) => {
     console.log('Has membership:', hasMembership, 'for user:', user.sub);
 
     if (!hasMembership) {
-      return redirect(siteUrl + '/alerts?error=no_membership');
+      return redirect(siteUrl + '/alerts-members-x9q3?error=no_membership');
     }
 
-    var sessionToken = Buffer.from(JSON.stringify({
-      userId: user.sub,
-      email: user.email || '',
-      expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
-    })).toString('base64');
+    var sessionToken = createSession({ userId: user.sub, email: user.email || '' });
 
     return {
       statusCode: 302,
       multiValueHeaders: {
         'Set-Cookie': [
-          'rose_session=' + sessionToken + '; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=604800',
+          sessionCookie(sessionToken),
           'pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0',
           'pkce_state=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0',
         ],
@@ -129,6 +125,6 @@ exports.handler = async (event) => {
 
   } catch (err) {
     console.error('Whop auth error:', err);
-    return redirect(siteUrl + '/alerts?error=server_error');
+    return redirect(siteUrl + '/alerts-members-x9q3?error=server_error');
   }
 };

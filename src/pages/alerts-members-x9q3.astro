@@ -21,10 +21,11 @@ import { Icon } from 'astro-icon/components';
     <div class="auth-icon">
       <Icon name="lucide:lock" />
     </div>
-    <h2>Access Required</h2>
-    <p>You need an active Rose.Trading subscription to view this page.</p>
-    <a href="https://whop.com/rose-trading-9b26/spx-alerts-and-analysis/" target="_blank" rel="noopener noreferrer" class="auth-btn">Subscribe →</a>
-    <a href="/.netlify/functions/whop-login" class="auth-link">Already subscribed? Sign in</a>
+    <h2>Members Sign In</h2>
+    <p>Subscribed on Whop? Sign in with the same Whop account to view live alerts.</p>
+    <p class="auth-error" id="auth-error" style="display:none;"></p>
+    <a href="/.netlify/functions/whop-login" class="auth-btn">Sign in with Whop</a>
+    <a href="https://whop.com/rose-trading-9b26/spx-alerts-and-analysis/" target="_blank" rel="noopener noreferrer" class="auth-link">Not a member yet? Subscribe →</a>
 
     <!-- Invite code sign-in (works inside the iPhone home-screen app) -->
     <div class="invite-box">
@@ -260,6 +261,21 @@ import { Icon } from 'astro-icon/components';
     return false;
   }
 
+  // ── Whop sign-in errors (whop-auth redirects back here with ?error=) ──
+  (function showAuthError() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('error');
+    if (!code) return;
+    const messages = {
+      no_membership: "We couldn't find an active membership on that Whop account. Make sure you sign in with the same Whop account you subscribed with.",
+      server_error:  'Something went wrong on our end. Please try again in a minute.',
+    };
+    const el = document.getElementById('auth-error');
+    el.textContent = messages[code] || "Sign-in didn't finish. Please try again.";
+    el.style.display = 'block';
+    history.replaceState(null, '', window.location.pathname);
+  })();
+
   (function showInviteError() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('invite') === 'invalid') {
@@ -342,6 +358,11 @@ import { Icon } from 'astro-icon/components';
     background: var(--blue); color: #fff; text-decoration: none;
     padding: 0.75rem 1.75rem; border-radius: 10px; font-weight: 700;
     font-size: 0.95rem; font-family: 'Syne', sans-serif;
+  }
+  .auth-error {
+    color: #FF5C5C !important; font-size: 0.85rem !important;
+    background: rgba(255,92,92,0.08); border: 1px solid rgba(255,92,92,0.25);
+    border-radius: 8px; padding: 0.6rem 0.9rem; margin: 0;
   }
   .auth-link { color: var(--purple); font-size: 0.82rem; text-decoration: none; }
   .auth-link:hover { text-decoration: underline; }
