@@ -164,6 +164,32 @@
     .chip-red.active    { background: var(--red);    border-color: var(--red);    color: #fff; }
     .chip-blue.active   { background: var(--green);  border-color: var(--green);  color: #000; }
     .chip-purple.active { background: var(--purple); border-color: var(--purple); color: #000; }
+    .chip-amber.active  { background: #e0a030;       border-color: #e0a030;       color: #000; }
+
+    /* ── Open-trade bar ────────────────────────────────────── */
+    .trade-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+      margin-top: .9rem;
+      padding: .45rem .7rem;
+      border: 1px dashed #e0a030;
+      border-radius: 8px;
+      font-size: .7rem;
+      color: #e0a030;
+    }
+    .trade-bar.visible { display: flex; }
+
+    /* ── Sold-at field (shown for TRIM / EXIT / STOP HIT) ─── */
+    .sold-row { display: none; }
+    .sold-row.visible { display: block; }
+    .sold-row input { border-color: #e0a03055; }
+    .trade-bar button {
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--muted); font-size: .66rem; padding: .2rem .55rem; cursor: pointer;
+    }
+    .trade-bar button:hover { color: var(--text); border-color: var(--blue); }
 
     /* ── Buttons ───────────────────────────────────────────── */
     .btn {
@@ -273,6 +299,7 @@
     <div class="field-label"><span>Action</span></div>
     <div class="chip-row" id="action-chips">
       <button class="chip chip-blue"   data-val="🚀 ENTRY">🚀 ENTRY</button>
+      <button class="chip chip-amber"  data-val="✂️ TRIM">✂️ TRIM</button>
       <button class="chip chip-blue"   data-val="✅ EXIT">✅ EXIT</button>
       <button class="chip chip-red"    data-val="🛑 STOP HIT">🛑 STOP HIT</button>
       <button class="chip chip-purple" data-val="👀 WATCHING">👀 WATCHING</button>
@@ -293,6 +320,11 @@
       </div>
     </div>
 
+    <div class="sold-row" id="alert-sold-row">
+      <div class="field-label"><span>Sold At</span><span class="opt">price you trimmed / exited at</span></div>
+      <input type="number" id="alert-sold" step="0.01" placeholder="4.00" />
+    </div>
+
     <div class="field-label"><span>Notes</span><span class="opt">optional</span></div>
     <input type="text" id="alert-notes" placeholder="e.g. tight stop at 5380, targeting 5450..." />
 
@@ -310,6 +342,10 @@
 
     <button class="btn btn-primary" id="alert-btn">✈️ Send Alert</button>
     <div class="status" id="alert-status"></div>
+    <div class="trade-bar" id="alert-trade-bar">
+      <span>📌 Trade open: fields kept for Trim / Exit / Stop</span>
+      <button type="button" id="alert-clear">Clear</button>
+    </div>
   </div>
 
   <!-- ── RIGHT: MARKET REVIEW ──────────────────────────────── -->
@@ -347,8 +383,6 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     <div class="status" id="review-status"></div>
   </div>
 
-</div>
-
   <!-- ── SWING ALERT ──────────────────────────────────────── -->
   <div class="panel">
     <div class="panel-title">📊 Swing Alert</div>
@@ -365,6 +399,7 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     <div class="field-label"><span>Action</span></div>
     <div class="chip-row" id="swing-action-chips">
       <button class="chip chip-blue"   data-val="🚀 ENTRY">🚀 ENTRY</button>
+      <button class="chip chip-amber"  data-val="✂️ TRIM">✂️ TRIM</button>
       <button class="chip chip-blue"   data-val="✅ EXIT">✅ EXIT</button>
       <button class="chip chip-red"    data-val="🛑 STOP HIT">🛑 STOP HIT</button>
       <button class="chip chip-purple" data-val="👀 WATCHING">👀 WATCHING</button>
@@ -385,6 +420,11 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
       </div>
     </div>
 
+    <div class="sold-row" id="swing-sold-row">
+      <div class="field-label"><span>Sold At</span><span class="opt">price you trimmed / exited at</span></div>
+      <input type="number" id="swing-sold" step="0.01" placeholder="4.00" />
+    </div>
+
     <div class="field-label"><span>Notes</span><span class="opt">optional</span></div>
     <input type="text" id="swing-notes" placeholder="e.g. stop below 200 EMA, target $180..." />
 
@@ -402,6 +442,10 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
 
     <button class="btn btn-primary" id="swing-btn" style="background:#3DDC84;color:#000;">📊 Send Swing Alert</button>
     <div class="status" id="swing-status"></div>
+    <div class="trade-bar" id="swing-trade-bar">
+      <span>📌 Trade open: fields kept for Trim / Exit / Stop</span>
+      <button type="button" id="swing-clear">Clear</button>
+    </div>
   </div>
 
 </div>
@@ -423,7 +467,59 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
         if (onChange) onChange();
       });
     });
-    return { get: () => selected };
+    return {
+      get: () => selected,
+      // Select a chip by value (or clear all with null) without a click
+      set: (val) => {
+        selected = null;
+        group.querySelectorAll('.chip').forEach(b => {
+          const on = val != null && b.dataset.val === val;
+          b.classList.toggle('active', on);
+          if (on) selected = val;
+        });
+      },
+    };
+  }
+
+  // ── Open-trade memory ─────────────────────────────────────
+  // After an ENTRY or TRIM, the trade details stay filled in (and survive a
+  // page refresh) so the next update is just: pick TRIM / EXIT / STOP HIT → Send.
+  // EXIT and STOP HIT close the trade and clear the fields.
+  // TRIM / EXIT / STOP HIT can carry the price you sold at
+  function isSellAction(action) {
+    return action === '✂️ TRIM' || action === '✅ EXIT' || action === '🛑 STOP HIT';
+  }
+  // "@ $2.50" or, when sold, "@ $2.50 → $4.00 (+60%)"
+  function priceText(paid, sold, action) {
+    if (!paid && !(sold && isSellAction(action))) return '';
+    const p = parseFloat(paid);
+    const s = parseFloat(sold);
+    if (isSellAction(action) && !isNaN(s)) {
+      if (isNaN(p)) return ' → sold $' + s.toFixed(2);
+      let txt = ' @ $' + p.toFixed(2) + ' → $' + s.toFixed(2);
+      if (p > 0) {
+        const pct = Math.round((s - p) / p * 100);
+        txt += ' (' + (pct >= 0 ? '+' : '') + pct + '%)';
+      }
+      return txt;
+    }
+    return isNaN(p) ? '' : ' @ $' + p.toFixed(2);
+  }
+  function toggleSoldRow(prefix, action) {
+    document.getElementById(prefix + '-sold-row').classList.toggle('visible', isSellAction(action));
+  }
+
+  function closesTrade(action) {
+    return action === '✅ EXIT' || action === '🛑 STOP HIT';
+  }
+  function saveTrade(key, data) {
+    try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+  }
+  function loadTrade(key) {
+    try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; }
+  }
+  function forgetTrade(key) {
+    try { localStorage.removeItem(key); } catch {}
   }
 
   // ── Status helper ─────────────────────────────────────────
@@ -456,8 +552,10 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     const strike    = document.getElementById('alert-strike').value.trim();
     const expiryRaw = document.getElementById('alert-expiry').value;
     const price     = document.getElementById('alert-price').value.trim();
+    const sold      = document.getElementById('alert-sold').value.trim();
     const notes     = document.getElementById('alert-notes').value.trim();
 
+    toggleSoldRow('alert', action);
     if (!direction || !action) return null;
 
     let expiryStr = '';
@@ -470,7 +568,7 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     let msg = action + ' | SPX ' + direction + ' ' + dirEmoji;
     if (strike)    msg += ' ' + strike;
     if (expiryStr) msg += ' ' + expiryStr;
-    if (price)     msg += ' @ $' + parseFloat(price).toFixed(2);
+    msg += priceText(price, sold, action);
     if (notes)     msg += '\n\n📌 ' + notes;
 
     return { message: msg, direction, dirEmoji, notes };
@@ -508,7 +606,7 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
   const actionChips    = makeChips('action-chips',    updatePreview);
   const reviewTypeChips = makeChips('review-type-chips');
 
-  ['alert-strike','alert-expiry','alert-price','alert-notes'].forEach(id => {
+  ['alert-strike','alert-expiry','alert-price','alert-sold','alert-notes'].forEach(id => {
     document.getElementById(id).addEventListener('input', updatePreview);
     document.getElementById(id).addEventListener('change', updatePreview);
   });
@@ -544,14 +642,16 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
       const baseMsg = result.message.split('\n\n📌')[0];
       await sendAlert({ title: 'SPX Alert', message: baseMsg, notes: notes || null, imageUrl: imageUrl || null });
       showStatus('alert-status', '✅ Alert sent!', 'success');
-      ['alert-strike','alert-price','alert-notes','alert-image-url'].forEach(id =>
-        document.getElementById(id).value = ''
-      );
-      document.getElementById('alert-expiry').value = todayStr;
-      // reset chips
-      document.getElementById('direction-chips').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
-      document.getElementById('action-chips').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
-      updatePreview();
+      // Notes + chart are per-alert, always clear them
+      ['alert-sold','alert-notes','alert-image-url'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('alert-url-warn').classList.remove('visible');
+      if (closesTrade(actionChips.get())) {
+        clearSpxTrade();
+      } else {
+        saveSpxTrade();
+        actionChips.set(null);   // keep direction/strike/expiry/price, just pick the next action
+        updatePreview();
+      }
     } catch (err) {
       showStatus('alert-status', '❌ ' + err.message, 'error');
     } finally {
@@ -559,6 +659,39 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
       btn.textContent = '✈️ Send Alert';
     }
   });
+
+  // ── SPX open-trade save / restore / clear ─────────────────
+  function saveSpxTrade() {
+    saveTrade('cc_spx_trade', {
+      direction: directionChips.get(),
+      strike:    document.getElementById('alert-strike').value,
+      expiry:    document.getElementById('alert-expiry').value,
+      price:     document.getElementById('alert-price').value,
+    });
+    document.getElementById('alert-trade-bar').classList.add('visible');
+  }
+  function clearSpxTrade() {
+    forgetTrade('cc_spx_trade');
+    ['alert-strike','alert-price','alert-sold','alert-notes','alert-image-url'].forEach(id =>
+      document.getElementById(id).value = ''
+    );
+    document.getElementById('alert-expiry').value = todayStr;
+    directionChips.set(null);
+    actionChips.set(null);
+    document.getElementById('alert-trade-bar').classList.remove('visible');
+    updatePreview();
+  }
+  document.getElementById('alert-clear').addEventListener('click', clearSpxTrade);
+  (function restoreSpxTrade() {
+    const t = loadTrade('cc_spx_trade');
+    if (!t) return;
+    directionChips.set(t.direction);
+    document.getElementById('alert-strike').value = t.strike || '';
+    document.getElementById('alert-expiry').value = t.expiry || todayStr;
+    document.getElementById('alert-price').value  = t.price  || '';
+    document.getElementById('alert-trade-bar').classList.add('visible');
+    updatePreview();
+  })();
 
   // ── Adhoc Note send ───────────────────────────────────────
   document.getElementById('adhoc-btn').addEventListener('click', async () => {
@@ -617,7 +750,7 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
   // Set today as default expiry for swing
   document.getElementById('swing-expiry').value = todayStr;
 
-  ['swing-ticker','swing-strike','swing-price','swing-notes'].forEach(id => {
+  ['swing-ticker','swing-strike','swing-price','swing-sold','swing-notes'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateSwingPreview);
   });
   document.getElementById('swing-expiry').addEventListener('change', updateSwingPreview);
@@ -637,8 +770,10 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     const strike    = document.getElementById('swing-strike').value.trim();
     const expiryRaw = document.getElementById('swing-expiry').value;
     const price     = document.getElementById('swing-price').value.trim();
+    const sold      = document.getElementById('swing-sold').value.trim();
     const notes     = document.getElementById('swing-notes').value.trim();
 
+    toggleSoldRow('swing', action);
     if (!direction || !action) return null;
 
     let expiryStr = '';
@@ -651,7 +786,7 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
     let msg = action + ' | ' + (ticker || 'TICKER') + ' ' + direction + ' ' + dirEmoji;
     if (strike)    msg += ' ' + strike;
     if (expiryStr) msg += ' ' + expiryStr;
-    if (price)     msg += ' @ $' + parseFloat(price).toFixed(2);
+    msg += priceText(price, sold, action);
     if (notes)     msg += '\n\n📌 ' + notes;
 
     return { message: msg, direction, dirEmoji, ticker, notes };
@@ -709,13 +844,15 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
         swingOnly: true,
       });
       showStatus('swing-status', '✅ Swing alert sent!', 'success');
-      ['swing-ticker','swing-strike','swing-price','swing-notes','swing-image-url'].forEach(id =>
-        document.getElementById(id).value = ''
-      );
-      document.getElementById('swing-expiry').value = todayStr;
-      document.getElementById('swing-direction-chips').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
-      document.getElementById('swing-action-chips').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
-      updateSwingPreview();
+      ['swing-sold','swing-notes','swing-image-url'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('swing-url-warn').classList.remove('visible');
+      if (closesTrade(swingActionChips.get())) {
+        clearSwingTrade();
+      } else {
+        saveSwingTrade();
+        swingActionChips.set(null);
+        updateSwingPreview();
+      }
     } catch (err) {
       showStatus('swing-status', '❌ ' + err.message, 'error');
     } finally {
@@ -723,6 +860,41 @@ What are you watching? Key levels? Bias? How did the day go?" style="min-height:
       btn.textContent = '📊 Send Swing Alert';
     }
   });
+
+  // ── Swing open-trade save / restore / clear ───────────────
+  function saveSwingTrade() {
+    saveTrade('cc_swing_trade', {
+      ticker:    document.getElementById('swing-ticker').value,
+      direction: swingDirectionChips.get(),
+      strike:    document.getElementById('swing-strike').value,
+      expiry:    document.getElementById('swing-expiry').value,
+      price:     document.getElementById('swing-price').value,
+    });
+    document.getElementById('swing-trade-bar').classList.add('visible');
+  }
+  function clearSwingTrade() {
+    forgetTrade('cc_swing_trade');
+    ['swing-ticker','swing-strike','swing-price','swing-sold','swing-notes','swing-image-url'].forEach(id =>
+      document.getElementById(id).value = ''
+    );
+    document.getElementById('swing-expiry').value = todayStr;
+    swingDirectionChips.set(null);
+    swingActionChips.set(null);
+    document.getElementById('swing-trade-bar').classList.remove('visible');
+    updateSwingPreview();
+  }
+  document.getElementById('swing-clear').addEventListener('click', clearSwingTrade);
+  (function restoreSwingTrade() {
+    const t = loadTrade('cc_swing_trade');
+    if (!t) return;
+    document.getElementById('swing-ticker').value = t.ticker || '';
+    swingDirectionChips.set(t.direction);
+    document.getElementById('swing-strike').value = t.strike || '';
+    document.getElementById('swing-expiry').value = t.expiry || todayStr;
+    document.getElementById('swing-price').value  = t.price  || '';
+    document.getElementById('swing-trade-bar').classList.add('visible');
+    updateSwingPreview();
+  })();
 </script>
 
 </body>
