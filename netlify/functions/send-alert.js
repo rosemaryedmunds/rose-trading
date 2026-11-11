@@ -105,9 +105,11 @@ export async function handler(event) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          content:    '@everyone',
           username:   'Rose Alerts 🌹',
           avatar_url: avatarUrl,
           embeds: [embed],
+          allowed_mentions: { parse: ['everyone'] },
         }),
       });
       if (!res.ok) console.error('Discord primary error:', await res.text());
