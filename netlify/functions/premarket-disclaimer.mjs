@@ -21,8 +21,8 @@ export default async () => {
     return;
   }
 
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-  if (!webhookUrl) throw new Error("DISCORD_WEBHOOK_URL is not set in Netlify");
+const webhookUrl = process.env.DISCORD_PREMARKET_WEBHOOK_URL;
+if (!webhookUrl) throw new Error("DISCORD_PREMARKET_WEBHOOK_URL is not set in Netlify");
 
   await sendToDiscord(webhookUrl);
   console.log("Posted pre-market disclaimer.");
